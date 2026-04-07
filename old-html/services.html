@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>BN | Onze Services</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+        <style>
+            .accordion-button:not(.collapsed) {
+                background-color: #fce4ec;
+                color: #996f00;
+            }
+            .text-gold {
+                color: #996f00;
+            }
+            .bg-soft-pink {
+                background-color: #f3e6ea;
+            }
+            /* Styling voor de nieuwe carousels in de cards */
+            .card-carousel img {
+                height: 250px;
+                object-fit: cover;
+            }
+        </style>
+    </head>
+    <body class="bg-light">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container px-5">
+                <a class="navbar-brand" href="index.html">
+                    <span class="fw-bold" style="color: #996f00">BEAUTYNAILS</span> DIANA
+                </a>
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#discover">Discover</a>
+                        </li>
+
+                        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section class="py-5">
+                <div class="container text-center mb-5" data-aos="fade-up">
+                    <h1 class="display-5 fw-bold">Onze Behandelingen</h1>
+                    <p class="lead text-muted">Professionele zorg voor je handen en voeten in een ontspannen sfeer.</p>
+                    <hr class="mx-auto" style="width: 50px; height: 3px; background: #996f00" />
+                </div>
+
+                <div class="container">
+                    <div class="row gx-5 align-items-center">
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <div
+                                id="serviceCarousel"
+                                class="carousel slide shadow-lg rounded-4 overflow-hidden"
+                                data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                            class="d-block w-100"
+                                            alt="Nails" />
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                            class="d-block w-100"
+                                            alt="Pedicure" />
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                            class="d-block w-100"
+                                            alt="Pedicure" />
+                                    </div>
+                                </div>
+                                <button
+                                    class="carousel-control-prev"
+                                    type="button"
+                                    data-bs-target="#serviceCarousel"
+                                    data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button
+                                    class="carousel-control-next"
+                                    type="button"
+                                    data-bs-target="#serviceCarousel"
+                                    data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <a href="port.html" class="btn btn-dark rounded-pill px-4"
+                                    >Bekijk Portfolio <i class="bi bi-arrow-right"></i
+                                ></a>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="accordion accordion-flush shadow-sm rounded border" id="servicesAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv1">
+                                            <i class="bi bi-gem me-3 text-gold"></i> Nieuwe Set (Full Set)
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv1"
+                                        class="accordion-collapse collapse show"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Verlenging van de natuurlijke nagels met tips of sjablonen, afgewerkt met
+                                            gel of acryl naar keuze.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv2">
+                                            <i class="bi bi-arrow-repeat me-3 text-gold"></i> Bijvullen (Fill)
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv2"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Onderhoud van je kunstnagels na 3-4 weken. We werken de uitgroei bij en
+                                            verfrissen de kleur.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv3">
+                                            <i class="bi bi-hand-index-thumb me-3 text-gold"></i> Luxe Manicure
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv3"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Verzorging van de nagelriemen, vijlen, handmassage en gellak finish voor
+                                            zijdezachte handen.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv4">
+                                            <i class="bi bi-magic me-3 text-gold"></i> Spa Pedicure
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv4"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Een heerlijk voetbad, eeltbehandeling en verzorging van de teennagels.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv5">
+                                            <i class="bi bi-palette me-3 text-gold"></i> Easy Nail Art
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv5"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Van handgeschilderde designs tot glitters en steentjes.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv6">
+                                            <i class="bi bi-shield-check me-3 text-gold"></i> Natural Nail Treatment
+                                            (BIAB)
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv6"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Versteviging van de eigen nagel zonder verlenging.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv7">
+                                            <i class="bi bi-shield-check me-3 text-gold"></i> Pedicure Met Gellak
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv7"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Versteviging van de eigen nagel zonder verlenging.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv8">
+                                            <i class="bi bi-shield-check me-3 text-gold"></i> Gel Verwijdering
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv8"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Versteviging van de eigen nagel zonder verlenging.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button
+                                            class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#serv9">
+                                            <i class="bi bi-shield-check me-3 text-gold"></i> Design
+                                        </button>
+                                    </h2>
+                                    <div
+                                        id="serv9"
+                                        class="accordion-collapse collapse"
+                                        data-bs-parent="#servicesAccordion">
+                                        <div class="accordion-body">
+                                            Versteviging van de eigen nagel zonder verlenging.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-5 bg-soft-pink">
+                <div class="container text-center mb-5">
+                    <h2 class="display-6 fw-bold">Build Ins</h2>
+                    <hr class="mx-auto" style="width: 50px; height: 3px; background: #996f00" />
+                </div>
+
+                <div class="container">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                                <div id="carouselCard1" class="carousel slide card-carousel" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                                class="d-block w-100"
+                                                alt="Card 1 Image 1" />
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                                class="d-block w-100"
+                                                alt="Card 1 Image 2" />
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                                class="d-block w-100"
+                                                alt="Card 1 Image 3" />
+                                        </div>
+                                    </div>
+                                    <button
+                                        class="carousel-control-prev"
+                                        type="button"
+                                        data-bs-target="#carouselCard1"
+                                        data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button
+                                        class="carousel-control-next"
+                                        type="button"
+                                        data-bs-target="#carouselCard1"
+                                        data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Verlenging Gel</h5>
+                                    <div class="accordion accordion-flush" id="accCard1">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button
+                                                    class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#c1-1">
+                                                    Inhoud 1
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id="c1-1"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accCard1">
+                                                <div class="accordion-body">Details over optie 1.</div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button
+                                                    class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#c1-2">
+                                                    Inhoud 2
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id="c1-2"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accCard1">
+                                                <div class="accordion-body">Details over optie 2.</div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button
+                                                    class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#c1-3">
+                                                    Inhoud 3
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id="c1-3"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accCard1">
+                                                <div class="accordion-body">Details over optie 3.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                                <div id="carouselCard2" class="carousel slide card-carousel" data-bs-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <div class="carousel-item active">
+                                            <img
+                                                src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg"
+                                                class="d-block w-100"
+                                                alt="Card 2 Image 1" />
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                                class="d-block w-100"
+                                                alt="Card 2 Image 2" />
+                                        </div>
+                                        <div class="carousel-item">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                                                class="d-block w-100"
+                                                alt="Card 2 Image 3" />
+                                        </div>
+                                    </div>
+                                    <button
+                                        class="carousel-control-prev"
+                                        type="button"
+                                        data-bs-target="#carouselCard2"
+                                        data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button
+                                        class="carousel-control-next"
+                                        type="button"
+                                        data-bs-target="#carouselCard2"
+                                        data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">Gel Overlay</h5>
+                                    <div class="accordion accordion-flush" id="accCard2">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button
+                                                    class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#c2-1">
+                                                    Inhoud 1
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id="c2-1"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accCard2">
+                                                <div class="accordion-body">Details over optie 1.</div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button
+                                                    class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#c2-2">
+                                                    Inhoud 2
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id="c2-2"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accCard2">
+                                                <div class="accordion-body">Details over optie 2.</div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button
+                                                    class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#c2-3">
+                                                    Inhoud 3
+                                                </button>
+                                            </h2>
+                                            <div
+                                                id="c2-3"
+                                                class="accordion-collapse collapse"
+                                                data-bs-parent="#accCard2">
+                                                <div class="accordion-body">Details over optie 3.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="py-5 bg-dark mt-auto">
+            <div class="container">
+                <p class="m-0 text-center text-white">Copyright &copy; BeautyNails Diana 2026</p>
+            </div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="nl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Design & Vorm | BeautyNails Diana</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap"
+            rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
+        <style>
+            :root {
+                --soft-pink: #fdf0f0;
+                --gold: #d4af37;
+                --dark-gold: #b8962e;
+                --dark-text: #2d2d2d;
+            }
+
+            body {
+                font-family: "Poppins", sans-serif;
+                background-color: var(--soft-pink);
+                color: var(--dark-text);
+                overflow-x: hidden;
+            }
+
+            h1,
+            h2,
+            h3,
+            .navbar-brand {
+                font-family: "Playfair Display", serif;
+            }
+
+            /* Navigatie */
+            .navbar {
+                background-color: #1a1a1a;
+                padding: 15px 0;
+            }
+            .nav-link {
+                color: #ffffff !important;
+                opacity: 0.8;
+                transition: 0.3s;
+            }
+            .nav-link:hover {
+                color: var(--gold) !important;
+                opacity: 1;
+            }
+
+            /* Header */
+            .page-header {
+                padding: 80px 0 40px;
+                text-align: center;
+            }
+            .gold-line {
+                width: 80px;
+                height: 3px;
+                background: var(--gold);
+                margin: 20px auto;
+            }
+
+            /* Shape Cards Grid */
+            .shape-card {
+                background: white;
+                border-radius: 20px;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                border: 1px solid rgba(212, 175, 55, 0.1);
+                height: 100%;
+            }
+
+            .shape-card:hover,
+            .shape-card.active {
+                transform: translateY(-10px);
+                border-color: var(--gold);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .shape-img-container {
+                position: relative;
+                height: 200px;
+                overflow: hidden;
+            }
+
+            .shape-img-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.6s ease;
+            }
+
+            .shape-card:hover img {
+                transform: scale(1.1);
+            }
+
+            .shape-info {
+                padding: 15px;
+                text-align: center;
+            }
+            .shape-info h3 {
+                font-size: 1.1rem;
+                margin: 0;
+                font-weight: 700;
+            }
+
+            /* Detail Paneel */
+            .detail-display {
+                background: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(10px);
+                border-radius: 30px;
+                padding: 40px;
+                margin-top: 40px;
+                border: 1px solid white;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                display: none;
+            }
+
+            /* Designs Sectie */
+            .design-group {
+                background: white;
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 30px;
+                border: 1px solid rgba(212, 175, 55, 0.1);
+            }
+
+            .category-tag {
+                display: inline-block;
+                background: var(--gold);
+                color: white;
+                padding: 4px 15px;
+                border-radius: 50px;
+                font-size: 0.8rem;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .design-item {
+                margin-bottom: 20px;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 15px;
+            }
+            .design-item:last-child {
+                border-bottom: none;
+            }
+            .design-name {
+                font-weight: 600;
+                color: var(--dark-text);
+                font-size: 1.1rem;
+            }
+
+            .btn-gold {
+                background-color: var(--gold);
+                color: white;
+                border-radius: 50px;
+                padding: 12px 35px;
+                text-decoration: none;
+                display: inline-block;
+                transition: 0.3s;
+            }
+
+            .btn-gold:hover {
+                background-color: var(--dark-gold);
+                color: white;
+                transform: scale(1.05);
+            }
+
+            .fade-in {
+                animation: fadeIn 0.5s ease-in;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            footer {
+                background: #1a1a1a;
+                color: white;
+                padding: 40px 0;
+                margin-top: 80px;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg sticky-top">
+            <div class="container">
+                <a class="navbar-brand text-white" href="#">
+                    <span style="color: var(--gold)">BEAUTYNAILS</span> DIANA
+                </a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="design.html">Design</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <header class="page-header container">
+            <h1 class="display-3 fw-bold">Vormen & Designs</h1>
+            <div class="gold-line"></div>
+            <p class="lead text-muted mx-auto" style="max-width: 700px">
+                Kies de perfecte vorm als basis en laat je inspireren door onze exclusieve nail art designs.
+            </p>
+        </header>
+
+        <main class="container mb-5">
+            <div class="row g-3 justify-content-center">
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('round', this)">
+                        <div class="shape-img-container"><img src=assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg alt="Rond" /></div>
+                        <div class="shape-info"><h3>Rond</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('oval', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Ovaal" /></div>
+                        <div class="shape-info"><h3>Ovaal</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('square', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Vierkant" /></div>
+                        <div class="shape-info"><h3>Vierkant</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('squoval', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Squoval" /></div>
+                        <div class="shape-info"><h3>Squoval</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('almond', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Amandel" /></div>
+                        <div class="shape-info"><h3>Amandel</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('stiletto', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Stiletto" /></div>
+                        <div class="shape-info"><h3>Stiletto</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('coffin', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Coffin" /></div>
+                        <div class="shape-info"><h3>Coffin</h3></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="shape-card" onclick="updateDetail('lipstick', this)">
+                        <div class="shape-img-container"><img src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg" alt="Lipstick" /></div>
+                        <div class="shape-info"><h3>Lipstick</h3></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="detailPanel" class="detail-display fade-in">
+                <div class="row align-items-center">
+                    <div class="col-lg-5">
+                        <img
+                            id="detailImg"
+                            src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg"
+                            alt="Detail"
+                            class="img-fluid rounded-4 shadow" />
+                    </div>
+                    <div class="col-lg-7 ps-lg-5 mt-4 mt-lg-0">
+                        <h2 id="detailTitle" class="fw-bold gold-text mb-3">Maak een keuze</h2>
+                        <p id="detailDesc" class="text-secondary mb-4 leading-relaxed"></p>
+                        <div class="mb-4">
+                            <h5 class="fw-bold small text-uppercase">Kenmerken:</h5>
+                            <ul id="detailFeatures" class="list-unstyled"></ul>
+                        </div>
+
+                        <a href="contact.html" class="btn btn-gold">Boek deze stijl</a>
+                        <button onclick="closeDetail()" class="btn btn-outline-secondary rounded-pill ms-2 px-4">
+                            Sluiten
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <section id="designs" class="mt-5 pt-5">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold">Nail Art & Designs</h2>
+                    <div class="gold-line" style="width: 60px"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="design-group shadow-sm">
+                            <span class="category-tag">De Tijdloze Looks</span>
+                            <div class="design-item">
+                                <div class="design-name">French Manicure</div>
+                                <p class="small text-muted">Klassiek wit, Micro French of Colored French.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Ombré / Babyboomer</div>
+                                <p class="small text-muted">Zachte overloop van roze naar wit of kleur.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Nude & Minimalist</div>
+                                <p class="small text-muted">Naturel met een verfijnd, minimalistisch detail.</p>
+                            </div>
+                        </div>
+
+                        <div class="design-group shadow-sm">
+                            <span class="category-tag">Textuur & Diepte</span>
+                            <div class="design-item">
+                                <div class="design-name">Cat Eye (Magnetic)</div>
+                                <p class="small text-muted">Fluweelachtig effect dat meebeweegt met het licht.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Chrome / Glazed Donut</div>
+                                <p class="small text-muted">Metallic of parelmoer glans over je favoriete kleur.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">3D Art</div>
+                                <p class="small text-muted">Reliëf, golven of breipatronen met dikke gel.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="design-group shadow-sm">
+                            <span class="category-tag">Artistiek & Grafisch</span>
+                            <div class="design-item">
+                                <div class="design-name">Marble (Marmer)</div>
+                                <p class="small text-muted">Gemixt kleurenspel dat lijkt op echt marmer.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Swirls</div>
+                                <p class="small text-muted">Abstracte, golvende lijnen voor een speelse look.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Aura Nails</div>
+                                <p class="small text-muted">Kleurrijke gloed vanuit het midden (airbrush effect).</p>
+                            </div>
+                        </div>
+
+                        <div class="design-group shadow-sm">
+                            <span class="category-tag">Speciale Effecten</span>
+                            <div class="design-item">
+                                <div class="design-name">Tortoise Shell</div>
+                                <p class="small text-muted">Iconisch bruin/zwart gevlekt schildpadpatroon.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Negative Space</div>
+                                <p class="small text-muted">Deels natuurlijke nagel, deels geometrische versiering.</p>
+                            </div>
+                            <div class="design-item">
+                                <div class="design-name">Velvet Nails</div>
+                                <p class="small text-muted">Unieke finish die eruitziet als luxe, zachte stof.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <script>
+            const content = {
+                round: {
+                    title: "Rond (Round)",
+                    desc: "De meest natuurlijke vorm. Ideaal voor korte nagels en mensen die hun handen veel gebruiken (ze breken minder snel).",
+                    img: "assets/round-large.jpg",
+                    features: ["Zeer sterk", "Natuurlijk", "Ideaal voor korte nagels"]
+                },
+                oval: {
+                    title: "Ovaal (Oval)",
+                    desc: "Een elegante, tijdloze vorm die je vingers langer doet lijken. Het is eigenlijk een verlengde ronde vorm.",
+                    img: "assets/oval-large.jpg",
+                    features: ["Verlengend effect", "Elegant", "Tijdloos"]
+                },
+                square: {
+                    title: "Vierkant (Square)",
+                    desc: "Helemaal recht afgevijld aan de bovenkant met scherpe hoeken. Heel populair voor een klassieke French manicure.",
+                    img: "assets/square-large.jpg",
+                    features: ["Strakke hoeken", "Klassiek", "Perfect voor French"]
+                },
+                squoval: {
+                    title: "Squoval",
+                    desc: "Een combinatie van square en oval. Het heeft de rechte bovenkant van de vierkante nagel, maar de hoeken zijn zacht afgerond. Meest gekozen vorm wereldwijd.",
+                    img: "assets/squoval-large.jpg",
+                    features: ["Beste van beide werelden", "Veelzijdig", "Zachte hoeken"]
+                },
+                almond: {
+                    title: "Amandel (Almond)",
+                    desc: "Slank aan de zijkanten en eindigend in een zachte punt. Super vrouwelijk en verlengend.",
+                    img: "assets/almond-large.jpg",
+                    features: ["Vrouwelijk", "Verlengend", "Modern"]
+                },
+                stiletto: {
+                    title: "Stiletto",
+                    desc: "De meest dramatische vorm. Zeer lang en eindigend in een vlijmscherpe punt. Meestal gezet met gel of acryl.",
+                    img: "assets/stiletto-large.jpg",
+                    features: ["Gewaagd", "Extreem lang", "Statement look"]
+                },
+                coffin: {
+                    title: "Coffin / Ballerina",
+                    desc: "Deze vorm lijkt op een stiletto, maar dan met een afgeplatte punt. Favoriet bij celebs.",
+                    img: "assets/coffin-large.jpg",
+                    features: ["Trendy", "Elegante punt", "Veel ruimte voor design"]
+                },
+                lipstick: {
+                    title: "Lipstick",
+                    desc: "De nagels worden in een asymmetrische hoek gevijld, precies zoals een nieuwe lippenstift eruitziet.",
+                    img: "assets/lipstick-large.jpg",
+                    features: ["Uniek", "Artistiek", "Asymmetrisch"]
+                }
+            };
+
+            function updateDetail(type, element) {
+                const panel = document.getElementById("detailPanel");
+                const title = document.getElementById("detailTitle");
+                const desc = document.getElementById("detailDesc");
+                const img = document.getElementById("detailImg");
+                const list = document.getElementById("detailFeatures");
+
+                title.innerText = content[type].title;
+                desc.innerText = content[type].desc;
+                img.src = content[type].img;
+
+                list.innerHTML = "";
+                content[type].features.forEach((feat) => {
+                    list.innerHTML += `<li><i class="bi bi-stars me-2" style="color: var(--gold);"></i> ${feat}</li>`;
+                });
+
+                panel.style.display = "block";
+                panel.classList.remove("fade-in");
+                void panel.offsetWidth;
+                panel.classList.add("fade-in");
+
+                document.querySelectorAll(".shape-card").forEach((c) => c.classList.remove("active"));
+                element.classList.add("active");
+
+                // Scroll zachtjes naar het geopende paneel
+                panel.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+
+            // NIEUW: Functie om het paneel te sluiten
+            function closeDetail() {
+                const panel = document.getElementById("detailPanel");
+                panel.style.display = "none";
+
+                // Verwijder ook de 'active' (gouden rand) van de kaarten
+                document.querySelectorAll(".shape-card").forEach((c) => c.classList.remove("active"));
+
+                // Scroll weer een stukje terug omhoog naar de vormen
+                document.getElementById("section-vormen").scrollIntoView({ behavior: "smooth" });
+            }
+        </script>
+    </body>
+</html>

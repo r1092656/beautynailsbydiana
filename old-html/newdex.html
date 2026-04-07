@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>BN | BeautyNails Diana</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+        <style>
+            body {
+                background-color: #fcf8f9;
+            }
+
+            .text-gold {
+                color: #996f00;
+            }
+            .bg-dark-gold {
+                background-color: #996f00;
+                color: white;
+            }
+
+            /* Hero sectie in de stijl van je About header */
+            .hero-header {
+                padding: 150px 0 100px 0;
+                background: linear-gradient(rgba(243, 230, 234, 0.7), rgba(252, 248, 249, 1)), url("assets/pattern.png");
+                background-size: cover;
+            }
+
+            .gold-divider {
+                width: 80px;
+                height: 4px;
+                background: #996f00;
+                opacity: 1;
+                margin: 20px auto;
+            }
+
+            /* De luxe kaarten van je About page */
+            .feature-card {
+                background: white;
+                border: none;
+                border-radius: 20px;
+                transition: transform 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            }
+
+            .feature-card:hover {
+                transform: translateY(-10px);
+            }
+
+            .btn-gold {
+                background-color: #996f00;
+                color: white;
+                border-radius: 50px;
+                padding: 12px 35px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-gold:hover {
+                background-color: #7a5900;
+                color: white;
+                transform: scale(1.05);
+            }
+
+            /* Profile img effect van About page maar dan voor home */
+            .home-img-container {
+                position: relative;
+                display: inline-block;
+            }
+
+            .home-img-container::before {
+                content: "";
+                position: absolute;
+                top: 15px;
+                right: -15px;
+                width: 100%;
+                height: 100%;
+                border: 2px solid #996f00;
+                border-radius: 1rem;
+                z-index: 0;
+            }
+
+            .home-img {
+                position: relative;
+                z-index: 1;
+                border-radius: 1rem;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container px-5">
+                <a class="navbar-brand" href="index.html">
+                    <span class="fw-bold" style="color: #996f00">BEAUTYNAILS</span> DIANA
+                </a>
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+                        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero-header text-center">
+            <div class="container px-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-lg-6 text-lg-start">
+                        <span class="text-uppercase tracking-widest text-gold fw-bold">Professional Nail Artist</span>
+                        <h1 class="display-2 fw-bold mt-2 mb-4">
+                            Perfectie tot in de <span class="text-gold">toppen</span>.
+                        </h1>
+                        <p class="lead text-muted mb-5">
+                            Ervaar pure luxe en persoonlijke aandacht. Wij transformeren jouw nagels tot een kunstwerk
+                            met de beste technieken en producten.
+                        </p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-lg-start">
+                            <a class="btn btn-gold btn-lg px-5 me-sm-3" href="#booking">Boek Nu</a>
+                            <a class="btn btn-outline-dark btn-lg px-5 rounded-pill" href="services.html"
+                                >Ontdek Meer</a
+                            >
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-none d-lg-block">
+                        <div class="home-img-container">
+                            <img class="img-fluid home-img" src="assets/page.jpg" alt="BeautyNails Diana Hero" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="py-5">
+            <div class="container px-5">
+                <div class="row gx-5">
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card h-100 p-4 text-center">
+                            <div class="mb-3"><i class="bi bi-gem text-gold fs-1"></i></div>
+                            <h4 class="fw-bold">Luxe Afwerking</h4>
+                            <p class="text-muted small">
+                                Alleen de hoogste kwaliteit producten voor een resultaat dat wekenlang straalt.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card h-100 p-4 text-center">
+                            <div class="mb-3"><i class="bi bi-brush text-gold fs-1"></i></div>
+                            <h4 class="fw-bold">Custom Design</h4>
+                            <p class="text-muted small">
+                                Van minimalistische elegantie tot gedurfde nail-art, volledig op maat.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card feature-card h-100 p-4 text-center">
+                            <div class="mb-3"><i class="bi bi-clock-history text-gold fs-1"></i></div>
+                            <h4 class="fw-bold">Duurzaamheid</h4>
+                            <p class="text-muted small">
+                                Technieken zoals BIAB zorgen voor sterke, gezonde en natuurlijke nagels.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="booking" class="py-5 bg-white">
+            <div class="container px-5 text-center">
+                <h2 class="fw-bold mb-2">Reserveer Jouw Moment</h2>
+                <hr class="gold-divider" />
+                <div class="mt-5">
+                    <button id="openBooking" class="btn btn-light mt-3 mt-md-0">Boek Nu</button>
+                </div>
+            </div>
+            <div id="bookingModal" class="modal">
+                <div class="modal-box">
+                    <div class="booking-layout">
+                        <div class="booking-left">
+                            <h2>Maak je afspraak</h2>
+                            <div id="stepServices"></div>
+                            <div id="stepCalendar" class="hidden">
+                                <div class="summary">
+                                    <span id="summaryService"></span>
+                                    <button onclick="backToServices()">Wijzigen</button>
+                                </div>
+                                <h3 id="selectedDateTitle"></h3>
+                                <div class="week-nav">
+                                    <button onclick="changeWeek(-1)">‹</button>
+                                    <div id="weekDays"></div>
+                                    <button onclick="changeWeek(1)">›</button>
+                                </div>
+                                <div class="times">
+                                    <h4>Ochtend</h4>
+                                    <div id="timesMorning"></div>
+                                    <h4>Middag</h4>
+                                    <div id="timesAfternoon"></div>
+                                    <h4>Avond</h4>
+                                    <div id="timesEvening"></div>
+                                </div>
+                            </div>
+                            <div id="stepDetails" class="hidden">
+                                <div class="summary">
+                                    <span id="summaryFull"></span>
+                                    <button onclick="backToCalendar()">Wijzigen</button>
+                                </div>
+                                <input id="name" placeholder="Naam *" />
+                                <input id="phone" placeholder="Telefoonnummer *" />
+                                <input id="email" placeholder="E-mailadres *" />
+                                <select id="serviceOption"></select>
+                                <button class="confirm" onclick="confirmBooking()">Afspraak Bevestigen</button>
+                            </div>
+                        </div>
+                        <div class="booking-right">
+                            <img
+                                src="https://i.pinimg.com/originals/00/9c/2e/009c2edda5fbc2b7df7e9930aecc58f9.jpg"
+                                class="salon-banner" />
+                            <h3>BeautyNails By Diana</h3>
+                            <p>Professionele nagelstudio gericht op kwaliteit en comfort.</p>
+                            <p>📱 WhatsApp</p>
+                            <p>📷 @beautynails_by_diana</p>
+                            <p>📍 Laakdal</p>
+                            <p>✉ dianacirpaci@icloud.com</p>
+                        </div>
+                    </div>
+                    <button class="close" onclick="closeModal()">✕</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-5 bg-dark-gold">
+            <div class="container px-5 text-center">
+                <h2 class="display-6 fw-bold mb-4">Nog vragen?</h2>
+                <a href="contact.html" class="btn btn-outline-light btn-lg rounded-pill px-5">Neem contact op</a>
+            </div>
+        </section>
+
+        <footer class="py-5 bg-dark">
+            <div class="container px-5">
+                <p class="m-0 text-center text-white">Copyright &copy; BeautyNails Diana 2026</p>
+            </div>
+        </footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="js/scripts.js"></script>
+    </body>
+</html>

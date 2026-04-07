@@ -1,0 +1,58 @@
+/* Container die de 3D ruimte bepaalt */
+.profile-img-container {
+    perspective: 1000px;
+    cursor: pointer;
+    width: 100%;
+    height: 400px; /* Pas deze hoogte aan naar de grootte van je foto */
+}
+
+/* De kaart zelf */
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+/* Hover effect: subtiel meebewegen alsof hij wil omdraaien */
+.profile-img-container:hover .flip-card-inner {
+    transform: rotateY(15deg); /* Lichtjes schuin trekken */
+}
+
+/* De klasse die JavaScript toevoegt bij klik */
+.profile-img-container.is-flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Voor- en achterkant basis styling */
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Belangrijk: verbergt achterkant tijdens draai */
+    backface-visibility: hidden;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Achterkant styling */
+.flip-card-back {
+    background-color: #fdf0f0; /* Zelfde zachte roze als je site */
+    color: #444;
+    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    border: 2px solid #d4af37; /* Goud randje */
+}
+
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

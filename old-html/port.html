@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>BN | Portfolio</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+        <style>
+            body {
+                background-color: #f3e6ea;
+            } /* Je kenmerkende roze kleur */
+
+            .nav-pills .nav-link.active {
+                background-color: #996f00; /* Goud accent */
+            }
+            .nav-pills .nav-link {
+                color: #212529;
+                margin: 5px;
+                border: 1px solid #996f00;
+            }
+
+            /* Gallery Styling */
+            .portfolio-item {
+                margin-bottom: 30px;
+            }
+            .portfolio-img {
+                cursor: pointer;
+                transition: transform 0.3s ease;
+                border-radius: 15px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                aspect-ratio: 1 / 1;
+                object-fit: cover;
+            }
+            .portfolio-img:hover {
+                transform: scale(1.03);
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container px-5">
+                <a class="navbar-brand" href="index.html">
+                    <span class="fw-bold" style="color: #996f00">BEAUTYNAILS</span> DIANA
+                </a>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="services.html">Services</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="galery.html">Portfolio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main class="py-5">
+            <div class="container text-center mb-5">
+                <h1 class="display-5 fw-bold">Mijn Werk</h1>
+                <p class="lead text-muted">Een greep uit de 50+ sets die ik met passie heb gezet.</p>
+                <hr class="mx-auto" style="width: 50px; height: 3px; background: #996f00" />
+            </div>
+
+            <div class="container mb-4">
+                <ul class="nav nav-pills justify-content-center" id="portfolio-filters">
+                    <li class="nav-item"><button class="nav-link active" data-filter="*">Alles</button></li>
+                    <li class="nav-item"><button class="nav-link" data-filter=".filter-biab">BIAB</button></li>
+                    <li class="nav-item"><button class="nav-link" data-filter=".filter-art">Nail Art</button></li>
+                    <li class="nav-item"><button class="nav-link" data-filter=".filter-fullset">Full Set</button></li>
+                </ul>
+            </div>
+
+            <div class="container">
+                <div class="row g-3" id="portfolio-grid">
+                    <div class="col-6 col-md-4 col-lg-3 portfolio-item filter-biab">
+                        <img
+                            src="assets/WhatsApp%20Image%202026-03-31%20at%2017.27.32.jpeg"
+                            class="img-fluid portfolio-img"
+                            alt="Nagels"
+                            loading="lazy" />
+                    </div>
+
+                    <div class="col-6 col-md-4 col-lg-3 portfolio-item filter-art">
+                        <img
+                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                            class="img-fluid portfolio-img"
+                            alt="Nagels"
+                            loading="lazy" />
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3 portfolio-item filter-fullset">
+                        <img
+                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                            class="img-fluid portfolio-img"
+                            alt="Nagels"
+                            loading="lazy" />
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3 portfolio-item filter-art">
+                        <img
+                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                            class="img-fluid portfolio-img"
+                            alt="Nagels"
+                            loading="lazy" />
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-3 portfolio-item filter-fullset">
+                        <img
+                            src="https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&q=80&w=800"
+                            class="img-fluid portfolio-img"
+                            alt="Nagels"
+                            loading="lazy" />
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+        <script>
+            $(window).on("load", function () {
+                var portfolioIsotope = $("#portfolio-grid").isotope({
+                    itemSelector: ".portfolio-item"
+                });
+
+                $("#portfolio-filters button").on("click", function () {
+                    $("#portfolio-filters button").removeClass("active");
+                    $(this).addClass("active");
+                    portfolioIsotope.isotope({
+                        filter: $(this).data("filter")
+                    });
+                });
+            });
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

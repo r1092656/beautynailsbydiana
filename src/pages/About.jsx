@@ -20,11 +20,7 @@ const About = () => {
       <section className="container py-5">
         <div className="row align-items-center">
           <div className="col-lg-5 mb-5 text-center">
-            <img 
-              src="/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (10).jpeg" 
-              alt="Diana" 
-              style={{ width: '100%', maxWidth: '400px', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} 
-            />
+            <img src="/assets/portfolio/hero.jpeg" alt="Diana" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
           </div>
           <div className="col-lg-7">
             <h2 className="fw-bold mb-4">Passie voor Perfectie</h2>

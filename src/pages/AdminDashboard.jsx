@@ -1,6 +1,8 @@
+import { useContent } from '../context/ContentContext';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import { Plus, Trash2, LogOut, Image, Clock, Folder } from 'lucide-react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
-import { useContent } from '../context/ContentContext';
 
 const AdminDashboard = () => {
   useDocumentTitle('Admin Dashboard');

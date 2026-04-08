@@ -1,5 +1,5 @@
 import { useBooking } from '../context/BookingContext';
-import { X, CheckCircle2, Upload, FileImage, Loader2 } from 'lucide-react';
+import { X, CircleCheck, Upload, FileImage, Loader } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { compressImage } from '../utils/compressImage';
 import './BookingModal.css';
@@ -419,7 +419,7 @@ const BookingModal = () => {
               <button type="submit" className="btn-gold w-100" style={{ marginTop: '20px' }} disabled={isSending}>
                 {isSending ? (
                   <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                    <Loader2 className="animate-spin" size={20} />
+                    <Loader className="animate-spin" size={20} />
                     Sending Booking...
                   </span>
                 ) : (
@@ -430,7 +430,7 @@ const BookingModal = () => {
           </div>
         ) : (
           <div className="booking-success fade-in">
-            <CheckCircle2 size={64} className="text-gold mb-4" />
+            <CircleCheck size={64} className="text-gold mb-4" />
             <h2 className="modal-title">Booking Confirmed!</h2>
             <p>Thank you, {name}.<br/>We've secured your <strong>{subService}</strong> appointment in <strong>{location}</strong> on {date} at {time}.</p>
             {needsNailOptions && (

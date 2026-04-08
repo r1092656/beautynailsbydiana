@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
-import { Mail, Phone, MapPin, Instagram, Facebook, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Camera, Globe, Send, CircleCheck } from 'lucide-react';
 
 const Contact = () => {
   useDocumentTitle('Contact');
@@ -41,6 +41,16 @@ const Contact = () => {
             <div>
               <h4 style={{ margin: '0 0 5px 0' }}>Location</h4>
               <p style={{ margin: 0, color: 'var(--text-muted)' }}>Laakdal, Belgium</p>
+            </div>
+          </div>
+
+          <div className="glass-panel" style={{ padding: '30px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>
+               <Camera color="var(--gold)" size={28} />
+            </div>
+            <div>
+               <h4 style={{ margin: '0 0 5px 0' }}>Instagram</h4>
+               <p style={{ margin: 0, color: 'var(--text-muted)' }}>@beautynailsbydiana_official</p>
             </div>
           </div>
         </div>

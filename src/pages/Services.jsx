@@ -37,7 +37,7 @@ const Services = () => {
       <div className="row">
         <div className="col-lg-6 mb-5">
           <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }}>
-            <img src="/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (10).jpeg" alt="Services" style={{ width: '100%', height: '500px', objectFit: 'cover' }} />
+            <img src="/assets/portfolio/hero.jpeg" alt="Services" style={{ width: '100%', height: '500px', objectFit: 'cover' }} />
           </div>
         </div>
 

@@ -3,14 +3,14 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useBooking } from '../context/BookingContext';
 
 const shapes = [
-  { id: 'round', title: "Rond (Round)", desc: "De meest natuurlijke vorm. Ideaal voor korte nagels en mensen die hun handen veel gebruiken.", features: ["Zeer sterk", "Natuurlijk", "Ideaal voor korte nagels"], img: "/assets/portfolio/WhatsApp Image 2026-03-31 at 17.27.32.jpeg" },
-  { id: 'oval', title: "Ovaal (Oval)", desc: "Een elegante, tijdloze vorm die je vingers langer doet lijken. Het is eigenlijk een verlengde ronde vorm.", features: ["Verlengend effect", "Elegant", "Tijdloos"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (3).jpeg" },
-  { id: 'square', title: "Vierkant (Square)", desc: "Helemaal recht afgevijld aan de bovenkant met scherpe hoeken. Heel populair voor een klassieke French manicure.", features: ["Strakke hoeken", "Klassiek", "Perfect voor French"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (7).jpeg" },
-  { id: 'squoval', title: "Squoval", desc: "Een combinatie van square en oval. De rechte bovenkant van de vierkante nagel, maar de hoeken zijn zacht afgerond.", features: ["Beste van beide werelden", "Veelzijdig", "Zachte hoeken"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (4).jpeg" },
-  { id: 'almond', title: "Amandel (Almond)", desc: "Slank aan de zijkanten en eindigend in een zachte punt. Super vrouwelijk en verlengend.", features: ["Vrouwelijk", "Verlengend", "Modern"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (3).jpeg" },
-  { id: 'stiletto', title: "Stiletto", desc: "De meest dramatische vorm. Zeer lang en eindigend in een vlijmscherpe punt.", features: ["Gewaagd", "Extreem lang", "Statement look"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (8).jpeg" },
-  { id: 'coffin', title: "Coffin / Ballerina", desc: "Deze vorm lijkt op een stiletto, maar dan met een afgeplatte punt.", features: ["Trendy", "Elegante punt", "Veel ruimte voor design"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (6).jpeg" },
-  { id: 'lipstick', title: "Lipstick", desc: "De nagels worden in een asymmetrische hoek gevijld, precies zoals een nieuwe lippenstift eruitziet.", features: ["Uniek", "Artistiek", "Asymmetrisch"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (12).jpeg" }
+  { id: 'round', title: "Rond (Round)", desc: "De meest natuurlijke vorm. Ideaal voor korte nagels en mensen die hun handen veel gebruiken.", features: ["Zeer sterk", "Natuurlijk", "Ideaal voor korte nagels"], img: "/assets/portfolio/shape-round.jpeg" },
+  { id: 'oval', title: "Ovaal (Oval)", desc: "Een elegante, tijdloze vorm die je vingers langer doet lijken. Het is eigenlijk een verlengde ronde vorm.", features: ["Verlengend effect", "Elegant", "Tijdloos"], img: "/assets/portfolio/shape-oval.jpeg" },
+  { id: 'square', title: "Vierkant (Square)", desc: "Helemaal recht afgevijld aan de bovenkant met scherpe hoeken. Heel populair voor een klassieke French manicure.", features: ["Strakke hoeken", "Klassiek", "Perfect voor French"], img: "/assets/portfolio/shape-square.jpeg" },
+  { id: 'squoval', title: "Squoval", desc: "Een combinatie van square en oval. De rechte bovenkant van de vierkante nagel, maar de hoeken zijn zacht afgerond.", features: ["Beste van beide werelden", "Veelzijdig", "Zachte hoeken"], img: "/assets/portfolio/shape-squoval.jpeg" },
+  { id: 'almond', title: "Amandel (Almond)", desc: "Slank aan de zijkanten en eindigend in een zachte punt. Super vrouwelijk en verlengend.", features: ["Vrouwelijk", "Verlengend", "Modern"], img: "/assets/portfolio/shape-almond.jpeg" },
+  { id: 'stiletto', title: "Stiletto", desc: "De meest dramatische vorm. Zeer lang en eindigend in een vlijmscherpe punt.", features: ["Gewaagd", "Extreem lang", "Statement look"], img: "/assets/portfolio/shape-stiletto.jpeg" },
+  { id: 'coffin', title: "Coffin / Ballerina", desc: "Deze vorm lijkt op een stiletto, maar dan met een afgeplatte punt.", features: ["Trendy", "Elegante punt", "Veel ruimte voor design"], img: "/assets/portfolio/shape-coffin.jpeg" },
+  { id: 'lipstick', title: "Lipstick", desc: "De nagels worden in een asymmetrische hoek gevijld, precies zoals een nieuwe lippenstift eruitziet.", features: ["Uniek", "Artistiek", "Asymmetrisch"], img: "/assets/portfolio/shape-lipstick.jpeg" }
 ];
 
 const DesignVorm = () => {

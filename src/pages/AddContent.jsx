@@ -4,7 +4,7 @@ import { useContent } from '../context/ContentContext';
 import { compressImage } from '../utils/compressImage';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { supabase } from '../supabaseClient';
-import { ArrowLeft, Upload, Check, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Upload, Check, Loader, X } from 'lucide-react';
 
 const AddContent = () => {
   useDocumentTitle('Add Content');
@@ -203,7 +203,7 @@ const AddContent = () => {
                   >
                     {uploading ? (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Loader2 className="spin" size={20} style={{ marginRight: '10px' }} /> Uploaden...
+                        <Loader className="spin" size={20} style={{ marginRight: '10px' }} /> Uploaden...
                       </div>
                     ) : success ? (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

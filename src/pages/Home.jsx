@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import WhatsNew from '../components/WhatsNew';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useBooking } from '../context/BookingContext';
 
 const Home = () => {
   useDocumentTitle('Diana');
@@ -28,7 +29,7 @@ const Home = () => {
             {/* The original app used an asset, we'll point to public/assets */}
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <div style={{ position: 'absolute', top: '20px', left: '-20px', right: '20px', bottom: '-20px', border: '2px solid var(--gold)', borderRadius: '20px', zIndex: -1 }}></div>
-              <img src="/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (10).jpeg" alt="BeautyNails Cover" style={{ width: '100%', maxWidth: '600px', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+              <img src="/assets/portfolio/hero.jpeg" alt="Diana" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
             </div>
           </div>
         </div>

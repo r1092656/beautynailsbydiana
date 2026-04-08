@@ -1,18 +1,20 @@
-import { useBooking } from '../context/BookingContext';
 import { useState, useRef } from 'react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useBooking } from '../context/BookingContext';
 
 const shapes = [
-  { id: 'round', title: "Rond (Round)", desc: "De meest natuurlijke vorm. Ideaal voor korte nagels en mensen die hun handen veel gebruiken.", features: ["Zeer sterk", "Natuurlijk", "Ideaal voor korte nagels"] },
-  { id: 'oval', title: "Ovaal (Oval)", desc: "Een elegante, tijdloze vorm die je vingers langer doet lijken. Het is eigenlijk een verlengde ronde vorm.", features: ["Verlengend effect", "Elegant", "Tijdloos"] },
-  { id: 'square', title: "Vierkant (Square)", desc: "Helemaal recht afgevijld aan de bovenkant met scherpe hoeken. Heel populair voor een klassieke French manicure.", features: ["Strakke hoeken", "Klassiek", "Perfect voor French"] },
-  { id: 'squoval', title: "Squoval", desc: "Een combinatie van square en oval. De rechte bovenkant van de vierkante nagel, maar de hoeken zijn zacht afgerond.", features: ["Beste van beide werelden", "Veelzijdig", "Zachte hoeken"] },
-  { id: 'almond', title: "Amandel (Almond)", desc: "Slank aan de zijkanten en eindigend in een zachte punt. Super vrouwelijk en verlengend.", features: ["Vrouwelijk", "Verlengend", "Modern"] },
-  { id: 'stiletto', title: "Stiletto", desc: "De meest dramatische vorm. Zeer lang en eindigend in een vlijmscherpe punt.", features: ["Gewaagd", "Extreem lang", "Statement look"] },
-  { id: 'coffin', title: "Coffin / Ballerina", desc: "Deze vorm lijkt op een stiletto, maar dan met een afgeplatte punt.", features: ["Trendy", "Elegante punt", "Veel ruimte voor design"] },
-  { id: 'lipstick', title: "Lipstick", desc: "De nagels worden in een asymmetrische hoek gevijld, precies zoals een nieuwe lippenstift eruitziet.", features: ["Uniek", "Artistiek", "Asymmetrisch"] }
+  { id: 'round', title: "Rond (Round)", desc: "De meest natuurlijke vorm. Ideaal voor korte nagels en mensen die hun handen veel gebruiken.", features: ["Zeer sterk", "Natuurlijk", "Ideaal voor korte nagels"], img: "/assets/portfolio/WhatsApp Image 2026-03-31 at 17.27.32.jpeg" },
+  { id: 'oval', title: "Ovaal (Oval)", desc: "Een elegante, tijdloze vorm die je vingers langer doet lijken. Het is eigenlijk een verlengde ronde vorm.", features: ["Verlengend effect", "Elegant", "Tijdloos"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (3).jpeg" },
+  { id: 'square', title: "Vierkant (Square)", desc: "Helemaal recht afgevijld aan de bovenkant met scherpe hoeken. Heel populair voor een klassieke French manicure.", features: ["Strakke hoeken", "Klassiek", "Perfect voor French"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (7).jpeg" },
+  { id: 'squoval', title: "Squoval", desc: "Een combinatie van square en oval. De rechte bovenkant van de vierkante nagel, maar de hoeken zijn zacht afgerond.", features: ["Beste van beide werelden", "Veelzijdig", "Zachte hoeken"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (4).jpeg" },
+  { id: 'almond', title: "Amandel (Almond)", desc: "Slank aan de zijkanten en eindigend in een zachte punt. Super vrouwelijk en verlengend.", features: ["Vrouwelijk", "Verlengend", "Modern"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (3).jpeg" },
+  { id: 'stiletto', title: "Stiletto", desc: "De meest dramatische vorm. Zeer lang en eindigend in een vlijmscherpe punt.", features: ["Gewaagd", "Extreem lang", "Statement look"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (8).jpeg" },
+  { id: 'coffin', title: "Coffin / Ballerina", desc: "Deze vorm lijkt op een stiletto, maar dan met een afgeplatte punt.", features: ["Trendy", "Elegante punt", "Veel ruimte voor design"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (6).jpeg" },
+  { id: 'lipstick', title: "Lipstick", desc: "De nagels worden in een asymmetrische hoek gevijld, precies zoals een nieuwe lippenstift eruitziet.", features: ["Uniek", "Artistiek", "Asymmetrisch"], img: "/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (12).jpeg" }
 ];
 
 const DesignVorm = () => {
+  useDocumentTitle('Design & Vorm');
   const { openModal } = useBooking();
   const [activeShape, setActiveShape] = useState(null);
   const detailRef = useRef(null);
@@ -63,9 +65,8 @@ const DesignVorm = () => {
         <div ref={detailRef} className="glass-panel fade-in" style={{ padding: '40px', marginTop: '40px' }}>
           <div className="row align-items-center">
             <div className="col-lg-5 mb-4 mb-lg-0">
-              <div style={{ width: '100%', height: '300px', backgroundColor: '#eee', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {/* Normally an image here */}
-                <h2 style={{ color: '#ccc' }}>{activeShape.title}</h2>
+            <div style={{ width: '100%', height: '350px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
+                <img src={activeShape.img} alt={activeShape.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             </div>
             <div className="col-lg-7 ps-lg-5">

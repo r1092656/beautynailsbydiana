@@ -1,6 +1,9 @@
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
+import { Mail, Phone, MapPin, Instagram, Facebook, Send, CheckCircle2 } from 'lucide-react';
 
 const Contact = () => {
+  useDocumentTitle('Contact');
   return (
     <div className="container py-5 fade-in">
       <div className="text-center mb-5">

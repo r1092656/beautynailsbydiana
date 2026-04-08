@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useContent } from '../context/ContentContext';
 
 const staticPortfolioItems = [
@@ -69,6 +70,7 @@ const staticPortfolioItems = [
 ];
 
 const Portfolio = () => {
+  useDocumentTitle('Portfolio');
   const [filter, setFilter] = useState('all');
   const { getPortfolioItems } = useContent();
   

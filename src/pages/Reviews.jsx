@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Star, AlertCircle } from 'lucide-react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const badWordsList = ['badword', 'offensive', 'hate', 'stupid', 'ugly', 'vulgar', 'insult', 'bitch', 'fuck', 'shit', 'ass', 'damn'];
 
 const Reviews = () => {
+  useDocumentTitle('Reviews');
   const [reviews, setReviews] = useState([]);
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);

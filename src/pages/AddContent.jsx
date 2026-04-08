@@ -2,10 +2,12 @@ import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useContent } from '../context/ContentContext';
 import { compressImage } from '../utils/compressImage';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import { supabase } from '../supabaseClient';
 import { ArrowLeft, Upload, Check, Loader2, X } from 'lucide-react';
 
 const AddContent = () => {
+  useDocumentTitle('Add Content');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [caption, setCaption] = useState('');

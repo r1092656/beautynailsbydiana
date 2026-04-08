@@ -1,15 +1,15 @@
-import { useContent } from '../context/ContentContext';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
 import { Plus, Trash2, LogOut, Image, Clock, Folder } from 'lucide-react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
+import { useContent } from '../context/ContentContext';
 
 const AdminDashboard = () => {
+  useDocumentTitle('Admin Dashboard');
   const { content, deleteContent } = useContent();
   const { logout } = useAuth();
 
   return (
     <div className="container py-5 mt-5 fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
         <div>
           <h1 className="display-6 text-gold">Beheerpaneel</h1>
           <p className="text-muted">Beheer hier je website content en "Wat is nieuw" sectie.</p>

@@ -1,72 +1,136 @@
-import { useState } from 'react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useBooking } from '../context/BookingContext';
+import { 
+  Sparkles, 
+  PlusCircle, 
+  RefreshCw, 
+  ShieldCheck, 
+  Hand, 
+  Footprints, 
+  Trash2, 
+  Palette, 
+  Brush,
+  Layers,
+  Heart
+} from 'lucide-react';
+import './Services.css';
 
-const servicesList = [
-  { id: 1, name: 'Nieuwe Set (Full Set)', desc: 'Verlenging van de natuurlijke nagels met tips of sjablonen, afgewerkt met gel of acryl naar keuze.', icon: '✨' },
-  { id: 2, name: 'Bijvullen (Fill)', desc: 'Onderhoud van je kunstnagels na 3-4 weken. We werken de uitgroei bij en verfrissen de kleur.', icon: '🔄' },
-  { id: 3, name: 'Luxe Manicure', desc: 'Verzorging van de nagelriemen, vijlen, handmassage en gellak finish voor zijdezachte handen.', icon: '💅' },
-  { id: 4, name: 'Spa Pedicure', desc: 'Een heerlijk voetbad, eeltbehandeling en verzorging van de teennagels.', icon: '🌸' },
-  { id: 5, name: 'Easy Nail Art', desc: 'Van handgeschilderde designs tot glitters en steentjes.', icon: '🎨' },
-  { id: 6, name: 'Natural Nail Treatment (BIAB)', desc: 'Versteviging van de eigen nagel zonder verlenging.', icon: '🛡️' },
-  { id: 7, name: 'Pedicure Met Gellak', desc: 'Pedicure behandeling inclusief langdurige gellak finish op de tenen.', icon: '👣' },
-  { id: 8, name: 'Gel Verwijdering', desc: 'Veilig en professioneel verwijderen van kunstnagels zonder de natuurlijke nagel te beschadigen.', icon: '🧼' },
+const serviceCategories = [
+  {
+    title: 'Kunstnagels',
+    icon: <Layers size={24} />,
+    items: [
+      { 
+        name: 'Verlengen', 
+        desc: 'Het langer maken van natuurlijke nagel met builder gel of polygel voor een elegante, verlengde look.', 
+        icon: Sparkles 
+      },
+      { 
+        name: 'Full Set', 
+        desc: 'Een volledige nieuwe set nagels, perfect voor een complete transformatie en versteviging.', 
+        icon: PlusCircle 
+      },
+      { 
+        name: 'Fill Ins / Opvullen', 
+        desc: 'Het professioneel bijwerken van uitgroei zonder dat een volledige nieuwe set nodig is.', 
+        icon: RefreshCw 
+      },
+    ]
+  },
+  {
+    title: 'Verzorging & Natuurlijk',
+    icon: <Heart size={24} />,
+    items: [
+      { 
+        name: 'Gel Overlay', 
+        desc: 'Hoogwaardige gel op de natuurlijke nagel voor extra stevigheid en een prachtige glans.', 
+        icon: ShieldCheck 
+      },
+      { 
+        name: 'Manicure', 
+        desc: 'Een complete verzorging van de natuurlijke nagels en nagelriemen voor een gezonde uitstraling.', 
+        icon: Hand 
+      },
+      { 
+        name: 'Pedicure met gel lak', 
+        desc: 'Grondige verzorging van de voeten en nagels, afgewerkt met een duurzame gellak.', 
+        icon: Footprints 
+      },
+      { 
+        name: 'Verwijderen van gel', 
+        desc: 'Veilig en professioneel verwijderen van (kunst)nagels met respect voor de natuurlijke nagel.', 
+        icon: Trash2 
+      },
+    ]
+  },
+  {
+    title: 'Art & Design',
+    icon: <Palette size={24} />,
+    items: [
+      { 
+        name: 'Easy Nail Art', 
+        desc: 'Het tekenen van eenvoudige nail art voor een subtiel en uniek accent op je nagels.', 
+        icon: Palette 
+      },
+      { 
+        name: 'Design', 
+        desc: 'Exclusieve toevoegingen en artistieke details bovenop de gelnails voor een signature look.', 
+        icon: Brush 
+      },
+    ]
+  }
 ];
 
 const Services = () => {
   useDocumentTitle('Services');
-  const [activeAccordion, setActiveAccordion] = useState(null);
   const { openModal } = useBooking();
 
-  const toggleAccordion = (id) => {
-    if (activeAccordion === id) {
-      setActiveAccordion(null);
-    } else {
-      setActiveAccordion(id);
-    }
-  };
-
   return (
-    <div className="container py-5 fade-in">
-      <div className="text-center mb-5">
-        <h1 className="display-5 text-gold">Onze Behandelingen</h1>
-        <div className="gold-line"></div>
-        <p className="lead">Professionele zorg voor je handen en voeten in een ontspannen sfeer.</p>
-      </div>
+    <div className="services-page fade-in">
+      <div className="container">
+        <header className="services-header">
+          <h1 className="text-gold">Onze Behandelingen</h1>
+          <div className="gold-line"></div>
+          <p className="lead text-muted">Exclusieve zorg en creativiteit voor jouw perfecte nagels.</p>
+        </header>
 
-      <div className="row">
-        <div className="col-lg-6 mb-5">
-          <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }}>
-            <img src="/assets/portfolio/hero.jpeg" alt="Services" style={{ width: '100%', height: '500px', objectFit: 'cover' }} />
-          </div>
-        </div>
-
-        <div className="col-lg-6">
-          <div className="glass-panel" style={{ padding: '20px' }}>
-            {servicesList.map((service) => (
-              <div key={service.id} style={{ borderBottom: '1px solid #eee', padding: '15px 0' }}>
-                <div 
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem' }}
-                  onClick={() => toggleAccordion(service.id)}
-                >
-                  <span>{service.icon} <span style={{ marginLeft: '10px' }}>{service.name}</span></span>
-                  <span style={{ fontSize: '1.5rem', color: 'var(--gold)', transition: '0.3s', transform: activeAccordion === service.id ? 'rotate(45deg)' : 'rotate(0)' }}>+</span>
-                </div>
-                
-                {activeAccordion === service.id && (
-                  <div className="fade-in" style={{ padding: '15px 0 10px 40px', color: 'var(--text-muted)' }}>
-                    <p style={{ marginBottom: '15px' }}>{service.desc}</p>
-                    <button className="btn-gold" style={{ padding: '8px 20px', fontSize: '0.9rem' }} onClick={() => openModal(service.name)}>
-                      Boek Nu
-                    </button>
+        {serviceCategories.map((category, index) => (
+          <section key={index} className="category-section">
+            <h2 className="category-title">
+              {category.icon}
+              {category.title}
+            </h2>
+            
+            <div className="services-grid">
+              {category.items.map((service, sIndex) => {
+                const IconComponent = service.icon;
+                return (
+                  <div key={sIndex} className="service-card">
+                    <div>
+                      <div className="service-icon-wrapper">
+                        <IconComponent size={32} />
+                      </div>
+                      <h3>{service.name}</h3>
+                      <p className="service-description">{service.desc}</p>
+                    </div>
+                    
+                    <div className="service-footer">
+                      <button 
+                        className="btn-book" 
+                        onClick={() => openModal(service.name)}
+                      >
+                        Boek Nu
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );
 };
+
 export default Services;

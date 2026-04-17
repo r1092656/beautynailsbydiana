@@ -7,10 +7,11 @@ import './BookingModal.css';
 // Pre-defined service list for the dropdown
 // Structured service categories
 const SERVICE_STRUCTURE = {
-  'Gel Overlay': ['Kleur', 'French', 'Basis Gel', 'Fullset', 'Fill In'],
-  'Verlenging': ['Verlenging met tips', 'Verlenging met sjabloon', 'Fill In', 'Fullset'],
-  'Manicure': [],
-  'Pedicure': ['Gellak Pedicure']
+  'Gel Overlay': ['Basis gel', 'Basis gel + gellak', 'French', 'Fullset', 'Fill In'],
+  'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
+  'Manicure': ['Standaard Manicure'],
+  'Pedicure': ['Gellak Pedicure'],
+  'Other': ['Verwijderen van gel', 'Easy Nail Art', 'Design']
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
@@ -64,16 +65,37 @@ const BookingModal = () => {
   useEffect(() => {
     // If a service was pre-selected from the Services page, try to match it or reset
     if (selectedService && isModalOpen) {
-      // Find which category it belongs to if it matches any sub-service
-      Object.entries(SERVICE_STRUCTURE).forEach(([cat, subs]) => {
-        if (subs.includes(selectedService)) {
-          setCategory(cat);
-          setSubService(selectedService);
-        } else if (cat === 'Pedicure' && PEDICURE_SERVICES.includes(selectedService)) {
-          setCategory(cat);
-          setSubService(selectedService);
-        }
-      });
+      const s = selectedService.toLowerCase();
+      
+      if (s.includes('verlengen') || s.includes('verlenging')) {
+        setCategory('Verlenging');
+        setSubService('Fullset');
+      } else if (s.includes('overlay')) {
+        setCategory('Gel Overlay');
+        setSubService('Basis gel');
+      } else if (s.includes('fill ins') || s.includes('opvullen')) {
+        // Need to know if it's Gel or Verlenging, but we'll default to Gel Overlay for now
+        setCategory('Gel Overlay');
+        setSubService('Fill In');
+      } else if (s.includes('full set')) {
+        setCategory('Verlenging');
+        setSubService('Fullset');
+      } else if (s.includes('manicure')) {
+        setCategory('Manicure');
+        setSubService('Standaard Manicure');
+      } else if (s.includes('pedicure')) {
+        setCategory('Pedicure');
+        setSubService('Gellak Pedicure');
+      } else if (s.includes('verwijderen')) {
+        setCategory('Other');
+        setSubService('Verwijderen van gel');
+      } else if (s.includes('easy nail art')) {
+        setCategory('Other');
+        setSubService('Easy Nail Art');
+      } else if (s.includes('design')) {
+        setCategory('Other');
+        setSubService('Design');
+      }
     }
   }, [selectedService, isModalOpen]);
 

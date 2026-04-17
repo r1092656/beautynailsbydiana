@@ -12,6 +12,7 @@ export default async function handler(req, res) {
     phone,
     category,
     sub_service,
+    gel_overlay_service,
     nail_length,
     design,
     location,
@@ -39,6 +40,7 @@ export default async function handler(req, res) {
         `Phone: ${phone}`,
         `Category: ${category}`,
         `Service: ${sub_service}`,
+        ...(gel_overlay_service ? [`Treatment: ${gel_overlay_service}`] : []),
         `Length: ${nail_length}`,
         `Design: ${design}`,
         `Location: ${location}`
@@ -117,6 +119,12 @@ export default async function handler(req, res) {
               <span class="label">Service:</span>
               <span class="value important-value">${sub_service}</span>
             </div>
+            ${gel_overlay_service ? `
+            <div class="detail-row">
+              <span class="label">Treatment:</span>
+              <span class="value">${gel_overlay_service}</span>
+            </div>
+            ` : ''}
             ${(category === 'Gel Overlay' || category === 'Verlenging') ? `
             <div class="detail-row">
               <span class="label">Nail Length:</span>

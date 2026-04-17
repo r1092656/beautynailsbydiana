@@ -17,6 +17,7 @@ const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
 const PEDICURE_DESIGNS = ['French', 'Others', 'No design'];
+const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak', 'French'];
 
 // Helper to convert HH:MM to minutes
 const timeToMins = (timeStr) => {
@@ -43,6 +44,7 @@ const BookingModal = () => {
   const [complete, setComplete] = useState(false);
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
+  const [gelOverlayService, setGelOverlayService] = useState('');
   const [nailLength, setNailLength] = useState('');
   const [design, setDesign] = useState('');
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
@@ -167,6 +169,7 @@ const BookingModal = () => {
         phone: phone,
         category: category,
         sub_service: subService,
+        gel_overlay_service: gelOverlayService,
         nail_length: nailLength || 'N/A',
         design: design || 'None',
         location: location,
@@ -213,6 +216,7 @@ const BookingModal = () => {
     setComplete(false);
     setCategory('');
     setSubService('');
+    setGelOverlayService('');
     setNailLength('');
     setDesign('');
     setShowFullsetWarning(false);
@@ -269,7 +273,7 @@ const BookingModal = () => {
                       key={cat}
                       type="button"
                       className={`option-btn ${category === cat ? 'selected' : ''}`}
-                      onClick={() => { setCategory(cat); setSubService(''); setNailLength(''); setDesign(''); }}
+                      onClick={() => { setCategory(cat); setSubService(''); setGelOverlayService(''); setNailLength(''); setDesign(''); }}
                     >
                       {cat}
                     </button>
@@ -296,6 +300,23 @@ const BookingModal = () => {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Gel Overlay Type (Conditional) */}
+              {category === 'Gel Overlay' && (
+                <div className="form-group fade-in">
+                  <label>Choose treatment</label>
+                  <select
+                    value={gelOverlayService}
+                    onChange={(e) => setGelOverlayService(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select a treatment...</option>
+                    {GEL_OVERLAY_SERVICES.map((opt, idx) => (
+                      <option key={idx} value={opt}>{opt}</option>
+                    ))}
+                  </select>
                 </div>
               )}
 

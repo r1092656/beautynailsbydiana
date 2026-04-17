@@ -8,10 +8,10 @@ export default async function handler(req, res) {
 
   const {
     name,
+    email,
     phone,
     category,
     sub_service,
-    nail_shape,
     nail_length,
     extra_bewerking,
     design,
@@ -36,10 +36,10 @@ export default async function handler(req, res) {
       const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
       const details = [
         `Customer: ${name}`,
+        `Email: ${email}`,
         `Phone: ${phone}`,
         `Category: ${category}`,
         `Service: ${sub_service}`,
-        `Shape: ${nail_shape}`,
         `Length: ${nail_length}`,
         `Extra: ${extra_bewerking}`,
         `Design: ${design}`,
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         text: `Nails: ${sub_service} (${name})`,
         dates: `${formatCalDate(startDate)}/${formatCalDate(endDate)}`,
         details: details,
-        location: location === 'Turnhout' ? 'Turnhout, Belgium' : 'Veerle, Belgium',
+        location: location === 'Turnhout' ? 'Turnhout, Belgium' : `${location}, Belgium`,
       });
 
       return `${baseUrl}&${params.toString()}`;
@@ -100,6 +100,10 @@ export default async function handler(req, res) {
               <span class="value">${name}</span>
             </div>
             <div class="detail-row">
+              <span class="label">Email:</span>
+              <span class="value">${email}</span>
+            </div>
+            <div class="detail-row">
               <span class="label">Phone:</span>
               <span class="value">${phone}</span>
             </div>
@@ -117,10 +121,6 @@ export default async function handler(req, res) {
             </div>
             ${(category === 'Gel Overlay' || category === 'Verlenging') ? `
             <div class="detail-row">
-              <span class="label">Nail Shape:</span>
-              <span class="value">${nail_shape}</span>
-            </div>
-            <div class="detail-row">
               <span class="label">Nail Length:</span>
               <span class="value">${nail_length}</span>
             </div>
@@ -128,6 +128,12 @@ export default async function handler(req, res) {
               <span class="label">Extra Bewerking:</span>
               <span class="value">${extra_bewerking}</span>
             </div>
+            <div class="detail-row">
+              <span class="label">Design:</span>
+              <span class="value">${design}</span>
+            </div>
+            ` : ''}
+            ${category === 'Pedicure' ? `
             <div class="detail-row">
               <span class="label">Design:</span>
               <span class="value">${design}</span>
@@ -185,8 +191,8 @@ export default async function handler(req, res) {
 
     const { data, error } = await resend.emails.send({
       from: 'Diana Booking <onboarding@resend.dev>', // You should verify your domain in Resend for more customizations
-      to: ['dianacirpaci777@gmail.com'],
-      subject: `New Booking: ${sub_service} - ${name}`,
+      to: ['dianacirpaci777@gmail.com', email],
+      subject: `Booking Confirmation: ${sub_service} - ${name}`,
       html: html,
       attachments: attachments,
     });

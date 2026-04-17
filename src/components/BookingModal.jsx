@@ -13,10 +13,11 @@ const SERVICE_STRUCTURE = {
   'Pedicure': ['Gellak Pedicure']
 };
 
-const NAIL_SHAPES = ['Oval', 'Round', 'Square', 'Squoval', 'Almond', 'Stiletto', 'Coffin', 'Edge'];
-const NAIL_LENGTHS = ['Short (1–2)', 'Medium (3–4)', 'Large (5–6)'];
+const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const EXTRA_BEWERKINGEN = ['Slim Technick'];
-const DESIGNS = ['French Tip', 'Cat Eye', 'Folie', 'Other'];
+const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
+const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
+const PEDICURE_DESIGNS = ['French', 'Others', 'No design'];
 
 // Helper to convert HH:MM to minutes
 const timeToMins = (timeStr) => {
@@ -29,7 +30,7 @@ const generateTimeSlots = () => {
   const slots = [];
   for (let h = 9; h <= 18; h++) {
     slots.push(`${h.toString().padStart(2, '0')}:00`);
-    if(h < 18) slots.push(`${h.toString().padStart(2, '0')}:30`);
+    if (h < 18) slots.push(`${h.toString().padStart(2, '0')}:30`);
   }
   return slots;
 };
@@ -38,12 +39,11 @@ const DURATION_MINS = 150; // 2.5 hours blocks
 
 const BookingModal = () => {
   const { isModalOpen, closeModal, selectedService } = useBooking();
-  
+
   // Form State
   const [complete, setComplete] = useState(false);
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
-  const [nailShape, setNailShape] = useState('');
   const [nailLength, setNailLength] = useState('');
   const [extraBewerking, setExtraBewerking] = useState('');
   const [design, setDesign] = useState('');
@@ -51,6 +51,7 @@ const BookingModal = () => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [location, setLocation] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
@@ -68,6 +69,9 @@ const BookingModal = () => {
         if (subs.includes(selectedService)) {
           setCategory(cat);
           setSubService(selectedService);
+        } else if (cat === 'Pedicure' && PEDICURE_SERVICES.includes(selectedService)) {
+          setCategory(cat);
+          setSubService(selectedService);
         }
       });
     }
@@ -83,9 +87,12 @@ const BookingModal = () => {
     }
   }, [isModalOpen]);
 
-  // Derived state to see if nail options are needed
   const needsNailOptions = useMemo(() => {
     return category === 'Gel Overlay' || category === 'Verlenging';
+  }, [category]);
+
+  const isPedicure = useMemo(() => {
+    return category === 'Pedicure';
   }, [category]);
 
   const isNewSet = useMemo(() => {
@@ -102,7 +109,7 @@ const BookingModal = () => {
     return allSlots.map(slot => {
       const startSlot = timeToMins(slot);
       const endSlot = startSlot + DURATION_MINS;
-      
+
       const isOverlapping = bookingsOnDate.some(booking => {
         const bStart = booking.startMins;
         const bEnd = booking.endMins;
@@ -155,13 +162,13 @@ const BookingModal = () => {
       // Prepare data for Web3Forms
       // Note: We use a hidden field for the access key
       const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "YOUR_ACCESS_KEY_HERE";
-      
+
       const emailPayload = {
         name: name,
+        email: email,
         phone: phone,
         category: category,
         sub_service: subService,
-        nail_shape: nailShape || 'N/A',
         nail_length: nailLength || 'N/A',
         extra_bewerking: extraBewerking || 'None',
         design: design || 'None',
@@ -209,7 +216,6 @@ const BookingModal = () => {
     setComplete(false);
     setCategory('');
     setSubService('');
-    setNailShape('');
     setNailLength('');
     setExtraBewerking('');
     setDesign('');
@@ -217,6 +223,7 @@ const BookingModal = () => {
     setDate('');
     setTime('');
     setName('');
+    setEmail('');
     setPhone('');
     setLocation('');
     setImagePreview(null);
@@ -228,31 +235,31 @@ const BookingModal = () => {
     <div className="modal-overlay fade-in">
       <div className="modal-content glass-panel fade-in">
         <button className="close-btn" onClick={handleClose}><X size={24} /></button>
-        
+
         {!complete ? (
           <div className="booking-form-wrapper">
             <h2 className="modal-title">Book Your Appointment</h2>
             <p className="modal-subtitle">Experience luxury nail care. Note: Appointments are scheduled for ~2.5 hours.</p>
-            
+
             <form onSubmit={handleSubmit} className="booking-form">
-              
+
               {/* Location Selection */}
               <div className="form-group">
                 <label>Select Location</label>
                 <div className="location-grid">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className={`location-btn ${location === 'Turnhout' ? 'selected' : ''}`}
                     onClick={() => setLocation('Turnhout')}
                   >
                     Turnhout
                   </button>
-                  <button 
-                    type="button" 
-                    className={`location-btn ${location === 'Veerle' ? 'selected' : ''}`}
-                    onClick={() => setLocation('Veerle')}
+                  <button
+                    type="button"
+                    className={`location-btn ${location === 'Laakdal' ? 'selected' : ''}`}
+                    onClick={() => setLocation('Laakdal')}
                   >
-                    Veerle
+                    Laakdal
                   </button>
                 </div>
               </div>
@@ -266,7 +273,7 @@ const BookingModal = () => {
                       key={cat}
                       type="button"
                       className={`option-btn ${category === cat ? 'selected' : ''}`}
-                      onClick={() => { setCategory(cat); setSubService(''); setNailShape(''); setNailLength(''); }}
+                      onClick={() => { setCategory(cat); setSubService(''); setNailLength(''); setDesign(''); }}
                     >
                       {cat}
                     </button>
@@ -274,19 +281,52 @@ const BookingModal = () => {
                 </div>
               </div>
 
-              {/* Sub-service Selection */}
-              {category && SERVICE_STRUCTURE[category].length > 0 && (
+              {/* Sub-service Selection (Gel/Extension) */}
+              {needsNailOptions && (
+                <div className="form-group fade-in">
+                  <label>Choose service</label>
+                  <div className="option-grid">
+                    {['Fill In', 'Fullset'].map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        className={`mini-option-btn ${subService === opt ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSubService(opt);
+                          if (opt === 'Fullset') setShowFullsetWarning(true);
+                        }}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pedicure Service Selection */}
+              {isPedicure && (
+                <div className="form-group fade-in">
+                  <label>Choose pedicure service</label>
+                  <select
+                    value={subService}
+                    onChange={(e) => setSubService(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select a treatment...</option>
+                    {PEDICURE_SERVICES.map((srv, idx) => (
+                      <option key={idx} value={srv}>{srv}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Sub-service Selection (Generic - if any other category added later) */}
+              {category && !needsNailOptions && !isPedicure && SERVICE_STRUCTURE[category].length > 0 && (
                 <div className="form-group fade-in">
                   <label>Which {category.toLowerCase()} service do you want?</label>
-                  <select 
-                    value={subService} 
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSubService(val);
-                      if (val === 'Fullset' && (category === 'Gel Overlay' || category === 'Verlenging')) {
-                        setShowFullsetWarning(true);
-                      }
-                    }}
+                  <select
+                    value={subService}
+                    onChange={(e) => setSubService(e.target.value)}
                     required
                   >
                     <option value="" disabled>Select a treatment...</option>
@@ -310,32 +350,35 @@ const BookingModal = () => {
                 </div>
               )}
 
-              {/* Design (Conditional) */}
+              {/* Design (Generic) */}
               {needsNailOptions && (
                 <div className="form-group fade-in">
                   <label>Design</label>
                   <select value={design} onChange={(e) => setDesign(e.target.value)}>
                     <option value="">No design</option>
-                    {DESIGNS.map((opt, idx) => (
+                    {GEL_DESIGNS.map((opt, idx) => (
                       <option key={idx} value={opt}>{opt}</option>
                     ))}
                   </select>
                 </div>
               )}
 
-              {/* Nail Shape and Length (Conditional) */}
+              {/* Design (Pedicure) */}
+              {isPedicure && (
+                <div className="form-group fade-in">
+                  <label>Design</label>
+                  <select value={design} onChange={(e) => setDesign(e.target.value)} required>
+                    <option value="" disabled>Choose a design...</option>
+                    {PEDICURE_DESIGNS.map((opt, idx) => (
+                      <option key={idx} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Nail Length (Conditional) */}
               {needsNailOptions && (
                 <div className="fade-in">
-                  <div className="form-group">
-                    <label>Select Nail Shape</label>
-                    <select value={nailShape} onChange={(e) => setNailShape(e.target.value)} required>
-                      <option value="" disabled>Choose a shape...</option>
-                      {NAIL_SHAPES.map((shape) => (
-                        <option key={shape} value={shape}>{shape}</option>
-                      ))}
-                    </select>
-                  </div>
-
                   <div className="form-group">
                     <label>Select Nail Length</label>
                     <div className="option-grid">
@@ -353,12 +396,16 @@ const BookingModal = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Personal Details */}
+              <div className="form-group">
+                <label>Full Name</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+              </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Full Name</label>
-                  <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+                  <label>Email Address</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required />
                 </div>
                 <div className="form-group">
                   <label>Contact Number</label>
@@ -369,12 +416,12 @@ const BookingModal = () => {
               {/* Date & Time Grid */}
               <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '10px' }}>
                 <label>Select Date</label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   value={date}
                   onChange={(e) => { setDate(e.target.value); setTime(''); }}
                   min={new Date().toISOString().split("T")[0]}
-                  required 
+                  required
                 />
               </div>
 
@@ -432,10 +479,10 @@ const BookingModal = () => {
           <div className="booking-success fade-in">
             <CircleCheck size={64} className="text-gold mb-4" />
             <h2 className="modal-title">Booking Confirmed!</h2>
-            <p>Thank you, {name}.<br/>We've secured your <strong>{subService}</strong> appointment in <strong>{location}</strong> on {date} at {time}.</p>
+            <p>Thank you, {name}.<br />We've secured your <strong>{subService}</strong> appointment in <strong>{location}</strong> on {date} at {time}.</p>
             {needsNailOptions && (
               <p className="text-muted small">
-                <strong>Shape:</strong> {nailShape} | <strong>Length:</strong> {nailLength}
+                <strong>Length:</strong> {nailLength}
               </p>
             )}
             <button onClick={handleClose} className="btn-outline-gold mt-4">Close</button>

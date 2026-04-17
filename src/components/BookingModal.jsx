@@ -14,7 +14,6 @@ const SERVICE_STRUCTURE = {
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
-const EXTRA_BEWERKINGEN = ['Slim Technick'];
 const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
 const PEDICURE_DESIGNS = ['French', 'Others', 'No design'];
@@ -45,7 +44,6 @@ const BookingModal = () => {
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
   const [nailLength, setNailLength] = useState('');
-  const [extraBewerking, setExtraBewerking] = useState('');
   const [design, setDesign] = useState('');
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
   const [date, setDate] = useState('');
@@ -170,7 +168,6 @@ const BookingModal = () => {
         category: category,
         sub_service: subService,
         nail_length: nailLength || 'N/A',
-        extra_bewerking: extraBewerking || 'None',
         design: design || 'None',
         location: location,
         date: date,
@@ -217,7 +214,6 @@ const BookingModal = () => {
     setCategory('');
     setSubService('');
     setNailLength('');
-    setExtraBewerking('');
     setDesign('');
     setShowFullsetWarning(false);
     setDate('');
@@ -336,20 +332,6 @@ const BookingModal = () => {
                   </select>
                 </div>
               )}
-
-              {/* Extra Bewerkingen (Conditional) */}
-              {isNewSet && (
-                <div className="form-group fade-in">
-                  <label>Extra Bewerkingen</label>
-                  <select value={extraBewerking} onChange={(e) => setExtraBewerking(e.target.value)}>
-                    <option value="">No extra treatment</option>
-                    {EXTRA_BEWERKINGEN.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               {/* Design (Generic) */}
               {needsNailOptions && (
                 <div className="form-group fade-in">
@@ -376,8 +358,8 @@ const BookingModal = () => {
                 </div>
               )}
 
-              {/* Nail Length (Conditional) */}
-              {needsNailOptions && (
+              {/* Nail Length (Verlenging Only) */}
+              {category === 'Verlenging' && (
                 <div className="fade-in">
                   <div className="form-group">
                     <label>Select Nail Length</label>

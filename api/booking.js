@@ -13,7 +13,6 @@ export default async function handler(req, res) {
     category,
     sub_service,
     nail_length,
-    extra_bewerking,
     design,
     location,
     date,
@@ -41,7 +40,6 @@ export default async function handler(req, res) {
         `Category: ${category}`,
         `Service: ${sub_service}`,
         `Length: ${nail_length}`,
-        `Extra: ${extra_bewerking}`,
         `Design: ${design}`,
         `Location: ${location}`
       ].join('\n');
@@ -123,10 +121,6 @@ export default async function handler(req, res) {
             <div class="detail-row">
               <span class="label">Nail Length:</span>
               <span class="value">${nail_length}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Extra Bewerking:</span>
-              <span class="value">${extra_bewerking}</span>
             </div>
             <div class="detail-row">
               <span class="label">Design:</span>

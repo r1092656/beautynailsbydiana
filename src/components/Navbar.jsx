@@ -33,9 +33,6 @@ const Navbar = () => {
             <Link to="/services" className={`nav-link ${isActive('/services')}`} onClick={toggleMenu}>Services</Link>
           </li>
           <li className="nav-item">
-            <Link to="/design" className={`nav-link ${isActive('/design')}`} onClick={toggleMenu}>Design & Vorm</Link>
-          </li>
-          <li className="nav-item">
             <Link to="/portfolio" className={`nav-link ${isActive('/portfolio')}`} onClick={toggleMenu}>Portfolio</Link>
           </li>
           <li className="nav-item">

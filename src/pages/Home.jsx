@@ -50,7 +50,7 @@ const Home = () => {
       {/* Quick Links / Discover */}
       <section className="container py-5 fade-in" style={{ animationDelay: '0.4s' }}>
         <div className="row">
-          <div className="col-md-4 mb-4">
+          <div className="col-md-6 mb-4">
             <div className="glass-panel" style={{ height: '100%', padding: '30px', display: 'flex', flexDirection: 'column' }}>
               <h2 className="text-gold mb-3">Diensten</h2>
               <p className="text-muted mb-4 flex-grow-1">
@@ -60,17 +60,7 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="col-md-4 mb-4">
-            <div className="glass-panel" style={{ height: '100%', padding: '30px', display: 'flex', flexDirection: 'column' }}>
-              <h2 className="text-gold mb-3">Design & Vorm</h2>
-              <p className="text-muted mb-4 flex-grow-1">
-                Ik creëer elegante en moderne nageldesigns die passen bij jouw stijl. Van stiletto tot ovaal en klassiek French; elke look wordt tot in de puntjes verzorgd.
-              </p>
-              <Link to="/design" className="btn-outline-gold" style={{ width: 'fit-content' }}>Bekijk Werk</Link>
-            </div>
-          </div>
-
-          <div className="col-md-4 mb-4">
+          <div className="col-md-6 mb-4">
             <div className="glass-panel" style={{ height: '100%', padding: '30px', display: 'flex', flexDirection: 'column' }}>
               <h2 className="text-gold mb-3">Portfolio</h2>
               <p className="text-muted mb-4 flex-grow-1">

@@ -1,77 +1,15 @@
-import { useState } from 'react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useContent } from '../context/ContentContext';
 
-const staticPortfolioItems = [
-  { id: 'p1', category: 'BIAB', img: '/assets/portfolio/shape-round.jpeg' },
-  { id: 'p2', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (1).jpeg' },
-  { id: 'p3', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (2).jpeg' },
-  { id: 'p4', category: 'Pedicure', img: '/assets/portfolio/shape-oval.jpeg' },
-  { id: 'p5', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (4).jpeg' },
-  { id: 'p6', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (5).jpeg' },
-  { id: 'p7', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (6).jpeg' },
-  { id: 'p8', category: 'Full Set', img: '/assets/portfolio/shape-square.jpeg' },
-  { id: 'p9', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41 (8).jpeg' },
-  { id: 'p10', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.41.jpeg' },
-  { id: 'p11', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (1).jpeg' },
-  { id: 'p12', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (2).jpeg' },
-  { id: 'p13', category: 'Full Set', img: '/assets/portfolio/shape-almond.jpeg' },
-  { id: 'p14', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (4).jpeg' },
-  { id: 'p15', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (5).jpeg' },
-  { id: 'p16', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (6).jpeg' },
-  { id: 'p17', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (7).jpeg' },
-  { id: 'p18', category: 'Full Set', img: '/assets/portfolio/shape-stiletto.jpeg' },
-  { id: 'p19', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (9).jpeg' },
-  { id: 'p20', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (10).jpeg' },
-  { id: 'p21', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (11).jpeg' },
-  { id: 'p22', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42 (12).jpeg' },
-  { id: 'p23', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.42.jpeg' },
-  { id: 'p24', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (1).jpeg' },
-  { id: 'p25', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (2).jpeg' },
-  { id: 'p26', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (3).jpeg' },
-  { id: 'p27', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (4).jpeg' },
-  { id: 'p28', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (5).jpeg' },
-  { id: 'p29', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (6).jpeg' },
-  { id: 'p30', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (7).jpeg' },
-  { id: 'p31', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (8).jpeg' },
-  { id: 'p32', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (9).jpeg' },
-  { id: 'p33', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (10).jpeg' },
-  { id: 'p34', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (11).jpeg' },
-  { id: 'p35', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43 (12).jpeg' },
-  { id: 'p36', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.43.jpeg' },
-  { id: 'p37', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (1).jpeg' },
-  { id: 'p38', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (2).jpeg' },
-  { id: 'p39', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (3).jpeg' },
-  { id: 'p40', category: 'Gel Overlay', img: '/assets/portfolio/shape-squoval.jpeg' },
-  { id: 'p41', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (5).jpeg' },
-  { id: 'p42', category: 'Nail Art', img: '/assets/portfolio/shape-coffin.jpeg' },
-  { id: 'p43', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (7).jpeg' },
-  { id: 'p44', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (8).jpeg' },
-  { id: 'p45', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (9).jpeg' },
-  { id: 'p46', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (10).jpeg' },
-  { id: 'p47', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44 (11).jpeg' },
-  { id: 'p48', category: 'Full Set', img: '/assets/portfolio/shape-lipstick.jpeg' },
-  { id: 'p49', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.44.jpeg' },
-  { id: 'p50', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (1).jpeg' },
-  { id: 'p51', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (2).jpeg' },
-  { id: 'p52', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (3).jpeg' },
-  { id: 'p53', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (4).jpeg' },
-  { id: 'p54', category: 'Pedicure', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (5).jpeg' },
-  { id: 'p55', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (6).jpeg' },
-  { id: 'p56', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (7).jpeg' },
-  { id: 'p57', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (8).jpeg' },
-  { id: 'p58', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (9).jpeg' },
-  { id: 'p59', category: 'Pedicure', img: '/assets/portfolio/hero.jpeg' },
-  { id: 'p60', category: 'Gel Overlay', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45 (11).jpeg' },
-  { id: 'p61', category: 'BIAB', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.45.jpeg' },
-  { id: 'p62', category: 'Nail Art', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.46 (1).jpeg' },
-  { id: 'p63', category: 'Full Set', img: '/assets/portfolio/WhatsApp Image 2026-04-06 at 17.23.46.jpeg' },
-  { id: 'p64', category: 'Pedicure', img: '/assets/portfolio/page.jpg' },
-];
+// Generate static numbered files 52 down to 1
+const staticItems = Array.from({ length: 52 }, (_, i) => ({
+  id: `static-${52 - i}`,
+  img: `/assets/portfolio/${52 - i}.jpeg`,
+  category: 'All'
+}));
 
 const Portfolio = () => {
   useDocumentTitle('Portfolio');
-  const [filter, setFilter] = useState('all');
   const { getPortfolioItems } = useContent();
   
   const dynamicItems = getPortfolioItems().map(item => ({
@@ -81,31 +19,23 @@ const Portfolio = () => {
     caption: item.caption
   }));
 
-  const allItems = [...dynamicItems, ...staticPortfolioItems];
+  // Logic: 2 most recent dynamic photos at top, then static numbered, then other dynamic
+  const latestDynamic = dynamicItems.slice(0, 2);
+  const otherDynamic = dynamicItems.slice(2);
 
-  const filteredItems = filter === 'all' 
-    ? allItems 
-    : allItems.filter(item => item.category.toLowerCase() === filter.toLowerCase());
+  // Final list: 2 Latest Dynamic -> Static Numbered (52...1) -> Remaining Dynamic
+  const allItems = [...latestDynamic, ...staticItems, ...otherDynamic];
 
   return (
     <div className="container py-5 fade-in">
       <div className="text-center mb-5">
-        <h1 className="display-5 text-gold">Mijn Werk</h1>
+        <h1 className="display-5 text-gold">Portfolio</h1>
         <div className="gold-line"></div>
-        <p className="lead">Een greep uit de 50+ sets die ik met passie heb gezet.</p>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '40px', flexWrap: 'wrap' }}>
-        <button className={filter === 'all' ? 'btn-gold' : 'btn-outline-gold'} onClick={() => setFilter('all')}>Alles</button>
-        <button className={filter === 'biab' ? 'btn-gold' : 'btn-outline-gold'} onClick={() => setFilter('biab')}>BIAB</button>
-        <button className={filter === 'nail art' ? 'btn-gold' : 'btn-outline-gold'} onClick={() => setFilter('nail art')}>Nail Art</button>
-        <button className={filter === 'fullset' ? 'btn-gold' : 'btn-outline-gold'} onClick={() => setFilter('fullset')}>Full Set</button>
-        <button className={filter === 'pedicure' ? 'btn-gold' : 'btn-outline-gold'} onClick={() => setFilter('pedicure')}>Pedicure</button>
-        <button className={filter === 'gel overlay' ? 'btn-gold' : 'btn-outline-gold'} onClick={() => setFilter('gel overlay')}>Gel Overlay</button>
+        <p className="lead">Bekijk hier een selectie van mijn werk, van de nieuwste creaties tot klassieke favorieten.</p>
       </div>
 
       <div className="row">
-        {filteredItems.map(item => (
+        {allItems.map(item => (
           <div key={item.id} className="col-6 col-md-4 col-lg-3 mb-4 fade-in">
             <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
               <img 
@@ -136,4 +66,5 @@ const Portfolio = () => {
     </div>
   );
 };
+
 export default Portfolio;

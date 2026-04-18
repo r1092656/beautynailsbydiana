@@ -10,14 +10,13 @@ const SERVICE_STRUCTURE = {
   'Gel Overlay': ['Basis gel', 'Basis gel + gellak', 'French', 'Fullset', 'Fill In'],
   'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
   'Manicure': ['Standaard Manicure'],
-  'Pedicure': ['Gellak Pedicure'],
-  'Other': ['Verwijderen van gel', 'Easy Nail Art', 'Design']
+  'Pedicure': ['Gellak Pedicure']
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
-const PEDICURE_DESIGNS = ['French', 'Others', 'No design'];
+const PEDICURE_DESIGNS = ['French', 'Nail Art', 'No design'];
 const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak', 'French'];
 
 // Helper to convert HH:MM to minutes
@@ -86,15 +85,6 @@ const BookingModal = () => {
       } else if (s.includes('pedicure')) {
         setCategory('Pedicure');
         setSubService('Gellak Pedicure');
-      } else if (s.includes('verwijderen')) {
-        setCategory('Other');
-        setSubService('Verwijderen van gel');
-      } else if (s.includes('easy nail art')) {
-        setCategory('Other');
-        setSubService('Easy Nail Art');
-      } else if (s.includes('design')) {
-        setCategory('Other');
-        setSubService('Design');
       }
     }
   }, [selectedService, isModalOpen]);
@@ -359,7 +349,7 @@ const BookingModal = () => {
                 </div>
               )}
 
-              {/* Sub-service Selection (Generic - if any other category added later) */}
+              {/* Sub-service Selection (Generic) */}
               {category && !needsNailOptions && !isPedicure && SERVICE_STRUCTURE[category].length > 0 && (
                 <div className="form-group fade-in">
                   <label>Which {category.toLowerCase()} service do you want?</label>

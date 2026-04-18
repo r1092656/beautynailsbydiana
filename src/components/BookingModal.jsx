@@ -1,10 +1,9 @@
 import { useBooking } from '../context/BookingContext';
-import { X, CircleCheck, Upload, FileImage, Loader, CreditCard, ChevronRight, ChevronLeft, Info } from 'lucide-react';
+import { X, CircleCheck, Upload, FileImage, Loader, CreditCard, ChevronRight, ChevronLeft, Info, ExternalLink } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { compressImage } from '../utils/compressImage';
 import './BookingModal.css';
 
-// Pre-defined service list for the dropdown
 const SERVICE_STRUCTURE = {
   'Gel Overlay': ['Basis gel', 'Basis gel + gellak/french'],
   'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
@@ -15,7 +14,7 @@ const SERVICE_STRUCTURE = {
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
-const PEDICURE_DESIGNS = ['No design', 'French']; // Updated: Removed Nail Art
+const PEDICURE_DESIGNS = ['No design', 'French'];
 const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak/french'];
 
 const timeToMins = (timeStr) => {
@@ -37,7 +36,7 @@ const DURATION_MINS = 150;
 const BookingModal = () => {
   const { isModalOpen, closeModal, selectedService } = useBooking();
 
-  // Booking Flow State: 'details' | 'payment' | 'complete'
+  // Booking Flow State: 'details' | 'payment_info' | 'awaiting_confirmation' | 'complete'
   const [step, setStep] = useState('details');
   
   // Form State
@@ -121,14 +120,21 @@ const BookingModal = () => {
     }
   };
 
-  const goToPayment = (e) => {
+  const goToPaymentInfo = (e) => {
     e.preventDefault();
     if (!location) { alert("Selecteer een locatie."); return; }
     if (!time) { alert("Selecteer een tijdslot."); return; }
-    setStep('payment');
+    setStep('payment_info');
   };
 
-  const handlePaymentAndConfirm = async () => {
+  const startPayment = () => {
+    // Open payment link in new window
+    window.open("https://pay.bancontact.com/p2p/c5513885-77a5-43ee-91d0-d748c4c9d678", "_blank");
+    // Transition to waiting step
+    setStep('awaiting_confirmation');
+  };
+
+  const finalizeBooking = async () => {
     setIsSending(true);
     try {
       let compressedImageBase64 = null;
@@ -212,7 +218,8 @@ const BookingModal = () => {
             <h2 className="modal-title">Maak een Afspraak</h2>
             <p className="modal-subtitle">Beleef luxe nagelverzorging. Alle afspraken duren ongeveer 2,5 uur.</p>
 
-            <form onSubmit={goToPayment} className="booking-form">
+            <form onSubmit={goToPaymentInfo} className="booking-form">
+              {/* Location */}
               <div className="form-group">
                 <label>Locatie</label>
                 <div className="location-grid">
@@ -221,6 +228,7 @@ const BookingModal = () => {
                 </div>
               </div>
 
+              {/* Category */}
               <div className="form-group">
                 <label>Categorie</label>
                 <div className="category-grid">
@@ -230,6 +238,7 @@ const BookingModal = () => {
                 </div>
               </div>
 
+              {/* Specific options (Gel/Verlenging/Pedicure) */}
               {needsNailOptions && (
                 <div className="form-group fade-in">
                   <label>Service Type</label>
@@ -241,80 +250,7 @@ const BookingModal = () => {
                 </div>
               )}
 
-              {category === 'Gel Overlay' && (
-                <div className="form-group fade-in">
-                  <label>Behandeling</label>
-                  <select value={gelOverlayService} onChange={(e) => setGelOverlayService(e.target.value)} required>
-                    <option value="" disabled>Selecteer een behandeling...</option>
-                    {GEL_OVERLAY_SERVICES.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {isPedicure && (
-                <div className="form-group fade-in">
-                  <label>Pedicure service</label>
-                  <select value={subService} onChange={(e) => setSubService(e.target.value)} required>
-                    <option value="" disabled>Selecteer een behandeling...</option>
-                    {PEDICURE_SERVICES.map((srv, idx) => <option key={idx} value={srv}>{srv}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {category && !needsNailOptions && !isPedicure && (
-                <div className="form-group fade-in">
-                  <label>Type {category.toLowerCase()}</label>
-                  <select value={subService} onChange={(e) => setSubService(e.target.value)} required>
-                    <option value="" disabled>Selecteer een behandeling...</option>
-                    {SERVICE_STRUCTURE[category].map((srv, idx) => <option key={idx} value={srv}>{srv}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {needsNailOptions && (
-                <div className="form-group fade-in">
-                  <label>Design</label>
-                  <select value={design} onChange={(e) => setDesign(e.target.value)}>
-                    <option value="">Geen design</option>
-                    {GEL_DESIGNS.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {isPedicure && (
-                <div className="form-group fade-in">
-                  <label>Design</label>
-                  <select value={design} onChange={(e) => setDesign(e.target.value)} required>
-                    <option value="" disabled>Kies een design...</option>
-                    {PEDICURE_DESIGNS.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {category === 'Verlenging' && (
-                <div className="form-group fade-in">
-                  <label>Nagellengte</label>
-                  <div className="option-grid">
-                    {NAIL_LENGTHS.map((len) => <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>)}
-                  </div>
-                </div>
-              )}
-
-              <div className="form-group">
-                <label>Volledige Naam</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Je naam" required />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>E-mail</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="je@email.com" required />
-                </div>
-                <div className="form-group">
-                  <label>Telefoonnummer</label>
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32..." required />
-                </div>
-              </div>
-
+              {/* Date & Time */}
               <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
                 <label>Datum</label>
                 <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(''); }} min={new Date().toISOString().split("T")[0]} required />
@@ -331,71 +267,79 @@ const BookingModal = () => {
                 </div>
               )}
 
-              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                <label>Inspiratie foto (Optioneel)</label>
-                <div className="file-upload-wrapper">
-                  {!imagePreview ? (
-                    <label className="file-upload-label">
-                      <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
-                      <Upload size={32} color="var(--gold)" style={{ marginBottom: '10px' }} />
-                      <span>Klik om een foto te uploaden</span>
-                    </label>
-                  ) : (
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Inspo" />
-                      <button type="button" className="remove-image-btn" onClick={() => setImagePreview(null)}>Verwijderen</button>
-                    </div>
-                  )}
+              {/* Personal Info */}
+              <div className="form-group">
+                <label>Volledige Naam</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Je naam" required />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>E-mail</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="je@email.com" required />
+                </div>
+                <div className="form-group">
+                  <label>Telefoonnummer</label>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32..." required />
                 </div>
               </div>
 
               <div className="deposit-info-banner glass-panel" style={{ marginBottom: '20px' }}>
                 <Info size={18} color="var(--gold)" />
-                <p>Er wordt een aanbetaling van <strong>€10,00</strong> gevraagd om je boeking te bevestigen.</p>
+                <p>Er wordt een aanbetaling van <strong>€10,00</strong> gevraagd.</p>
               </div>
 
-              <button type="submit" className="btn-gold w-100">Ga naar Betaling <ChevronRight size={20} style={{ marginLeft: '8px' }} /></button>
+              <button type="submit" className="btn-gold w-100">Naar Betaling <ChevronRight size={20} style={{ marginLeft: '8px' }} /></button>
             </form>
           </div>
         )}
 
-        {step === 'payment' && (
+        {step === 'payment_info' && (
           <div className="payment-step fade-in">
-            <h2 className="modal-title">Bevestig & Betaal</h2>
+            <h2 className="modal-title">Aanbetaling & Beleid</h2>
             <div className="payment-details glass-panel" style={{ padding: '25px', marginBottom: '30px' }}>
               <div className="payment-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                <span style={{ fontWeight: '600' }}>{subService || category}</span>
-                <span className="text-gold" style={{ fontWeight: 'bold' }}>€10,00 Aanbetaling</span>
+                <span style={{ fontWeight: '600' }}>Voorschot Beauty Nails</span>
+                <span className="text-gold" style={{ fontWeight: 'bold' }}>€10,00</span>
               </div>
               
-              <div className="cancellation-policy" style={{ fontSize: '0.9rem', color: '#666' }}>
+              <div className="cancellation-policy">
                 <h4 style={{ color: 'var(--dark-text)', fontSize: '1rem', marginBottom: '10px' }}>Annuleringsbeleid</h4>
-                <ul style={{ paddingLeft: '20px' }}>
-                  <li>Bij annulering <strong>meer dan 48 uur</strong> voor aanvang wordt de aanbetaling terugbetaald.</li>
-                  <li>Bij annulering <strong>minder dan 48 uur</strong> voor aanvang vervalt de aanbetaling en is deze niet restitueerbaar.</li>
+                <ul className="policy-list">
+                  <li>Annuleren <strong>&gt; 48 uur</strong>: Aanbetaling wordt teruggestort.</li>
+                  <li>Annuleren <strong>&lt; 48 uur</strong>: Aanbetaling wordt <strong>niet</strong> terugbetaald.</li>
                 </ul>
               </div>
             </div>
 
-            <p className="text-center mb-4">Om je boeking te voltooien, klik op de Payconiq knop hieronder:</p>
-            
-            <a 
-              href="https://pay.bancontact.com/p2p/c5513885-77a5-43ee-91d0-d748c4c9d678" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn-gold w-100 mb-3"
-              style={{ padding: '20px', fontSize: '1.2rem' }}
-              onClick={() => {
-                // We keep the modal open and provide a way to confirm after they pay
-                const confirmAfterPay = window.confirm("Heb je de betaling succesvol afgerond in de Payconiq/Bancontact app?");
-                if (confirmAfterPay) handlePaymentAndConfirm();
-              }}
-            >
-              <CreditCard size={24} style={{ marginRight: '12px' }} /> Betaal €10,00 via Payconiq
-            </a>
+            <button className="btn-gold w-100 mb-3" onClick={startPayment}>
+              <CreditCard size={20} style={{ marginRight: '10px' }} /> Start Betaling via Payconiq
+            </button>
             
             <button className="btn-outline-gold w-100" onClick={() => setStep('details')}>
-              <ChevronLeft size={20} style={{ marginRight: '8px' }} /> Terug naar details
+              <ChevronLeft size={20} style={{ marginRight: '8px' }} /> Terug naar gegevens
+            </button>
+          </div>
+        )}
+
+        {step === 'awaiting_confirmation' && (
+          <div className="awaiting-confirmation fade-in text-center">
+            <div className="loader-ring mb-4">
+              <Loader size={48} className="animate-spin text-gold" />
+            </div>
+            <h2 className="modal-title">Betaling Bezig...</h2>
+            <p className="mb-4">Je wordt/bent doorverwezen naar de Payconiq/Bancontact app om de betaling van €10,00 te voltooien.</p>
+            
+            <div className="glass-panel" style={{ padding: '20px', marginBottom: '30px', borderLeft: '4px solid var(--gold)' }}>
+              <p style={{ margin: 0, fontSize: '0.95rem' }}><strong>Keer hier terug</strong> na je betaling en klik op de knop hieronder om je boeking te voltooien.</p>
+            </div>
+
+            <button className="btn-gold w-100 mb-3" onClick={finalizeBooking} disabled={isSending}>
+              {isSending ? <Loader className="animate-spin" size={20} /> : <CircleCheck size={20} style={{ marginRight: '10px' }} />}
+              {isSending ? "Verifiëren..." : "Ik heb betaald, bevestig mijn boeking"}
+            </button>
+
+            <button className="btn-text-gold" onClick={() => window.open("https://pay.bancontact.com/p2p/c5513885-77a5-43ee-91d0-d748c4c9d678", "_blank")}>
+              <ExternalLink size={16} style={{ marginRight: '6px' }} /> Link opnieuw openen
             </button>
           </div>
         )}
@@ -404,8 +348,8 @@ const BookingModal = () => {
           <div className="booking-success fade-in">
             <CircleCheck size={64} className="text-gold mb-4" />
             <h2 className="modal-title">Boeking Bevestigd!</h2>
-            <p>Bedankt, {name}.<br />Je afspraak voor <strong>{subService || category}</strong> in <strong>{location}</strong> op {date} om {time} is vastgelegd en de aanbetaling is ontvangen.</p>
-            <p className="text-muted small mt-3">Je ontvangt een bevestiging per e-mail.</p>
+            <p>Bedankt, {name}.<br />Je afspraak voor <strong>{subService || category}</strong> is vastgelegd.</p>
+            <p className="text-muted small mt-3">Je ontvangt direct een bevestiging per e-mail.</p>
             <button onClick={handleClose} className="btn-outline-gold mt-4">Sluiten</button>
           </div>
         )}
@@ -424,3 +368,4 @@ const BookingModal = () => {
   );
 };
 export default BookingModal;
+BookingModal;

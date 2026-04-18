@@ -23,6 +23,17 @@ const AdminCalendar = () => {
 
   useEffect(() => {
     fetchData();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('calendar-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'availability_blocks' }, () => fetchData())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [currentDate]);
 
   const fetchData = async () => {

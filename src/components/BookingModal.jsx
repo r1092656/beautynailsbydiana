@@ -119,6 +119,17 @@ const BookingModal = () => {
   useEffect(() => {
     if (isModalOpen && date) {
       fetchAvailability(date);
+
+      // Listen for real-time changes while the modal is open
+      const channel = supabase
+        .channel(`availability-${date}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchAvailability(date))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'availability_blocks' }, () => fetchAvailability(date))
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [isModalOpen, date]);
 

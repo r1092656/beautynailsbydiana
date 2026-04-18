@@ -57,6 +57,11 @@ const serviceCategories = [
         icon: Footprints 
       },
       { 
+        name: 'Nagel Correctie', 
+        desc: 'Professionele correctie van beschadigde of vervormde nagels voor een gezonde, esthetische uitstraling.', 
+        icon: Sparkles 
+      },
+      { 
         name: 'Verwijderen van gel', 
         desc: 'Veilig en professioneel verwijderen van (kunst)nagels met respect voor de natuurlijke nagel.', 
         icon: Trash2 

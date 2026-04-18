@@ -7,7 +7,7 @@ import './BookingModal.css';
 // Pre-defined service list for the dropdown
 // Structured service categories
 const SERVICE_STRUCTURE = {
-  'Gel Overlay': ['Basis gel', 'Basis gel + gellak', 'French', 'Fullset', 'Fill In'],
+  'Gel Overlay': ['Basis gel', 'Basis gel + gellak/french'],
   'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
   'Manicure': ['Standaard Manicure'],
   'Pedicure': ['Gellak Pedicure']
@@ -17,7 +17,7 @@ const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
 const PEDICURE_DESIGNS = ['French', 'Nail Art', 'No design'];
-const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak', 'French'];
+const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak/french'];
 
 // Helper to convert HH:MM to minutes
 const timeToMins = (timeStr) => {

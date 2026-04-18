@@ -29,7 +29,7 @@ const Home = () => {
             {/* The original app used an asset, we'll point to public/assets */}
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <div style={{ position: 'absolute', top: '20px', left: '-20px', right: '20px', bottom: '-20px', border: '2px solid var(--gold)', borderRadius: '20px', zIndex: -1 }}></div>
-              <img src="/assets/portfolio/hero.jpeg" alt="Diana" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+              <img src="/assets/homepage.jpeg" alt="Diana BeautyNails" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
             </div>
           </div>
         </div>

@@ -16,6 +16,7 @@ const AdminCalendar = () => {
   const [bookings, setBookings] = useState([]);
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isSavingData, setIsSavingData] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
   const [slotSelector, setSlotSelector] = useState(null); // { slot, date }
 
@@ -84,19 +85,16 @@ const AdminCalendar = () => {
     // Days
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      const dayBookings = bookings.filter(b => b.date === dateStr);
-      const dayBlocks = blocks.filter(b => b.date === dateStr);
       
       days.push({
         day: d,
         date: dateStr,
-        bookings: dayBookings,
-        blocks: dayBlocks,
+        // We no longer store bookings/blocks here to avoid stale state
         isToday: new Date().toISOString().split('T')[0] === dateStr
       });
     }
     return days;
-  }, [currentDate, bookings, blocks]);
+  }, [currentDate]); // Only depends on month/year changes
 
   const toggleMonth = (dir) => {
     const newDate = new Date(currentDate);
@@ -108,8 +106,20 @@ const AdminCalendar = () => {
   const updateSlotStatus = async (slot, status) => {
     if (!selectedDate) return;
     
+    // 1. Pessimistic backup for rollback
+    const previousBlocks = [...blocks];
+    
+    // 2. OPTIMISTIC UPDATE: Update UI instantly
+    const newBlocks = blocks.filter(b => !(b.date === selectedDate.date && b.time_slot === slot));
+    if (status !== 'available') {
+      newBlocks.push({ date: selectedDate.date, time_slot: slot, status });
+    }
+    setBlocks(newBlocks);
+    setSlotSelector(null);
+    setIsSavingData(true);
+
     try {
-      // First, remove any existing manual block for this slot
+      // 3. Backend Update
       await supabase
         .from('availability_blocks')
         .delete()
@@ -117,22 +127,24 @@ const AdminCalendar = () => {
         .eq('time_slot', slot);
 
       if (status !== 'available') {
-        // If not green, insert the new block with the chosen status
         const { error } = await supabase
           .from('availability_blocks')
           .insert([{ 
             date: selectedDate.date, 
             time_slot: slot,
-            status: status // 'planned' (Blue) or 'blocked' (Red)
+            status: status
           }]);
         if (error) throw error;
       }
       
-      setSlotSelector(null);
-      fetchData(); // Refresh calendar data
+      // Success - fetchData will eventually sync via realtime anyway
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Fout bij het wijzigen van beschikbaarheid');
+      // ROLLBACK on error
+      setBlocks(previousBlocks);
+      alert('Fout bij het wijzigen van beschikbaarheid. Probeer het opnieuw.');
+    } finally {
+      setIsSavingData(false);
     }
   };
 
@@ -184,23 +196,28 @@ const AdminCalendar = () => {
         </div>
 
         <div className="calendar-grid">
-          {calendarDays.map((d, index) => (
-            <div 
-              key={index}
-              className={`calendar-day ${!d.day ? 'empty' : ''} ${selectedDate?.date === d.date ? 'selected' : ''} ${d.isToday ? 'today' : ''}`}
-              onClick={() => handleDaySelect(d)}
-            >
-              {d.day && (
-                <>
-                  <span className="day-number">{d.day}</span>
-                  <div className="day-indicators">
-                    {d.bookings.length > 0 && <span className="dot booked"></span>}
-                    {d.blocks.length > 0 && <span className="dot blocked"></span>}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+          {calendarDays.map((d, index) => {
+            const dayBookings = bookings.filter(b => b.date === d.date);
+            const dayBlocks = blocks.filter(b => b.date === d.date);
+            
+            return (
+              <div 
+                key={index}
+                className={`calendar-day ${!d.day ? 'empty' : ''} ${selectedDate?.date === d.date ? 'selected' : ''} ${d.isToday ? 'today' : ''}`}
+                onClick={() => handleDaySelect(d)}
+              >
+                {d.day && (
+                  <>
+                    <span className="day-number">{d.day}</span>
+                    <div className="day-indicators">
+                      {dayBookings.length > 0 && <span className="dot booked"></span>}
+                      {dayBlocks.length > 0 && <span className="dot blocked"></span>}
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="calendar-legend">
@@ -218,14 +235,18 @@ const AdminCalendar = () => {
         ) : (
           <div className="day-view">
             <div className="day-header">
-              <h3>{new Date(selectedDate.date).toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <h3>{new Date(selectedDate.date).toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
+                {isSavingData && <div className="saving-indicator"><Loader size={12} className="spin" /> Opslaan...</div>}
+              </div>
               <p className="text-muted">Klik op een groen vakje om het te blokkeren (rood), of andersom.</p>
             </div>
 
             <div className="time-slots-grid">
               {TIME_SLOTS.map(slot => {
-                const booking = selectedDate.bookings.find(b => b.time === slot);
-                const manualBlock = selectedDate.blocks.find(b => b.time_slot === slot || b.time_slot === 'all_day');
+                // Query LIVE state directly instead of selectedDate snapshot
+                const booking = bookings.find(b => b.date === selectedDate.date && b.time === slot);
+                const manualBlock = blocks.find(b => b.date === selectedDate.date && (b.time_slot === slot || b.time_slot === 'all_day'));
                 
                 let state = 'available';
                 if (booking) state = 'booked';
@@ -234,7 +255,7 @@ const AdminCalendar = () => {
                 return (
                   <div 
                     key={slot} 
-                    className={`time-slot-card ${state}`}
+                    className={`time-slot-card ${state} fade-in`}
                     onClick={() => {
                       if (booking) setActiveBooking(booking);
                       else setSlotSelector({ slot, date: selectedDate.date });

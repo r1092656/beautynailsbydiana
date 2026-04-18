@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Star, AlertCircle, Quote, User, Clock } from 'lucide-react';
+import { Star, AlertCircle, Quote, User, Clock, CheckCircle } from 'lucide-react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import './Reviews.css';
 
 const badWordsList = ['badword', 'offensive', 'hate', 'stupid', 'ugly', 'vulgar', 'insult', 'bitch', 'fuck', 'shit', 'ass', 'damn'];
 
@@ -18,8 +19,8 @@ const Reviews = () => {
       setReviews(JSON.parse(saved));
     } else {
       setReviews([
-        { id: 1, name: 'Sarah', rating: 5, text: 'Absoluut dol op mijn nagels! Diana is een echte kunstenaar.', date: '12/04/2026' },
-        { id: 2, name: 'Anoniem', rating: 5, text: 'Beste BIAB behandeling die ik ooit heb gehad. Zo ontspannend.', date: '10/04/2026' }
+        { id: 1, name: 'Sarah', rating: 5, text: 'Absoluut dol op mijn nagels! Diana is een echte kunstenaar.', date: '12/04/2026', verified: true },
+        { id: 2, name: 'Anoniem', rating: 5, text: 'Beste BIAB behandeling die ik ooit heb gehad. Zo ontspannend.', date: '10/04/2026', verified: true }
       ]);
     }
   }, []);
@@ -33,7 +34,7 @@ const Reviews = () => {
     );
 
     if (containsBadWords) {
-      setErrorMsg('Je beoordeling kon niet worden geplaatst. Neem voor problemen direct contact met ons op.');
+      setErrorMsg('Oeps! Je bericht bevat ongepaste taal. Laten we het netjes houden.');
       return;
     }
 
@@ -42,7 +43,8 @@ const Reviews = () => {
       name: name.trim() === '' ? 'Anoniem' : name.trim(),
       rating: rating,
       text: text,
-      date: new Date().toLocaleDateString('nl-BE')
+      date: new Date().toLocaleDateString('nl-BE'),
+      verified: false
     };
 
     const updatedReviews = [newReview, ...reviews];
@@ -55,128 +57,126 @@ const Reviews = () => {
   };
 
   return (
-    <div className="container py-5 fade-in">
-      <div className="text-center mb-5">
-        <h1 className="display-4 text-gold mb-3">Klantenbeoordelingen</h1>
+    <div className="reviews-container fade-in">
+      <header className="reviews-header text-center mb-5">
+        <h1 className="display-4 text-gold fw-bold mb-3">Ervaringen</h1>
         <div className="gold-line"></div>
-        <p className="lead text-muted max-width-600 mx-auto">
-          Lees de ervaringen van onze klanten of deel je eigen mening over je bezoek aan de studio.
+        <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
+          Jouw schoonheid is mijn passie. Lees wat anderen over hun bezoek zeggen of deel jouw eigen ervaring.
         </p>
-      </div>
+      </header>
 
-      <div className="row g-5">
-        {/* Submit Review Form */}
-        <div className="col-lg-4">
-          <div className="glass-panel p-4" style={{ position: 'sticky', top: '100px' }}>
-            <h3 className="h4 mb-4 fw-bold">Schrijf een Beoordeling</h3>
+      <div className="reviews-grid">
+        {/* Sidebar Form */}
+        <aside className="reviews-sidebar">
+          <div className="review-form-card">
+            <h3 className="form-title">Schrijf een Review</h3>
             
             {errorMsg && (
-              <div className="alert alert-danger d-flex align-items-center gap-2" role="alert">
-                <AlertCircle size={18} />
-                <div style={{ fontSize: '0.9rem' }}>{errorMsg}</div>
+              <div className="alert-box mb-4">
+                <AlertCircle size={20} />
+                <span>{errorMsg}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="form-label fw-bold small text-uppercase mb-2">Naam (Optioneel)</label>
+              <div className="custom-form-group">
+                <label className="custom-form-label">Naam (Optioneel)</label>
                 <input 
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Laat leeg voor Anoniem"
-                  className="form-control custom-input"
-                  style={{ borderRadius: '12px', padding: '12px' }}
+                  className="custom-input-field"
                 />
               </div>
 
-              <div className="mb-3">
-                <label className="form-label fw-bold small text-uppercase mb-2">Waardering</label>
-                <div className="d-flex gap-1 rating-input">
+              <div className="custom-form-group">
+                <label className="custom-form-label">Waardering</label>
+                <div className="rating-selector">
                   {[1, 2, 3, 4, 5].map(star => (
                     <Star 
                       key={star} 
                       onClick={() => setRating(star)} 
                       fill={star <= rating ? 'var(--gold)' : 'none'} 
-                      color={star <= rating ? 'var(--gold)' : '#dee2e6'} 
-                      size={24}
-                      style={{ cursor: 'pointer', transition: '0.2s transform' }}
-                      className="star-hover"
+                      color={star <= rating ? 'var(--gold)' : '#e0e0e0'} 
+                      size={28}
+                      className="star-icon"
                     />
                   ))}
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label className="form-label fw-bold small text-uppercase mb-2">Jouw Ervaring</label>
+              <div className="custom-form-group">
+                <label className="custom-form-label">Jouw Bericht</label>
                 <textarea 
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  rows="4"
-                  placeholder="Deel je ervaring..."
-                  className="form-control custom-input"
+                  rows="5"
+                  placeholder="Hoe was je ervaring bij Diana?"
+                  className="custom-input-field"
                   required
-                  style={{ borderRadius: '12px', padding: '12px', resize: 'none' }}
+                  style={{ resize: 'none' }}
                 />
               </div>
 
-              <button type="submit" className="btn-gold w-100 py-3 fw-bold">
-                Plaats Beoordeling
+              <button type="submit" className="btn-gold w-100 py-3 mt-2 fw-bold">
+                Review Plaatsen
               </button>
             </form>
           </div>
-        </div>
+        </aside>
 
         {/* Reviews List */}
-        <div className="col-lg-8">
-          <div className="d-flex flex-column gap-4">
-            {reviews.map((review, index) => (
-              <div 
-                key={review.id} 
-                className="review-card glass-panel p-4 fade-in" 
-                style={{ 
-                  borderRadius: '20px', 
-                  border: '1px solid rgba(212, 175, 55, 0.1)',
-                  animationDelay: `${index * 0.1}s`
-                }}
-              >
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="avatar-circle d-flex align-items-center justify-content-center" style={{ width: '45px', height: '45px', backgroundColor: 'var(--soft-pink)', borderRadius: '50%' }}>
-                      <User size={20} color="var(--gold)" />
-                    </div>
-                    <div>
-                      <h5 className="mb-0 fw-bold">{review.name}</h5>
-                      <div className="d-flex align-items-center gap-1 mt-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={14} fill={i < review.rating ? 'var(--gold)' : 'none'} color={i < review.rating ? 'var(--gold)' : '#dee2e6'} />
-                        ))}
-                      </div>
-                    </div>
+        <main className="reviews-feed">
+          {reviews.map((review, index) => (
+            <div 
+              key={review.id} 
+              className="testimonial-card fade-in" 
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <Quote className="quote-icon font-display" size={60} />
+              
+              <div className="card-header">
+                <div className="user-info">
+                  <div className="user-avatar">
+                    <User color="var(--gold)" size={24} />
                   </div>
-                  <div className="text-muted d-flex align-items-center gap-1 small">
-                    <Clock size={14} />
-                    {review.date}
+                  <div>
+                    <h4 className="reviewer-name">{review.name}</h4>
+                    {review.verified && (
+                      <span className="verified-badge">
+                        <CheckCircle size={10} style={{ marginRight: '4px' }} />
+                        Geverifieerd
+                      </span>
+                    )}
                   </div>
                 </div>
-                
-                <div className="position-relative">
-                  <Quote size={40} className="position-absolute opacity-05" style={{ top: '-10px', left: '-10px', color: 'var(--gold)', opacity: 0.1 }} />
-                  <p className="mb-0 fs-5 ps-3 py-2" style={{ fontStyle: 'italic', color: '#444' }}>
-                    {review.text}
-                  </p>
+                <div className="review-date">
+                  <Clock size={14} />
+                  {review.date}
                 </div>
               </div>
-            ))}
-            
-            {reviews.length === 0 && (
-              <div className="text-center py-5 glass-panel" style={{ borderRadius: '20px' }}>
-                <Quote size={48} className="text-gold opacity-25 mb-3" />
-                <p className="text-muted">Nog geen beoordelingen. Deel als eerste jouw ervaring!</p>
+
+              <div className="mb-3 d-flex gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={16} fill={i < review.rating ? 'var(--gold)' : 'none'} color={i < review.rating ? 'var(--gold)' : '#ddd'} />
+                ))}
               </div>
-            )}
-          </div>
-        </div>
+              
+              <p className="testimonial-text">
+                {review.text}
+              </p>
+            </div>
+          ))}
+          
+          {reviews.length === 0 && (
+            <div className="text-center py-5 glass-panel opacity-75">
+              <Quote size={40} className="text-gold opacity-25 mb-3" />
+              <p className="text-muted">Nog geen beoordelingen. Wees de eerste!</p>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

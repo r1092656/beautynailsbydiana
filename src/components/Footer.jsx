@@ -13,7 +13,7 @@ const Footer = () => {
           <a href="https://www.instagram.com/beautynails_by_diana/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.7 }} aria-label="Instagram">
             Instagram
           </a>
-          <a href="https://www.tiktok.com/@beautynails_by_di0" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.7 }} aria-label="TikTok">
+          <a href="https://www.tiktok.com/@beautynails.diana" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.7 }} aria-label="TikTok">
             TikTok
           </a>
         </div>

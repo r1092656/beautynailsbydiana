@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   } = req.body;
 
   const resend = new Resend(process.env.RESEND_API_KEY);
+  const needsNailOptions = category === 'Gel Overlay' || category === 'Verlenging';
 
   // Generate Google Calendar Link
   const generateCalendarLink = () => {
@@ -152,7 +153,7 @@ export default async function handler(req, res) {
             <div class="detail-row"><span class="label">Service:</span><span class="value">${sub_service || category}</span></div>
             <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
-            <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
+            <div class="detail-row"><span class="label dynamic-time">Tijd:</span><span class="value important-value">${time}</span></div>
           </div>
 
           <div class="section">
@@ -175,8 +176,6 @@ export default async function handler(req, res) {
     </html>
   `;
 
-  const needsNailOptions = category === 'Gel Overlay' || category === 'Verlenging';
-
   try {
     const attachments = [];
     if (inspiration_image) {
@@ -189,23 +188,30 @@ export default async function handler(req, res) {
       });
     }
 
-    // 1. Send to Admin
+    // 1. Send to Admin (Your email)
+    // This usually works immediately as you are the account holder
     await resend.emails.send({
-      from: 'Diana Booking <onboarding@resend.dev>',
-      to: 'dianacirpaci777@gmail.com',
+      from: 'Diana Booking <info@beautynailsbydiana.be>',
+      to: 'info@beautynailsbydiana.be',
       subject: `NIEUWE BOEKING: ${sub_service} - ${name}`,
       html: adminHtml,
       attachments: attachments,
     });
 
-    // 2. Send to Customer
-    await resend.emails.send({
-      from: 'Beauty Nails by Diana <onboarding@resend.dev>',
-      to: email,
-      subject: `Je afspraak is bevestigd - Beauty Nails by Diana`,
-      html: customerHtml,
-      attachments: attachments,
-    });
+    // 2. Send to Customer (Wrapper with try-catch)
+    // This will fail until you verify your domain in Resend
+    try {
+      await resend.emails.send({
+        from: 'Beauty Nails by Diana <info@beautynailsbydiana.be>',
+        to: email,
+        subject: `Je afspraak is bevestigd - Beauty Nails by Diana`,
+        html: customerHtml,
+        attachments: attachments,
+      });
+    } catch (customerEmailError) {
+      console.warn('Customer confirmation email failed. Check Resend domain verification.', customerEmailError);
+      // We don't throw here, so the user still sees a success message
+    }
 
     return res.status(200).json({ success: true });
   } catch (error) {

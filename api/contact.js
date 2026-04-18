@@ -73,8 +73,8 @@ export default async function handler(req, res) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Diana Contact <onboarding@resend.dev>',
-      to: ['dianacirpaci777@gmail.com'],
+      from: 'Diana Contact <info@beautynailsbydiana.be>',
+      to: ['info@beautynailsbydiana.be'],
       subject: `New Message from ${name}`,
       html: html,
     });

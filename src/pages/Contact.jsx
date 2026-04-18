@@ -55,7 +55,14 @@ const Contact = () => {
             </div>
             <div>
               <h4 style={{ margin: '0 0 5px 0' }}>Email</h4>
-              <p style={{ margin: 0, color: 'var(--text-muted)' }}>dianacirpaci@icloud.com</p>
+              <a 
+                href="mailto:info@beautynailsbydiana.be" 
+                style={{ margin: 0, color: 'var(--text-muted)', textDecoration: 'none', transition: '0.3s' }}
+                onMouseOver={(e) => e.target.style.color = 'var(--gold)'}
+                onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}
+              >
+                info@beautynailsbydiana.be
+              </a>
             </div>
           </div>
 
@@ -69,13 +76,13 @@ const Contact = () => {
             </div>
           </a>
 
-          <a href="https://www.tiktok.com/@beautynails_by_di0?lang=nl-NL" target="_blank" rel="noopener noreferrer" className="glass-panel" style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px', textDecoration: 'none', color: 'inherit' }}>
+          <a href="https://www.tiktok.com/@beautynails.diana?lang=nl-NL" target="_blank" rel="noopener noreferrer" className="glass-panel" style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>
               <Music color="var(--gold)" size={24} />
             </div>
             <div>
               <h4 style={{ margin: '0 0 5px 0' }}>TikTok</h4>
-              <p style={{ margin: 0, color: 'var(--text-muted)' }}>@beautynails_by_di0</p>
+              <p style={{ margin: 0, color: 'var(--text-muted)' }}>@beautynails.diana</p>
             </div>
           </a>
         </div>

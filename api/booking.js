@@ -16,11 +16,13 @@ export default async function handler(req, res) {
     nail_length,
     design,
     location,
-    date,
     time,
     inspiration_image, // Base64 Data URL
     payment_status,
-    deposit_amount
+    deposit_amount,
+    type = 'online', // 'online' or 'manual'
+    description,    // Optional for manual
+    duration_mins = 150 // Default
   } = req.body;
 
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -51,7 +53,7 @@ export default async function handler(req, res) {
       ].join('\n');
 
       const params = new URLSearchParams({
-        text: `Nails: ${sub_service} (${name})`,
+        text: type === 'manual' ? `Nails: ${description} (${name})` : `Nails: ${sub_service} (${name})`,
         dates: `${formatCalDate(startDate)}/${formatCalDate(endDate)}`,
         details: details,
         location: location === 'Turnhout' ? 'Turnhout, Belgium' : `${location}, Belgium`,
@@ -158,7 +160,7 @@ export default async function handler(req, res) {
 
           <div class="section">
             <div class="section-title">Betaling</div>
-            <p>We hebben je aanbetaling van <strong>${deposit_amount}</strong> goed ontvangen. Dit bedrag wordt in mindering gebracht op het totaalbedrag tijdens je afspraak.</p>
+            <p>We have je aanbetaling van <strong>${deposit_amount}</strong> goed ontvangen. Dit bedrag wordt in mindering gebracht op het totaalbedrag tijdens je afspraak.</p>
             <p style="font-size: 13px; color: #666;"><em>Let op: Annuleren kan tot 48 uur voor de afspraak voor een volledige terugbetaling van de aanbetaling.</em></p>
           </div>
 
@@ -168,6 +170,74 @@ export default async function handler(req, res) {
           </div>
 
           <p style="margin-top: 30px;">Ik kijk ernaar uit je te zien!</p>
+          <p>Met vriendelijke groet,<br>Diana</p>
+        </div>
+        <div class="footer">&copy; 2026 Beauty Nails by Diana.</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Admin Email Template (Manual booking version)
+  const adminManualHtml = `
+    <!DOCTYPE html>
+    <html>
+    ${htmlHead}
+    <body>
+      <div class="container">
+        <div class="header"><h1>HANDMATIGE AFSPRAAK</h1></div>
+        <div class="content">
+          <div class="section">
+            <div class="section-title">Klantgegevens</div>
+            <div class="detail-row"><span class="label">Naam:</span><span class="value">${name}</span></div>
+            <div class="detail-row"><span class="label">Email:</span><span class="value">${email}</span></div>
+            <div class="detail-row"><span class="label">Telefoon:</span><span class="value">${phone}</span></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Details</div>
+            <div class="detail-row"><span class="label">Omschrijving:</span><span class="value">${description || 'Eigen planning'}</span></div>
+            <div class="detail-row"><span class="label">Duur:</span><span class="value">${duration_mins} min</span></div>
+            <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Datum & Tijd</div>
+            <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
+            <div class="detail-row"><span class="label">Tijdstip:</span><span class="value">${time}</span></div>
+          </div>
+          <div class="btn-container"><a href="${calendarLink}" class="btn">TOEVOEGEN AAN CALENDAR</a></div>
+        </div>
+        <div class="footer">&copy; 2026 Beauty Nails by Diana Booking System.</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Customer Email Template (Manual booking version)
+  const customerManualHtml = `
+    <!DOCTYPE html>
+    <html>
+    ${htmlHead}
+    <body>
+      <div class="container">
+        <div class="header"><h1>AFSPRAAK BEVESTIGD</h1></div>
+        <div class="content">
+          <p>Beste ${name},</p>
+          <p>Diana heeft een afspraak voor je ingepland bij Beauty Nails by Diana! Je bent van harte welkom.</p>
+          
+          <div class="section">
+            <div class="section-title">Jouw Afspraak</div>
+            <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
+            <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
+            <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
+            <div class="detail-row"><span class="label">Service:</span><span class="value">${description || 'Nagelbehandeling'}</span></div>
+          </div>
+
+          <div class="contact-box">
+            <p style="margin: 0; font-weight: bold; color: #D4AF37;">Heb je vragen? Neem contact op:</p>
+            <p style="margin: 5px 0 0 0;">WhatsApp: <strong>+32 465 62 06 88</strong></p>
+          </div>
+
+          <p style="margin-top: 30px;">Tot snel!</p>
           <p>Met vriendelijke groet,<br>Diana</p>
         </div>
         <div class="footer">&copy; 2026 Beauty Nails by Diana.</div>
@@ -189,28 +259,25 @@ export default async function handler(req, res) {
     }
 
     // 1. Send to Admin (Your email)
-    // This usually works immediately as you are the account holder
     await resend.emails.send({
       from: 'Diana Booking <info@beautynailsbydiana.be>',
       to: 'info@beautynailsbydiana.be',
-      subject: `NIEUWE BOEKING: ${sub_service} - ${name}`,
-      html: adminHtml,
+      subject: type === 'manual' ? `HANDMATIGE AFSPRAAK: ${name}` : `NIEUWE BOEKING: ${sub_service} - ${name}`,
+      html: type === 'manual' ? adminManualHtml : adminHtml,
       attachments: attachments,
     });
 
-    // 2. Send to Customer (Wrapper with try-catch)
-    // This will fail until you verify your domain in Resend
+    // 2. Send to Customer
     try {
       await resend.emails.send({
         from: 'Beauty Nails by Diana <info@beautynailsbydiana.be>',
         to: email,
         subject: `Je afspraak is bevestigd - Beauty Nails by Diana`,
-        html: customerHtml,
+        html: type === 'manual' ? customerManualHtml : customerHtml,
         attachments: attachments,
       });
     } catch (customerEmailError) {
-      console.warn('Customer confirmation email failed. Check Resend domain verification.', customerEmailError);
-      // We don't throw here, so the user still sees a success message
+      console.warn('Customer confirmation email failed.', customerEmailError);
     }
 
     return res.status(200).json({ success: true });

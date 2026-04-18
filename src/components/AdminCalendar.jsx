@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
-import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle, CalendarCheck, UserMinus, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle, CalendarCheck, UserMinus, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
 import './AdminCalendar.css';
 
 const TIME_SLOTS = [
@@ -18,7 +18,15 @@ const AdminCalendar = () => {
   const [loading, setLoading] = useState(false);
   const [isSavingData, setIsSavingData] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
-  const [slotSelector, setSlotSelector] = useState(null); // { slot, date }
+  const [slotSelector, setSlotSelector] = useState(null); // { slot, date, step: 'choice' | 'form' }
+  const [manualFormData, setManualFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    description: '',
+    duration: 120 // 2h default as requested
+  });
+  const [viewingManualBlock, setViewingManualBlock] = useState(null);
 
   const monthYear = currentDate.toLocaleString('nl-BE', { month: 'long', year: 'numeric' });
 
@@ -106,6 +114,12 @@ const AdminCalendar = () => {
   const updateSlotStatus = async (slot, status) => {
     if (!selectedDate) return;
     
+    if (status === 'planned') {
+      // Move to step 2: the form
+      setSlotSelector({ ...slotSelector, step: 'form' });
+      return;
+    }
+
     // 1. Pessimistic backup for rollback
     const previousBlocks = [...blocks];
     
@@ -119,7 +133,7 @@ const AdminCalendar = () => {
     setIsSavingData(true);
 
     try {
-      // 3. Backend Update
+      // 3. Backend Update (Simple block/unblock)
       await supabase
         .from('availability_blocks')
         .delete()
@@ -136,13 +150,103 @@ const AdminCalendar = () => {
           }]);
         if (error) throw error;
       }
-      
-      // Success - fetchData will eventually sync via realtime anyway
     } catch (err) {
       console.error('Error updating status:', err);
-      // ROLLBACK on error
       setBlocks(previousBlocks);
-      alert('Fout bij het wijzigen van beschikbaarheid. Probeer het opnieuw.');
+      alert('Fout bij het wijzigen van beschikbaarheid.');
+    } finally {
+      setIsSavingData(false);
+    }
+  };
+
+  const handleManualBookingSubmit = async (e) => {
+    e.preventDefault();
+    if (!slotSelector) return;
+
+    setIsSavingData(true);
+    const groupId = crypto.randomUUID();
+    const startTimeStr = slotSelector.slot;
+    const [h, m] = startTimeStr.split(':').map(Number);
+    const startMins = h * 60 + m;
+    const endMins = startMins + manualFormData.duration;
+
+    // Calculate slots to block
+    const affectedSlots = TIME_SLOTS.filter(s => {
+      const [sh, sm] = s.split(':').map(Number);
+      const slotMins = sh * 60 + sm;
+      return slotMins >= startMins && slotMins < endMins;
+    });
+
+    const newBlockEntries = affectedSlots.map(s => ({
+      date: selectedDate.date,
+      time_slot: s,
+      status: 'planned',
+      client_name: manualFormData.name,
+      client_email: manualFormData.email,
+      client_phone: manualFormData.phone,
+      description: manualFormData.description,
+      duration_mins: manualFormData.duration,
+      group_id: groupId
+    }));
+
+    // Optimistic UI
+    const previousBlocks = [...blocks];
+    setBlocks([...blocks, ...newBlockEntries]);
+    setSlotSelector(null);
+
+    try {
+      // Insert all slots
+      const { error } = await supabase
+        .from('availability_blocks')
+        .insert(newBlockEntries);
+      if (error) throw error;
+
+      // Send confirmation email
+      if (manualFormData.email) {
+        fetch('/api/booking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'manual',
+            name: manualFormData.name,
+            email: manualFormData.email,
+            phone: manualFormData.phone,
+            description: manualFormData.description,
+            date: selectedDate.date,
+            time: startTimeStr,
+            duration_mins: manualFormData.duration,
+            location: 'Turnhout' // Default
+          })
+        }).catch(err => console.error('Email error:', err));
+      }
+
+      setManualFormData({ name: '', email: '', phone: '', description: '', duration: 120 });
+    } catch (err) {
+      console.error('Error saving manual booking:', err);
+      setBlocks(previousBlocks);
+      alert('Fout bij het opslaan van de afspraak.');
+    } finally {
+      setIsSavingData(false);
+    }
+  };
+
+  const handleDeleteManualGroup = async (groupId) => {
+    if (!groupId || !window.confirm('Weet je zeker dat je deze hele afspraak wilt verwijderen?')) return;
+    
+    const previousBlocks = [...blocks];
+    setBlocks(blocks.filter(b => b.group_id !== groupId));
+    setViewingManualBlock(null);
+    setIsSavingData(true);
+
+    try {
+      const { error } = await supabase
+        .from('availability_blocks')
+        .delete()
+        .eq('group_id', groupId);
+      if (error) throw error;
+    } catch (err) {
+      setBlocks(previousBlocks);
+      alert('Fout bij het verwijderen.');
     } finally {
       setIsSavingData(false);
     }
@@ -258,7 +362,8 @@ const AdminCalendar = () => {
                     className={`time-slot-card ${state} fade-in`}
                     onClick={() => {
                       if (booking) setActiveBooking(booking);
-                      else setSlotSelector({ slot, date: selectedDate.date });
+                      else if (manualBlock && manualBlock.status === 'planned') setViewingManualBlock(manualBlock);
+                      else setSlotSelector({ slot, date: selectedDate.date, step: 'choice' });
                     }}
                   >
                     <div className="slot-main">
@@ -342,41 +447,144 @@ const AdminCalendar = () => {
         </div>
       )}
 
+
       {slotSelector && (
         <div className="booking-details-modal-overlay" onClick={() => setSlotSelector(null)}>
           <div className="booking-details-modal glass-panel status-selector-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Status selecteren</h3>
+              <h3>{slotSelector.step === 'form' ? 'Klantgegevens' : 'Status selecteren'}</h3>
               <p className="text-muted" style={{ fontSize: '0.9rem' }}>{slotSelector.slot} op {new Date(slotSelector.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
             </div>
             
-            <div className="status-options-list">
-              <button className="status-btn available" onClick={() => updateSlotStatus(slotSelector.slot, 'available')}>
-                <CheckCircle size={20} />
-                <div>
-                  <strong>Beschikbaar</strong>
-                  <span>Klanten kunnen dit tijdslot boeken</span>
-                </div>
-              </button>
+            {slotSelector.step === 'choice' ? (
+              <div className="status-options-list">
+                <button className="status-btn available" onClick={() => updateSlotStatus(slotSelector.slot, 'available')}>
+                  <CheckCircle size={20} />
+                  <div>
+                    <strong>Beschikbaar</strong>
+                    <span>Vrijgeven voor boekingen</span>
+                  </div>
+                </button>
 
-              <button className="status-btn planned" onClick={() => updateSlotStatus(slotSelector.slot, 'planned')}>
-                <CalendarCheck size={20} />
-                <div>
-                  <strong>Ingepland / Eigen tijd</strong>
-                  <span>Geblokkeerd voor klanten (Blauw)</span>
-                </div>
-              </button>
+                <button className="status-btn planned" onClick={() => updateSlotStatus(slotSelector.slot, 'planned')}>
+                  <CalendarCheck size={20} />
+                  <div>
+                    <strong>Inplannen afspraak</strong>
+                    <span>Blauw (met klantinfo & duur)</span>
+                  </div>
+                </button>
 
-              <button className="status-btn blocked" onClick={() => updateSlotStatus(slotSelector.slot, 'blocked')}>
-                <UserMinus size={20} />
-                <div>
-                  <strong>Niet Beschikbaar</strong>
-                  <span>Compleet afgesloten (Rood)</span>
+                <button className="status-btn blocked" onClick={() => updateSlotStatus(slotSelector.slot, 'blocked')}>
+                  <UserMinus size={20} />
+                  <div>
+                    <strong>Handmatig blokkeren</strong>
+                    <span>Rood (zonder klantinfo)</span>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleManualBookingSubmit} className="manual-booking-form">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Naam Klant</label>
+                    <input type="text" value={manualFormData.name} onChange={e => setManualFormData({...manualFormData, name: e.target.value})} required placeholder="Naam..." />
+                  </div>
+                  <div className="form-group">
+                    <label>Telefoon</label>
+                    <input type="tel" value={manualFormData.phone} onChange={e => setManualFormData({...manualFormData, phone: e.target.value})} placeholder="+32..." />
+                  </div>
+                  <div className="form-group full-width">
+                    <label>E-mail (voor bevestiging)</label>
+                    <input type="email" value={manualFormData.email} onChange={e => setManualFormData({...manualFormData, email: e.target.value})} placeholder="email@voorbeeld.be" />
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Omschrijving / Wens</label>
+                    <textarea value={manualFormData.description} onChange={e => setManualFormData({...manualFormData, description: e.target.value})} placeholder="Wat wil de klant?" rows={2}></textarea>
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Duur afspraak</label>
+                    <div className="duration-grid">
+                      {[30, 60, 90, 120, 150, 180, 240].map(mins => (
+                        <button 
+                          key={mins}
+                          type="button"
+                          className={`duration-btn ${manualFormData.duration === mins ? 'selected' : ''}`}
+                          onClick={() => setManualFormData({...manualFormData, duration: mins})}
+                        >
+                          {mins / 60}u
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </button>
+                <div className="form-actions mt-4">
+                  <button type="submit" className="btn-gold w-100" disabled={isSavingData}>
+                    {isSavingData ? <Loader className="spin" /> : 'Afspraak Opslaan'}
+                  </button>
+                  <button type="button" className="btn-outline-gold w-100 mt-2" onClick={() => setSlotSelector({...slotSelector, step: 'choice'})}>Terug</button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {viewingManualBlock && (
+        <div className="booking-details-modal-overlay" onClick={() => setViewingManualBlock(null)}>
+          <div className="booking-details-modal glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Geplande Afspraak</h3>
+              <button className="close-btn" onClick={() => setViewingManualBlock(null)}>&times;</button>
+            </div>
+            
+            <div className="booking-info-grid">
+              <div className="info-item">
+                <User size={18} className="text-gold" />
+                <div>
+                  <label>Klant</label>
+                  <span>{viewingManualBlock.client_name || 'Niet opgegeven'}</span>
+                </div>
+              </div>
+              <div className="info-item">
+                <Clock size={18} className="text-gold" />
+                <div>
+                  <label>Duur</label>
+                  <span>{viewingManualBlock.duration_mins} minuten</span>
+                </div>
+              </div>
+              <div className="info-item">
+                <Phone size={18} className="text-gold" />
+                <div>
+                  <label>Telefoon</label>
+                  <span>{viewingManualBlock.client_phone || '-'}</span>
+                </div>
+              </div>
+              <div className="info-item">
+                <Mail size={18} className="text-gold" />
+                <div>
+                  <label>Email</label>
+                  <span>{viewingManualBlock.client_email || '-'}</span>
+                </div>
+              </div>
+              <div className="info-item full-width mt-2">
+                <Edit size={18} className="text-gold" />
+                <div>
+                  <label>Omschrijving</label>
+                  <span>{viewingManualBlock.description || 'Geen omschrijving'}</span>
+                </div>
+              </div>
             </div>
 
-            <button className="btn-outline-gold w-100 mt-4" onClick={() => setSlotSelector(null)}>Annuleren</button>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+              <button 
+                className="btn-outline-red" 
+                onClick={() => handleDeleteManualGroup(viewingManualBlock.group_id)}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', border: '1px solid #ef4444', padding: '8px 15px', borderRadius: '8px', background: 'none', cursor: 'pointer' }}
+              >
+                <Trash2 size={16} /> Verwijderen
+              </button>
+              <button className="btn-outline-gold" onClick={() => setViewingManualBlock(null)}>Sluiten</button>
+            </div>
           </div>
         </div>
       )}

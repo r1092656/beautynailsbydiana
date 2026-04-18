@@ -287,15 +287,70 @@
 
 .modal-header h3 { margin: 0; color: var(--gold); }
 
-.status-selector-modal {
-  max-width: 400px;
-}
-
 .status-options-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: 20px;
+}
+
+.manual-booking-form {
+  padding-top: 15px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fafafa;
+}
+
+.duration-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.duration-btn {
+  padding: 10px;
+  border: 1px solid #eee;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.duration-btn:hover {
+  border-color: var(--gold);
+}
+
+.duration-btn.selected {
+  background: var(--gold);
+  color: white;
+  border-color: var(--gold);
 }
 
 .status-btn {

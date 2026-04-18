@@ -9,14 +9,13 @@ const SERVICE_STRUCTURE = {
   'Gel Overlay': ['Basis gel', 'Basis gel + gellak/french'],
   'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
   'Manicure': ['Standaard Manicure'],
-  'Pedicure': ['Gellak Pedicure']
+  'Pedicure': ['Esthetische Pedicure', 'Medische Pedicure', 'Spa Pedicure']
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
-const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
-const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
-const PEDICURE_DESIGNS = ['No design', 'French'];
-const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak/french'];
+const GEL_DESIGNS = ['No design', 'Simpel', 'Medium', 'Full'];
+const PEDICURE_SERVICES = ['Esthetische Pedicure', 'Medische Pedicure', 'Spa Pedicure'];
+const PEDICURE_ADDONS = ['Gellak (+€15)', 'Full color (+€10)', 'French (+€15)'];
 
 const timeToMins = (timeStr) => {
   const [h, m] = timeStr.split(':').map(Number);
@@ -280,22 +279,38 @@ const BookingModal = () => {
 
         {step === 'details' && (
           <div className="booking-form-wrapper">
-            <h2 className="modal-title">Maak een Afspraak</h2>
-            <p className="modal-subtitle">Beleef luxe nagelverzorging. Alle afspraken duren ongeveer 2,5 uur.</p>
+            <h2 className="modal-title serif-title">Book your Appointment</h2>
+            <p className="modal-subtitle">Experience luxury nail care. All appointments are ~2.5 hours.</p>
 
             <form onSubmit={goToPaymentInfo} className="booking-form">
-              {/* Location */}
+              {/* Personal Info - Desktop Row */}
               <div className="form-group">
-                <label>Locatie</label>
+                <label>Full Name</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" required />
+                </div>
+                <div className="form-group">
+                  <label>Contact Number</label>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32..." required />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="form-group mt-2">
+                <label>Location</label>
                 <div className="location-grid">
                   <button type="button" className={`location-btn ${location === 'Turnhout' ? 'selected' : ''}`} onClick={() => setLocation('Turnhout')}>Turnhout</button>
-                  <button type="button" className={`location-btn ${location === 'Veerle' ? 'selected' : ''}`} onClick={() => setLocation('Veerle')}>Veerle</button>
+                  <button type="button" className={`location-btn ${location === 'Laakdal' ? 'selected' : ''}`} onClick={() => setLocation('Laakdal')}>Laakdal</button>
                 </div>
               </div>
 
               {/* Category */}
               <div className="form-group">
-                <label>Categorie</label>
+                <label>Category</label>
                 <div className="category-grid">
                   {Object.keys(SERVICE_STRUCTURE).map((cat) => (
                     <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => { setCategory(cat); setSubService(''); setGelOverlayService(''); setNailLength(''); setDesign(''); }}>{cat}</button>
@@ -329,17 +344,16 @@ const BookingModal = () => {
               {isPedicure && (
                 <div className="fade-in">
                   <div className="form-group">
-                    <label>Type Pedicure</label>
-                    <div className="option-grid">
-                      {PEDICURE_SERVICES.map((opt) => (
-                        <button key={opt} type="button" className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} onClick={() => setSubService(opt)}>{opt}</button>
-                      ))}
-                    </div>
+                    <label>Treatment Type</label>
+                    <select value={subService} onChange={e => setSubService(e.target.value)} required>
+                      <option value="">Select treatment...</option>
+                      {PEDICURE_SERVICES.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
                   </div>
                   <div className="form-group">
-                    <label>Design Pedicure</label>
+                    <label>Add-ons (Design)</label>
                     <div className="option-grid">
-                      {PEDICURE_DESIGNS.map((opt) => (
+                      {PEDICURE_ADDONS.map((opt) => (
                         <button key={opt} type="button" className={`mini-option-btn ${design === opt ? 'selected' : ''}`} onClick={() => setDesign(opt)}>{opt}</button>
                       ))}
                     </div>
@@ -349,35 +363,36 @@ const BookingModal = () => {
 
               {needsNailOptions && (
                 <div className="fade-in">
-                  <div className="form-group">
-                    <label>Nagellengte</label>
-                    <div className="option-grid">
-                      {NAIL_LENGTHS.map((len) => (
-                        <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>
-                      ))}
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Nail Length</label>
+                      <div className="option-grid">
+                        {NAIL_LENGTHS.map((len) => (
+                          <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Design Complexiteit</label>
-                    <div className="option-grid">
-                      {GEL_DESIGNS.map((d) => (
-                        <button key={d} type="button" className={`mini-option-btn ${design === d ? 'selected' : ''}`} onClick={() => setDesign(d)}>{d}</button>
-                      ))}
+                    <div className="form-group">
+                      <label>Design</label>
+                      <select value={design} onChange={e => setDesign(e.target.value)}>
+                        {GEL_DESIGNS.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
                     </div>
                   </div>
                   
                   <div className="form-group">
-                    <label>Inspiratie Foto (optioneel)</label>
-                    <div className="file-upload-container">
-                      <label className="file-upload-label">
-                        <Upload size={18} />
-                        <span>{selectedFile ? selectedFile.name : 'Upload een foto'}</span>
-                        <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
-                      </label>
-                      {imagePreview && (
-                        <div className="image-preview-wrapper mt-3">
-                          <img src={imagePreview} alt="Preview" className="upload-preview" />
-                          <button type="button" className="remove-img-btn" onClick={() => { setSelectedFile(null); setImagePreview(null); }}>&times;</button>
+                    <label>If you have an inspo, drop an image</label>
+                    <div className="file-upload-wrapper">
+                      {!imagePreview ? (
+                        <label className="file-upload-label">
+                          <Upload size={24} className="mb-2" />
+                          <span>Tap to upload inspiration</span>
+                          <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                        </label>
+                      ) : (
+                        <div className="image-preview">
+                          <img src={imagePreview} alt="Preview" />
+                          <button type="button" className="remove-image-btn" onClick={() => { setSelectedFile(null); setImagePreview(null); }}>Remove</button>
                         </div>
                       )}
                     </div>
@@ -386,14 +401,14 @@ const BookingModal = () => {
               )}
 
               {/* Date & Time */}
-              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                <label>Datum</label>
+              <div className="form-group mt-4" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                <label>Preferred Date</label>
                 <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(''); }} min={new Date().toISOString().split("T")[0]} required />
               </div>
 
               {date && (
                 <div className="form-group fade-in">
-                  <label>Beschikbare Tijden (Blok van 2,5 uur)</label>
+                  <label>Available Time Slots (2.5hr block)</label>
                   <div className="time-grid">
                     {availableSlots.map((slot) => (
                       <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
@@ -402,28 +417,14 @@ const BookingModal = () => {
                 </div>
               )}
 
-              {/* Personal Info */}
-              <div className="form-group">
-                <label>Volledige Naam</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Je naam" required />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>E-mail</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="je@email.com" required />
-                </div>
-                <div className="form-group">
-                  <label>Telefoonnummer</label>
-                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32..." required />
-                </div>
-              </div>
+              {/* Removed duplicate personal info from here as it's now at the top */}
 
               <div className="deposit-info-banner glass-panel" style={{ marginBottom: '20px' }}>
                 <Info size={18} color="var(--gold)" />
                 <p>Er wordt een aanbetaling van <strong>€10,00</strong> gevraagd.</p>
               </div>
 
-              <button type="submit" className="btn-gold w-100">Naar Betaling <ChevronRight size={20} style={{ marginLeft: '8px' }} /></button>
+              <button type="submit" className="btn-gold w-100">Confirm Booking <ChevronRight size={20} /></button>
             </form>
           </div>
         )}

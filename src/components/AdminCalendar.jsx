@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
-import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle, CalendarCheck, UserMinus, CheckCircle, XCircle } from 'lucide-react';
 import './AdminCalendar.css';
 
 const TIME_SLOTS = [
@@ -17,6 +17,7 @@ const AdminCalendar = () => {
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
+  const [slotSelector, setSlotSelector] = useState(null); // { slot, date }
 
   const monthYear = currentDate.toLocaleString('nl-BE', { month: 'long', year: 'numeric' });
 
@@ -93,30 +94,62 @@ const AdminCalendar = () => {
     setSelectedDate(null);
   };
 
-  const handleToggleBlock = async (slot) => {
+  const updateSlotStatus = async (slot, status) => {
     if (!selectedDate) return;
     
-    const isBlocked = selectedDate.blocks.some(b => b.time_slot === slot);
-    
     try {
-      if (isBlocked) {
-        // Unblock
+      // First, remove any existing manual block for this slot
+      await supabase
+        .from('availability_blocks')
+        .delete()
+        .eq('date', selectedDate.date)
+        .eq('time_slot', slot);
+
+      if (status !== 'available') {
+        // If not green, insert the new block with the chosen status
         const { error } = await supabase
           .from('availability_blocks')
-          .delete()
-          .eq('date', selectedDate.date)
-          .eq('time_slot', slot);
-        if (error) throw error;
-      } else {
-        // Block
-        const { error } = await supabase
-          .from('availability_blocks')
-          .insert([{ date: selectedDate.date, time_slot: slot }]);
+          .insert([{ 
+            date: selectedDate.date, 
+            time_slot: slot,
+            status: status // 'planned' (Blue) or 'blocked' (Red)
+          }]);
         if (error) throw error;
       }
-      fetchData(); // Refresh
+      
+      setSlotSelector(null);
+      fetchData(); // Refresh calendar data
     } catch (err) {
+      console.error('Error updating status:', err);
       alert('Fout bij het wijzigen van beschikbaarheid');
+    }
+  };
+
+  const handleBookingStatusChange = async (newStatus) => {
+    if (!activeBooking) return;
+    
+    try {
+      if (newStatus === 'available') {
+        // Cancelling/Removing a booking effectively makes it available
+        const { error } = await supabase
+          .from('bookings')
+          .update({ status: 'cancelled' })
+          .eq('id', activeBooking.id);
+        if (error) throw error;
+      } else {
+        // Block the slot manually
+        await updateSlotStatus(activeBooking.time, newStatus);
+        // Also mark the booking as cancelled to remove the "User" version
+        await supabase
+          .from('bookings')
+          .update({ status: 'cancelled' })
+          .eq('id', activeBooking.id);
+      }
+      
+      setActiveBooking(null);
+      fetchData();
+    } catch (err) {
+      alert('Fout bij het wijzigen van boeking status');
     }
   };
 
@@ -181,11 +214,11 @@ const AdminCalendar = () => {
             <div className="time-slots-grid">
               {TIME_SLOTS.map(slot => {
                 const booking = selectedDate.bookings.find(b => b.time === slot);
-                const isBlocked = selectedDate.blocks.some(b => b.time_slot === slot || b.time_slot === 'all_day');
+                const manualBlock = selectedDate.blocks.find(b => b.time_slot === slot || b.time_slot === 'all_day');
                 
                 let state = 'available';
                 if (booking) state = 'booked';
-                else if (isBlocked) state = 'blocked';
+                else if (manualBlock) state = manualBlock.status || 'blocked'; // 'planned' or 'blocked'
 
                 return (
                   <div 
@@ -193,12 +226,17 @@ const AdminCalendar = () => {
                     className={`time-slot-card ${state}`}
                     onClick={() => {
                       if (booking) setActiveBooking(booking);
-                      else handleToggleBlock(slot);
+                      else setSlotSelector({ slot, date: selectedDate.date });
                     }}
                   >
-                    <div className="slot-time">{slot}</div>
+                    <div className="slot-main">
+                      <div className="slot-time">{slot}</div>
+                      {state === 'booked' && <User size={14} className="slot-icon" />}
+                      {state === 'planned' && <CalendarCheck size={14} className="slot-icon" />}
+                      {state === 'blocked' && <UserMinus size={14} className="slot-icon" />}
+                    </div>
                     <div className="slot-status">
-                      {booking ? 'Gereserveerd' : isBlocked ? 'Geblokkeerd' : 'Beschikbaar'}
+                      {booking ? 'Gereserveerd' : state === 'planned' ? 'Ingepland' : state === 'blocked' ? 'Geblokkeerd' : 'Beschikbaar'}
                     </div>
                   </div>
                 );
@@ -261,9 +299,52 @@ const AdminCalendar = () => {
               </div>
             </div>
 
-            <div className="modal-footer">
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="status-btn mini blocked" onClick={() => handleBookingStatusChange('blocked')} title="Wijzig naar Geblokkeerd"><XCircle size={16} /></button>
+                <button className="status-btn mini available" onClick={() => handleBookingStatusChange('available')} title="Vrijgeven"><CheckCircle size={16} /></button>
+              </div>
               <button className="btn-outline-gold" onClick={() => setActiveBooking(null)}>Sluiten</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {slotSelector && (
+        <div className="booking-details-modal-overlay" onClick={() => setSlotSelector(null)}>
+          <div className="booking-details-modal glass-panel status-selector-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Status selecteren</h3>
+              <p className="text-muted" style={{ fontSize: '0.9rem' }}>{slotSelector.slot} op {new Date(slotSelector.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+            </div>
+            
+            <div className="status-options-list">
+              <button className="status-btn available" onClick={() => updateSlotStatus(slotSelector.slot, 'available')}>
+                <CheckCircle size={20} />
+                <div>
+                  <strong>Beschikbaar</strong>
+                  <span>Klanten kunnen dit tijdslot boeken</span>
+                </div>
+              </button>
+
+              <button className="status-btn planned" onClick={() => updateSlotStatus(slotSelector.slot, 'planned')}>
+                <CalendarCheck size={20} />
+                <div>
+                  <strong>Ingepland / Eigen tijd</strong>
+                  <span>Geblokkeerd voor klanten (Blauw)</span>
+                </div>
+              </button>
+
+              <button className="status-btn blocked" onClick={() => updateSlotStatus(slotSelector.slot, 'blocked')}>
+                <UserMinus size={20} />
+                <div>
+                  <strong>Niet Beschikbaar</strong>
+                  <span>Compleet afgesloten (Rood)</span>
+                </div>
+              </button>
+            </div>
+
+            <button className="btn-outline-gold w-100 mt-4" onClick={() => setSlotSelector(null)}>Annuleren</button>
           </div>
         </div>
       )}

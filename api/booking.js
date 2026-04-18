@@ -16,6 +16,7 @@ export default async function handler(req, res) {
     nail_length,
     design,
     location,
+    date,
     time,
     inspiration_image, // Base64 Data URL
     payment_status,
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
       const [year, month, day] = date.split('-');
       const [hour, minute] = time.split(':');
       const startDate = new Date(year, month - 1, day, hour, minute);
-      const endDate = new Date(startDate.getTime() + 150 * 60000); // 2.5 hours
+      const endDate = new Date(startDate.getTime() + duration_mins * 60000); 
 
       const formatCalDate = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
 

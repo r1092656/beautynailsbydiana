@@ -289,7 +289,7 @@ const BookingModal = () => {
                 <label>Locatie</label>
                 <div className="location-grid">
                   <button type="button" className={`location-btn ${location === 'Turnhout' ? 'selected' : ''}`} onClick={() => setLocation('Turnhout')}>Turnhout</button>
-                  <button type="button" className={`location-btn ${location === 'Laakdal' ? 'selected' : ''}`} onClick={() => setLocation('Laakdal')}>Laakdal</button>
+                  <button type="button" className={`location-btn ${location === 'Veerle' ? 'selected' : ''}`} onClick={() => setLocation('Veerle')}>Veerle</button>
                 </div>
               </div>
 
@@ -304,13 +304,83 @@ const BookingModal = () => {
               </div>
 
               {/* Specific options (Gel/Verlenging/Pedicure) */}
-              {needsNailOptions && (
+              {category === 'Gel Overlay' && (
+                <div className="form-group fade-in">
+                  <label>Type Behandeling</label>
+                  <div className="option-grid">
+                    {GEL_OVERLAY_SERVICES.map((opt) => (
+                      <button key={opt} type="button" className={`mini-option-btn ${gelOverlayService === opt ? 'selected' : ''}`} onClick={() => setGelOverlayService(opt)}>{opt}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {category === 'Verlenging' && (
                 <div className="form-group fade-in">
                   <label>Service Type</label>
                   <div className="option-grid">
                     {['Fill In', 'Fullset'].map((opt) => (
                       <button key={opt} type="button" className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} onClick={() => { setSubService(opt); if (opt === 'Fullset') setShowFullsetWarning(true); }}>{opt}</button>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {isPedicure && (
+                <div className="fade-in">
+                  <div className="form-group">
+                    <label>Type Pedicure</label>
+                    <div className="option-grid">
+                      {PEDICURE_SERVICES.map((opt) => (
+                        <button key={opt} type="button" className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} onClick={() => setSubService(opt)}>{opt}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Design Pedicure</label>
+                    <div className="option-grid">
+                      {PEDICURE_DESIGNS.map((opt) => (
+                        <button key={opt} type="button" className={`mini-option-btn ${design === opt ? 'selected' : ''}`} onClick={() => setDesign(opt)}>{opt}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {needsNailOptions && (
+                <div className="fade-in">
+                  <div className="form-group">
+                    <label>Nagellengte</label>
+                    <div className="option-grid">
+                      {NAIL_LENGTHS.map((len) => (
+                        <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Design Complexiteit</label>
+                    <div className="option-grid">
+                      {GEL_DESIGNS.map((d) => (
+                        <button key={d} type="button" className={`mini-option-btn ${design === d ? 'selected' : ''}`} onClick={() => setDesign(d)}>{d}</button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Inspiratie Foto (optioneel)</label>
+                    <div className="file-upload-container">
+                      <label className="file-upload-label">
+                        <Upload size={18} />
+                        <span>{selectedFile ? selectedFile.name : 'Upload een foto'}</span>
+                        <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                      </label>
+                      {imagePreview && (
+                        <div className="image-preview-wrapper mt-3">
+                          <img src={imagePreview} alt="Preview" className="upload-preview" />
+                          <button type="button" className="remove-img-btn" onClick={() => { setSelectedFile(null); setImagePreview(null); }}>&times;</button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

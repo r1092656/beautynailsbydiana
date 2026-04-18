@@ -164,3 +164,59 @@ h1, h2, h3, h4, h5, h6 {
 .col-6:hover .portfolio-caption {
   transform: translateY(0);
 }
+
+/* Admin Table Styles */
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.custom-table th {
+  padding: 12px 15px;
+  text-align: left;
+  border: none;
+  font-family: var(--font-heading);
+  color: var(--dark-text);
+  opacity: 0.6;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.custom-table tbody tr {
+  background: rgba(255, 255, 255, 0.4);
+  transition: 0.2s ease-in-out;
+}
+
+.custom-table tbody tr:hover {
+  background: white;
+  box-shadow: 0 5px 15px rgba(74, 59, 78, 0.05);
+}
+
+.custom-table td {
+  padding: 15px;
+  vertical-align: middle;
+}
+
+.custom-table td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.custom-table td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-delete-small:hover {
+  background-color: #d9534f !important;
+  color: white !important;
+  transform: scale(1.05);
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, AlertCircle, Quote, User, Clock, CheckCircle } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import './Reviews.css';
 
@@ -12,20 +13,45 @@ const Reviews = () => {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    const saved = localStorage.getItem('bn_reviews');
-    if (saved) {
-      setReviews(JSON.parse(saved));
+  const fetchReviews = async () => {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching reviews:', error);
     } else {
-      setReviews([
-        { id: 1, name: 'Sarah', rating: 5, text: 'Absoluut dol op mijn nagels! Diana is een echte kunstenaar.', date: '12/04/2026', verified: true },
-        { id: 2, name: 'Anoniem', rating: 5, text: 'Beste BIAB behandeling die ik ooit heb gehad. Zo ontspannend.', date: '10/04/2026', verified: true }
-      ]);
+      setReviews(data || []);
     }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchReviews();
+
+    // Subscribe to real-time changes
+    const subscription = supabase
+      .channel('public:reviews')
+      .on('postgres_changes', { event: '*', table: 'reviews', schema: 'public' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setReviews(prev => [payload.new, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setReviews(prev => prev.filter(r => r.id !== payload.old.id));
+        } else if (payload.eventType === 'UPDATE') {
+          setReviews(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -39,21 +65,24 @@ const Reviews = () => {
     }
 
     const newReview = {
-      id: Date.now(),
       name: name.trim() === '' ? 'Anoniem' : name.trim(),
       rating: rating,
       text: text,
-      date: new Date().toLocaleDateString('nl-BE'),
       verified: false
     };
 
-    const updatedReviews = [newReview, ...reviews];
-    setReviews(updatedReviews);
-    localStorage.setItem('bn_reviews', JSON.stringify(updatedReviews));
-    
-    setName('');
-    setRating(5);
-    setText('');
+    const { error } = await supabase
+      .from('reviews')
+      .insert([newReview]);
+
+    if (error) {
+      setErrorMsg('Er is iets misgegaan bij het plaatsen van je review. Probeer het later opnieuw.');
+      console.error('Submission error:', error);
+    } else {
+      setName('');
+      setRating(5);
+      setText('');
+    }
   };
 
   return (
@@ -129,52 +158,60 @@ const Reviews = () => {
 
         {/* Reviews List */}
         <main className="reviews-feed">
-          {reviews.map((review, index) => (
-            <div 
-              key={review.id} 
-              className="testimonial-card fade-in" 
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <Quote className="quote-icon font-display" size={60} />
-              
-              <div className="card-header">
-                <div className="user-info">
-                  <div className="user-avatar">
-                    <User color="var(--gold)" size={24} />
+          {loading ? (
+            <div className="text-center py-5">
+              <p className="text-gold">Reviews laden...</p>
+            </div>
+          ) : (
+            <>
+              {reviews.map((review, index) => (
+                <div 
+                  key={review.id} 
+                  className="testimonial-card fade-in" 
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <Quote className="quote-icon font-display" size={60} />
+                  
+                  <div className="card-header">
+                    <div className="user-info">
+                      <div className="user-avatar">
+                        <User color="var(--gold)" size={24} />
+                      </div>
+                      <div>
+                        <h4 className="reviewer-name">{review.name}</h4>
+                        {review.verified && (
+                          <span className="verified-badge">
+                            <CheckCircle size={10} style={{ marginRight: '4px' }} />
+                            Geverifieerd
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="review-date">
+                      <Clock size={14} />
+                      {new Date(review.created_at).toLocaleDateString('nl-BE')}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="reviewer-name">{review.name}</h4>
-                    {review.verified && (
-                      <span className="verified-badge">
-                        <CheckCircle size={10} style={{ marginRight: '4px' }} />
-                        Geverifieerd
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="review-date">
-                  <Clock size={14} />
-                  {review.date}
-                </div>
-              </div>
 
-              <div className="mb-3 d-flex gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={16} fill={i < review.rating ? 'var(--gold)' : 'none'} color={i < review.rating ? 'var(--gold)' : '#ddd'} />
-                ))}
-              </div>
+                  <div className="mb-3 d-flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={16} fill={i < review.rating ? 'var(--gold)' : 'none'} color={i < review.rating ? 'var(--gold)' : '#ddd'} />
+                    ))}
+                  </div>
+                  
+                  <p className="testimonial-text">
+                    {review.text}
+                  </p>
+                </div>
+              ))}
               
-              <p className="testimonial-text">
-                {review.text}
-              </p>
-            </div>
-          ))}
-          
-          {reviews.length === 0 && (
-            <div className="text-center py-5 glass-panel opacity-75">
-              <Quote size={40} className="text-gold opacity-25 mb-3" />
-              <p className="text-muted">Nog geen beoordelingen. Wees de eerste!</p>
-            </div>
+              {reviews.length === 0 && (
+                <div className="text-center py-5 glass-panel opacity-75">
+                  <Quote size={40} className="text-gold opacity-25 mb-3" />
+                  <p className="text-muted">Nog geen beoordelingen. Wees de eerste!</p>
+                </div>
+              )}
+            </>
           )}
         </main>
       </div>

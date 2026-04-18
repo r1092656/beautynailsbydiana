@@ -3,7 +3,7 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import { Mail, Phone, MapPin, Camera, Music, Send, CircleCheck, Loader } from 'lucide-react';
 
 const Contact = () => {
-  useDocumentTitle('Contact & Afspraak Maken', 'Hebt u vragen of wilt u een afspraak maken bij Beauty Nails by Diana? Neem contact op via telefoon, WhatsApp of email in Laakdal.');
+  useDocumentTitle('Contact & Afspraak Maken', 'Hebt u vragen of wilt u een afspraak maken bij Beauty Nails by Diana? Neem contact op via WhatsApp of email in Laakdal.');
   const [isSending, setIsSending] = useState(false);
   const [complete, setComplete] = useState(false);
   const [formData, setFormData] = useState({
@@ -48,16 +48,6 @@ const Contact = () => {
 
       <div className="row" style={{ justifyContent: 'center' }}>
         <div className="col-lg-5 mb-5" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          <a href="tel:+32465620688" className="glass-panel" style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px', textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>
-              <Phone color="var(--gold)" size={24} />
-            </div>
-            <div>
-              <h4 style={{ margin: '0 0 5px 0' }}>Telefoon / WhatsApp</h4>
-              <p style={{ margin: 0, color: 'var(--text-muted)' }}>+32 465 62 06 88</p>
-            </div>
-          </a>
           
           <div className="glass-panel" style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px' }}>
             <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>

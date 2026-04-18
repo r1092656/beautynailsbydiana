@@ -19,6 +19,8 @@ export default async function handler(req, res) {
     date,
     time,
     inspiration_image, // Base64 Data URL
+    payment_status,
+    deposit_amount
   } = req.body;
 
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -43,7 +45,8 @@ export default async function handler(req, res) {
         ...(gel_overlay_service ? [`Treatment: ${gel_overlay_service}`] : []),
         `Length: ${nail_length}`,
         `Design: ${design}`,
-        `Location: ${location}`
+        `Location: ${location}`,
+        `Aanbetaling: ${deposit_amount} (${payment_status})`
       ].join('\n');
 
       const params = new URLSearchParams({
@@ -61,17 +64,15 @@ export default async function handler(req, res) {
 
   const calendarLink = generateCalendarLink();
 
-  // Branded HTML Template
-  const html = `
-    <!DOCTYPE html>
-    <html>
+  // Common HTML Head & Style
+  const htmlHead = `
     <head>
       <meta charset="utf-8">
       <style>
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #FDF5F2; }
         .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .header { background-color: #D4AF37; padding: 40px 20px; text-align: center; color: white; }
-        .header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; text-transform: uppercase; }
+        .header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; text-transform: uppercase; color: white; }
         .content { padding: 40px; }
         .section { margin-bottom: 30px; border-bottom: 1px solid #FDF5F2; padding-bottom: 20px; }
         .section:last-child { border-bottom: none; }
@@ -84,127 +85,129 @@ export default async function handler(req, res) {
         .btn { display: inline-block; padding: 12px 25px; background-color: #D4AF37; color: white !important; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; }
         .inspo-image { margin-top: 20px; border-radius: 8px; border: 1px solid #D4AF37; max-width: 100%; height: auto; display: block; margin-left: auto; margin-right: auto; }
         .footer { background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 12px; color: #999; }
+        .contact-box { background: #FDF5F2; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #D4AF37; }
       </style>
     </head>
+  `;
+
+  // Admin Email Template
+  const adminHtml = `
+    <!DOCTYPE html>
+    <html>
+    ${htmlHead}
     <body>
       <div class="container">
-        <div class="header">
-          <h1>NEW BOOKING</h1>
-        </div>
-        
+        <div class="header"><h1>NIEUWE BOEKING</h1></div>
         <div class="content">
           <div class="section">
-            <div class="section-title">Customer Information</div>
-            <div class="detail-row">
-              <span class="label">Name:</span>
-              <span class="value">${name}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Email:</span>
-              <span class="value">${email}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Phone:</span>
-              <span class="value">${phone}</span>
-            </div>
+            <div class="section-title">Klantgegevens</div>
+            <div class="detail-row"><span class="label">Naam:</span><span class="value">${name}</span></div>
+            <div class="detail-row"><span class="label">Email:</span><span class="value">${email}</span></div>
+            <div class="detail-row"><span class="label">Telefoon:</span><span class="value">${phone}</span></div>
           </div>
-
           <div class="section">
-            <div class="section-title">Service Details</div>
-            <div class="detail-row">
-              <span class="label">Category:</span>
-              <span class="value">${category}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Service:</span>
-              <span class="value important-value">${sub_service}</span>
-            </div>
-            ${gel_overlay_service ? `
-            <div class="detail-row">
-              <span class="label">Treatment:</span>
-              <span class="value">${gel_overlay_service}</span>
-            </div>
+            <div class="section-title">Behandeling Details</div>
+            <div class="detail-row"><span class="label">Categorie:</span><span class="value">${category}</span></div>
+            <div class="detail-row"><span class="label">Service:</span><span class="value important-value">${sub_service}</span></div>
+            ${gel_overlay_service ? `<div class="detail-row"><span class="label">Type:</span><span class="value">${gel_overlay_service}</span></div>` : ''}
+            ${needsNailOptions ? `
+              <div class="detail-row"><span class="label">Lengte:</span><span class="value">${nail_length}</span></div>
+              <div class="detail-row"><span class="label">Design:</span><span class="value">${design}</span></div>
             ` : ''}
-            ${(category === 'Gel Overlay' || category === 'Verlenging') ? `
-            <div class="detail-row">
-              <span class="label">Nail Length:</span>
-              <span class="value">${nail_length}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Design:</span>
-              <span class="value">${design}</span>
-            </div>
-            ` : ''}
-            ${category === 'Pedicure' ? `
-            <div class="detail-row">
-              <span class="label">Design:</span>
-              <span class="value">${design}</span>
-            </div>
-            ` : ''}
+            <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
           </div>
-
           <div class="section">
-            <div class="section-title">Time & Location</div>
-            <div class="detail-row">
-              <span class="label">Location:</span>
-              <span class="value">${location}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Date:</span>
-              <span class="value">${date}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Time:</span>
-              <span class="value">${time}</span>
-            </div>
+            <div class="section-title">Datum & Tijd</div>
+            <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
+            <div class="detail-row"><span class="label">Tijdstip:</span><span class="value">${time}</span></div>
           </div>
-
-          ${inspiration_image ? `
           <div class="section">
-            <div class="section-title">Inspiration Image</div>
-            <img src="cid:inspo_image" class="inspo-image" alt="Inspo" />
-          </div>` : ''}
-
-          <div class="btn-container">
-            <a href="${calendarLink}" class="btn">ADD TO MY CALENDAR</a>
+            <div class="section-title">Status Betaling</div>
+            <div class="detail-row"><span class="label">Aanbetaling:</span><span class="value">${deposit_amount}</span></div>
+            <div class="detail-row"><span class="label">Status:</span><span class="value" style="color: green; font-weight: bold;">${payment_status.toUpperCase()}</span></div>
           </div>
+          ${inspiration_image ? `<div class="section"><div class="section-title">Inspiratie</div><img src="cid:inspo_image" class="inspo-image" /></div>` : ''}
+          <div class="btn-container"><a href="${calendarLink}" class="btn">TOEVOEGEN AAN CALENDAR</a></div>
         </div>
-
-        <div class="footer">
-          &copy; 2026 Diana Nails Booking System. This is an automated notification.
-        </div>
+        <div class="footer">&copy; 2026 Beauty Nails by Diana Booking System.</div>
       </div>
     </body>
     </html>
   `;
 
+  // Customer Email Template
+  const customerHtml = `
+    <!DOCTYPE html>
+    <html>
+    ${htmlHead}
+    <body>
+      <div class="container">
+        <div class="header"><h1>BEVESTIGING BOEKING</h1></div>
+        <div class="content">
+          <p>Beste ${name},</p>
+          <p>Bedankt voor je boeking bij Beauty Nails by Diana! Je afspraak is succesvol geregistreerd.</p>
+          
+          <div class="section">
+            <div class="section-title">Jouw Afspraak</div>
+            <div class="detail-row"><span class="label">Service:</span><span class="value">${sub_service || category}</span></div>
+            <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
+            <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
+            <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Betaling</div>
+            <p>We hebben je aanbetaling van <strong>${deposit_amount}</strong> goed ontvangen. Dit bedrag wordt in mindering gebracht op het totaalbedrag tijdens je afspraak.</p>
+            <p style="font-size: 13px; color: #666;"><em>Let op: Annuleren kan tot 48 uur voor de afspraak voor een volledige terugbetaling van de aanbetaling.</em></p>
+          </div>
+
+          <div class="contact-box">
+            <p style="margin: 0; font-weight: bold; color: #D4AF37;">Heb je vragen? Neem contact met me op:</p>
+            <p style="margin: 5px 0 0 0;">Telefoon / WhatsApp: <strong>+32 465 62 06 88</strong></p>
+          </div>
+
+          <p style="margin-top: 30px;">Ik kijk ernaar uit je te zien!</p>
+          <p>Met vriendelijke groet,<br>Diana</p>
+        </div>
+        <div class="footer">&copy; 2026 Beauty Nails by Diana.</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const needsNailOptions = category === 'Gel Overlay' || category === 'Verlenging';
+
   try {
     const attachments = [];
     if (inspiration_image) {
-      // Convert Data URL to Buffer
       const base64Content = inspiration_image.split(',')[1];
       attachments.push({
         filename: 'inspiration.jpg',
         content: base64Content,
         disposition: 'inline',
-        content_id: 'inspo_image', // Used in the <img> tag above
+        content_id: 'inspo_image',
       });
     }
 
-    const { data, error } = await resend.emails.send({
-      from: 'Diana Booking <onboarding@resend.dev>', // You should verify your domain in Resend for more customizations
-      to: ['dianacirpaci777@gmail.com', email],
-      subject: `Booking Confirmation: ${sub_service} - ${name}`,
-      html: html,
+    // 1. Send to Admin
+    await resend.emails.send({
+      from: 'Diana Booking <onboarding@resend.dev>',
+      to: 'dianacirpaci777@gmail.com',
+      subject: `NIEUWE BOEKING: ${sub_service} - ${name}`,
+      html: adminHtml,
       attachments: attachments,
     });
 
-    if (error) {
-      console.error('Resend Error:', error);
-      return res.status(400).json({ error: error.message });
-    }
+    // 2. Send to Customer
+    await resend.emails.send({
+      from: 'Beauty Nails by Diana <onboarding@resend.dev>',
+      to: email,
+      subject: `Je afspraak is bevestigd - Beauty Nails by Diana`,
+      html: customerHtml,
+      attachments: attachments,
+    });
 
-    return res.status(200).json({ success: true, id: data.id });
+    return res.status(200).json({ success: true });
   } catch (error) {
     console.error('Server Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });

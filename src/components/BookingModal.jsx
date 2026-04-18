@@ -1,11 +1,10 @@
 import { useBooking } from '../context/BookingContext';
-import { X, CircleCheck, Upload, FileImage, Loader } from 'lucide-react';
+import { X, CircleCheck, Upload, FileImage, Loader, CreditCard, ChevronRight, ChevronLeft, Info } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { compressImage } from '../utils/compressImage';
 import './BookingModal.css';
 
 // Pre-defined service list for the dropdown
-// Structured service categories
 const SERVICE_STRUCTURE = {
   'Gel Overlay': ['Basis gel', 'Basis gel + gellak/french'],
   'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
@@ -16,16 +15,14 @@ const SERVICE_STRUCTURE = {
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const GEL_DESIGNS = ['Simpel', 'Medium', 'Full'];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
-const PEDICURE_DESIGNS = ['French', 'Nail Art', 'No design'];
+const PEDICURE_DESIGNS = ['No design', 'French']; // Updated: Removed Nail Art
 const GEL_OVERLAY_SERVICES = ['Basis gel', 'Basis gel + gellak/french'];
 
-// Helper to convert HH:MM to minutes
 const timeToMins = (timeStr) => {
   const [h, m] = timeStr.split(':').map(Number);
   return h * 60 + m;
 };
 
-// Generate standard timeslots from 09:00 to 18:00
 const generateTimeSlots = () => {
   const slots = [];
   for (let h = 9; h <= 18; h++) {
@@ -35,13 +32,15 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-const DURATION_MINS = 150; // 2.5 hours blocks
+const DURATION_MINS = 150; 
 
 const BookingModal = () => {
   const { isModalOpen, closeModal, selectedService } = useBooking();
 
+  // Booking Flow State: 'details' | 'payment' | 'complete'
+  const [step, setStep] = useState('details');
+  
   // Form State
-  const [complete, setComplete] = useState(false);
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
   const [gelOverlayService, setGelOverlayService] = useState('');
@@ -62,10 +61,8 @@ const BookingModal = () => {
   const [existingBookings, setExistingBookings] = useState([]);
 
   useEffect(() => {
-    // If a service was pre-selected from the Services page, try to match it or reset
     if (selectedService && isModalOpen) {
       const s = selectedService.toLowerCase();
-      
       if (s.includes('verlengen') || s.includes('verlenging')) {
         setCategory('Verlenging');
         setSubService('Fullset');
@@ -73,7 +70,6 @@ const BookingModal = () => {
         setCategory('Gel Overlay');
         setSubService('Basis gel');
       } else if (s.includes('fill ins') || s.includes('opvullen')) {
-        // Need to know if it's Gel or Verlenging, but we'll default to Gel Overlay for now
         setCategory('Gel Overlay');
         setSubService('Fill In');
       } else if (s.includes('full set')) {
@@ -90,7 +86,6 @@ const BookingModal = () => {
   }, [selectedService, isModalOpen]);
 
   useEffect(() => {
-    // Load bookings from simulated database (localStorage)
     if (isModalOpen) {
       const saved = localStorage.getItem('bn_bookings');
       if (saved) {
@@ -99,43 +94,20 @@ const BookingModal = () => {
     }
   }, [isModalOpen]);
 
-  const needsNailOptions = useMemo(() => {
-    return category === 'Gel Overlay' || category === 'Verlenging';
-  }, [category]);
+  const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'Verlenging', [category]);
+  const isPedicure = useMemo(() => category === 'Pedicure', [category]);
 
-  const isPedicure = useMemo(() => {
-    return category === 'Pedicure';
-  }, [category]);
-
-  const isNewSet = useMemo(() => {
-    return subService === 'Fullset' || subService === 'Verlenging met tips' || subService === 'Verlenging met sjabloon';
-  }, [subService]);
-
-  // Derived state for blocked timeslots for the selected date
   const availableSlots = useMemo(() => {
     const allSlots = generateTimeSlots();
     if (!date) return [];
-
     const bookingsOnDate = existingBookings.filter(b => b.date === date);
-
     return allSlots.map(slot => {
       const startSlot = timeToMins(slot);
       const endSlot = startSlot + DURATION_MINS;
-
-      const isOverlapping = bookingsOnDate.some(booking => {
-        const bStart = booking.startMins;
-        const bEnd = booking.endMins;
-        // Two intervals [startSlot, endSlot] and [bStart, bEnd] overlap if:
-        return (startSlot < bEnd && endSlot > bStart);
-      });
-
-      return {
-        time: slot,
-        blocked: isOverlapping
-      };
+      const isOverlapping = bookingsOnDate.some(booking => (startSlot < booking.endMins && endSlot > booking.startMins));
+      return { time: slot, blocked: isOverlapping };
     });
   }, [date, existingBookings]);
-
 
   if (!isModalOpen) return null;
 
@@ -144,88 +116,75 @@ const BookingModal = () => {
     if (file) {
       setSelectedFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const goToPayment = (e) => {
     e.preventDefault();
-    if (!location) {
-      alert("Please select a location.");
-      return;
-    }
-    if (!time) {
-      alert("Please select a valid time slot.");
-      return;
-    }
+    if (!location) { alert("Selecteer een locatie."); return; }
+    if (!time) { alert("Selecteer een tijdslot."); return; }
+    setStep('payment');
+  };
 
+  const handlePaymentAndConfirm = async () => {
     setIsSending(true);
-
     try {
       let compressedImageBase64 = null;
       if (selectedFile) {
-        // Compress image before sending (max width 800px, 70% quality)
         compressedImageBase64 = await compressImage(selectedFile, 800, 0.7);
       }
 
-      // Prepare data for Web3Forms
-      // Note: We use a hidden field for the access key
-      const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "YOUR_ACCESS_KEY_HERE";
-
       const emailPayload = {
-        name: name,
-        email: email,
-        phone: phone,
-        category: category,
+        name,
+        email,
+        phone,
+        category,
         sub_service: subService,
         gel_overlay_service: gelOverlayService,
         nail_length: nailLength || 'N/A',
         design: design || 'None',
-        location: location,
-        date: date,
-        time: time,
+        location,
+        date,
+        time,
         inspiration_image: compressedImageBase64,
+        payment_status: 'paid',
+        deposit_amount: '€10,00'
       };
 
       const response = await fetch("/api/booking", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(emailPayload),
       });
 
       const result = await response.json();
-
       if (result.success) {
-        // Save the new booking to local storage
         const newBooking = {
-          date: date,
-          time: time,
-          location: location,
+          date,
+          time,
+          location,
           startMins: timeToMins(time),
           endMins: timeToMins(time) + DURATION_MINS,
+          paymentStatus: 'paid'
         };
         const updatedBookings = [...existingBookings, newBooking];
         localStorage.setItem('bn_bookings', JSON.stringify(updatedBookings));
-
-        setComplete(true);
+        setStep('complete');
       } else {
-        throw new Error(result.error || "Failed to send booking email.");
+        throw new Error(result.error || "Fout bij verzenden van boeking.");
       }
     } catch (error) {
-      console.error("Booking submission error:", error);
-      alert("Er is iets misgegaan bij het verzenden. Controleer je internetverbinding of probeer het later opnieuw.");
+      console.error("Booking error:", error);
+      alert("Er is iets misgegaan. Probeer het later opnieuw.");
     } finally {
       setIsSending(false);
     }
   };
 
   const handleClose = () => {
-    setComplete(false);
+    setStep('details');
     setCategory('');
     setSubService('');
     setGelOverlayService('');
@@ -248,269 +207,215 @@ const BookingModal = () => {
       <div className="modal-content glass-panel fade-in">
         <button className="close-btn" onClick={handleClose}><X size={24} /></button>
 
-        {!complete ? (
+        {step === 'details' && (
           <div className="booking-form-wrapper">
-            <h2 className="modal-title">Book Your Appointment</h2>
-            <p className="modal-subtitle">Experience luxury nail care. Note: Appointments are scheduled for ~2.5 hours.</p>
+            <h2 className="modal-title">Maak een Afspraak</h2>
+            <p className="modal-subtitle">Beleef luxe nagelverzorging. Alle afspraken duren ongeveer 2,5 uur.</p>
 
-            <form onSubmit={handleSubmit} className="booking-form">
-
-              {/* Location Selection */}
+            <form onSubmit={goToPayment} className="booking-form">
               <div className="form-group">
-                <label>Select Location</label>
+                <label>Locatie</label>
                 <div className="location-grid">
-                  <button
-                    type="button"
-                    className={`location-btn ${location === 'Turnhout' ? 'selected' : ''}`}
-                    onClick={() => setLocation('Turnhout')}
-                  >
-                    Turnhout
-                  </button>
-                  <button
-                    type="button"
-                    className={`location-btn ${location === 'Laakdal' ? 'selected' : ''}`}
-                    onClick={() => setLocation('Laakdal')}
-                  >
-                    Laakdal
-                  </button>
+                  <button type="button" className={`location-btn ${location === 'Turnhout' ? 'selected' : ''}`} onClick={() => setLocation('Turnhout')}>Turnhout</button>
+                  <button type="button" className={`location-btn ${location === 'Laakdal' ? 'selected' : ''}`} onClick={() => setLocation('Laakdal')}>Laakdal</button>
                 </div>
               </div>
 
-              {/* Category Selection */}
               <div className="form-group">
-                <label>Select Category</label>
+                <label>Categorie</label>
                 <div className="category-grid">
                   {Object.keys(SERVICE_STRUCTURE).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      className={`option-btn ${category === cat ? 'selected' : ''}`}
-                      onClick={() => { setCategory(cat); setSubService(''); setGelOverlayService(''); setNailLength(''); setDesign(''); }}
-                    >
-                      {cat}
-                    </button>
+                    <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => { setCategory(cat); setSubService(''); setGelOverlayService(''); setNailLength(''); setDesign(''); }}>{cat}</button>
                   ))}
                 </div>
               </div>
 
-              {/* Sub-service Selection (Gel/Extension) */}
               {needsNailOptions && (
                 <div className="form-group fade-in">
-                  <label>Choose service</label>
+                  <label>Service Type</label>
                   <div className="option-grid">
                     {['Fill In', 'Fullset'].map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        className={`mini-option-btn ${subService === opt ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSubService(opt);
-                          if (opt === 'Fullset') setShowFullsetWarning(true);
-                        }}
-                      >
-                        {opt}
-                      </button>
+                      <button key={opt} type="button" className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} onClick={() => { setSubService(opt); if (opt === 'Fullset') setShowFullsetWarning(true); }}>{opt}</button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Gel Overlay Type (Conditional) */}
               {category === 'Gel Overlay' && (
                 <div className="form-group fade-in">
-                  <label>Choose treatment</label>
-                  <select
-                    value={gelOverlayService}
-                    onChange={(e) => setGelOverlayService(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>Select a treatment...</option>
-                    {GEL_OVERLAY_SERVICES.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
+                  <label>Behandeling</label>
+                  <select value={gelOverlayService} onChange={(e) => setGelOverlayService(e.target.value)} required>
+                    <option value="" disabled>Selecteer een behandeling...</option>
+                    {GEL_OVERLAY_SERVICES.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                   </select>
                 </div>
               )}
 
-              {/* Pedicure Service Selection */}
               {isPedicure && (
                 <div className="form-group fade-in">
-                  <label>Choose pedicure service</label>
-                  <select
-                    value={subService}
-                    onChange={(e) => setSubService(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>Select a treatment...</option>
-                    {PEDICURE_SERVICES.map((srv, idx) => (
-                      <option key={idx} value={srv}>{srv}</option>
-                    ))}
+                  <label>Pedicure service</label>
+                  <select value={subService} onChange={(e) => setSubService(e.target.value)} required>
+                    <option value="" disabled>Selecteer een behandeling...</option>
+                    {PEDICURE_SERVICES.map((srv, idx) => <option key={idx} value={srv}>{srv}</option>)}
                   </select>
                 </div>
               )}
 
-              {/* Sub-service Selection (Generic) */}
-              {category && !needsNailOptions && !isPedicure && SERVICE_STRUCTURE[category].length > 0 && (
+              {category && !needsNailOptions && !isPedicure && (
                 <div className="form-group fade-in">
-                  <label>Which {category.toLowerCase()} service do you want?</label>
-                  <select
-                    value={subService}
-                    onChange={(e) => setSubService(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>Select a treatment...</option>
-                    {SERVICE_STRUCTURE[category].map((srv, idx) => (
-                      <option key={idx} value={srv}>{srv}</option>
-                    ))}
+                  <label>Type {category.toLowerCase()}</label>
+                  <select value={subService} onChange={(e) => setSubService(e.target.value)} required>
+                    <option value="" disabled>Selecteer een behandeling...</option>
+                    {SERVICE_STRUCTURE[category].map((srv, idx) => <option key={idx} value={srv}>{srv}</option>)}
                   </select>
                 </div>
               )}
-              {/* Design (Generic) */}
+
               {needsNailOptions && (
                 <div className="form-group fade-in">
                   <label>Design</label>
                   <select value={design} onChange={(e) => setDesign(e.target.value)}>
-                    <option value="">No design</option>
-                    {GEL_DESIGNS.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
+                    <option value="">Geen design</option>
+                    {GEL_DESIGNS.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                   </select>
                 </div>
               )}
 
-              {/* Design (Pedicure) */}
               {isPedicure && (
                 <div className="form-group fade-in">
                   <label>Design</label>
                   <select value={design} onChange={(e) => setDesign(e.target.value)} required>
-                    <option value="" disabled>Choose a design...</option>
-                    {PEDICURE_DESIGNS.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
+                    <option value="" disabled>Kies een design...</option>
+                    {PEDICURE_DESIGNS.map((opt, idx) => <option key={idx} value={opt}>{opt}</option>)}
                   </select>
                 </div>
               )}
 
-              {/* Nail Length (Verlenging Only) */}
               {category === 'Verlenging' && (
-                <div className="fade-in">
-                  <div className="form-group">
-                    <label>Select Nail Length</label>
-                    <div className="option-grid">
-                      {NAIL_LENGTHS.map((len) => (
-                        <button
-                          key={len}
-                          type="button"
-                          className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`}
-                          onClick={() => setNailLength(len)}
-                        >
-                          {len}
-                        </button>
-                      ))}
-                    </div>
+                <div className="form-group fade-in">
+                  <label>Nagellengte</label>
+                  <div className="option-grid">
+                    {NAIL_LENGTHS.map((len) => <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>)}
                   </div>
                 </div>
               )}
 
-              {/* Personal Details */}
               <div className="form-group">
-                <label>Full Name</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+                <label>Volledige Naam</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Je naam" required />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Email Address</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required />
+                  <label>E-mail</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="je@email.com" required />
                 </div>
                 <div className="form-group">
-                  <label>Contact Number</label>
+                  <label>Telefoonnummer</label>
                   <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32..." required />
                 </div>
               </div>
 
-              {/* Date & Time Grid */}
-              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '10px' }}>
-                <label>Select Date</label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => { setDate(e.target.value); setTime(''); }}
-                  min={new Date().toISOString().split("T")[0]}
-                  required
-                />
+              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                <label>Datum</label>
+                <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(''); }} min={new Date().toISOString().split("T")[0]} required />
               </div>
 
               {date && (
                 <div className="form-group fade-in">
-                  <label>Available Time Slots (2.5hr block)</label>
+                  <label>Beschikbare Tijden (Blok van 2,5 uur)</label>
                   <div className="time-grid">
                     {availableSlots.map((slot) => (
-                      <button
-                        type="button"
-                        key={slot.time}
-                        disabled={slot.blocked}
-                        onClick={() => setTime(slot.time)}
-                        className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}
-                      >
-                        {slot.time}
-                      </button>
+                      <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Image Upload */}
-              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '10px' }}>
-                <label>If you have an inspo, drop an image</label>
+              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                <label>Inspiratie foto (Optioneel)</label>
                 <div className="file-upload-wrapper">
                   {!imagePreview ? (
                     <label className="file-upload-label">
                       <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
                       <Upload size={32} color="var(--gold)" style={{ marginBottom: '10px' }} />
-                      <span>Click to upload an inspiration photo</span>
+                      <span>Klik om een foto te uploaden</span>
                     </label>
                   ) : (
                     <div className="image-preview">
                       <img src={imagePreview} alt="Inspo" />
-                      <button type="button" className="remove-image-btn" onClick={() => setImagePreview(null)}>Remove</button>
+                      <button type="button" className="remove-image-btn" onClick={() => setImagePreview(null)}>Verwijderen</button>
                     </div>
                   )}
                 </div>
               </div>
 
-              <button type="submit" className="btn-gold w-100" style={{ marginTop: '20px' }} disabled={isSending}>
-                {isSending ? (
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                    <Loader className="animate-spin" size={20} />
-                    Sending Booking...
-                  </span>
-                ) : (
-                  "Confirm Booking"
-                )}
-              </button>
+              <div className="deposit-info-banner glass-panel" style={{ marginBottom: '20px' }}>
+                <Info size={18} color="var(--gold)" />
+                <p>Er wordt een aanbetaling van <strong>€10,00</strong> gevraagd om je boeking te bevestigen.</p>
+              </div>
+
+              <button type="submit" className="btn-gold w-100">Ga naar Betaling <ChevronRight size={20} style={{ marginLeft: '8px' }} /></button>
             </form>
-          </div>
-        ) : (
-          <div className="booking-success fade-in">
-            <CircleCheck size={64} className="text-gold mb-4" />
-            <h2 className="modal-title">Booking Confirmed!</h2>
-            <p>Thank you, {name}.<br />We've secured your <strong>{subService}</strong> appointment in <strong>{location}</strong> on {date} at {time}.</p>
-            {needsNailOptions && (
-              <p className="text-muted small">
-                <strong>Length:</strong> {nailLength}
-              </p>
-            )}
-            <button onClick={handleClose} className="btn-outline-gold mt-4">Close</button>
           </div>
         )}
 
-        {/* Fullset Warning Modal */}
+        {step === 'payment' && (
+          <div className="payment-step fade-in">
+            <h2 className="modal-title">Bevestig & Betaal</h2>
+            <div className="payment-details glass-panel" style={{ padding: '25px', marginBottom: '30px' }}>
+              <div className="payment-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                <span style={{ fontWeight: '600' }}>{subService || category}</span>
+                <span className="text-gold" style={{ fontWeight: 'bold' }}>€10,00 Aanbetaling</span>
+              </div>
+              
+              <div className="cancellation-policy" style={{ fontSize: '0.9rem', color: '#666' }}>
+                <h4 style={{ color: 'var(--dark-text)', fontSize: '1rem', marginBottom: '10px' }}>Annuleringsbeleid</h4>
+                <ul style={{ paddingLeft: '20px' }}>
+                  <li>Bij annulering <strong>meer dan 48 uur</strong> voor aanvang wordt de aanbetaling terugbetaald.</li>
+                  <li>Bij annulering <strong>minder dan 48 uur</strong> voor aanvang vervalt de aanbetaling en is deze niet restitueerbaar.</li>
+                </ul>
+              </div>
+            </div>
+
+            <p className="text-center mb-4">Om je boeking te voltooien, klik op de Payconiq knop hieronder:</p>
+            
+            <a 
+              href="https://pay.bancontact.com/p2p/c5513885-77a5-43ee-91d0-d748c4c9d678" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn-gold w-100 mb-3"
+              style={{ padding: '20px', fontSize: '1.2rem' }}
+              onClick={() => {
+                // We keep the modal open and provide a way to confirm after they pay
+                const confirmAfterPay = window.confirm("Heb je de betaling succesvol afgerond in de Payconiq/Bancontact app?");
+                if (confirmAfterPay) handlePaymentAndConfirm();
+              }}
+            >
+              <CreditCard size={24} style={{ marginRight: '12px' }} /> Betaal €10,00 via Payconiq
+            </a>
+            
+            <button className="btn-outline-gold w-100" onClick={() => setStep('details')}>
+              <ChevronLeft size={20} style={{ marginRight: '8px' }} /> Terug naar details
+            </button>
+          </div>
+        )}
+
+        {step === 'complete' && (
+          <div className="booking-success fade-in">
+            <CircleCheck size={64} className="text-gold mb-4" />
+            <h2 className="modal-title">Boeking Bevestigd!</h2>
+            <p>Bedankt, {name}.<br />Je afspraak voor <strong>{subService || category}</strong> in <strong>{location}</strong> op {date} om {time} is vastgelegd en de aanbetaling is ontvangen.</p>
+            <p className="text-muted small mt-3">Je ontvangt een bevestiging per e-mail.</p>
+            <button onClick={handleClose} className="btn-outline-gold mt-4">Sluiten</button>
+          </div>
+        )}
+
         {showFullsetWarning && (
           <div className="warning-overlay fade-in">
             <div className="warning-content glass-panel">
-              <h3 className="text-gold mb-3">Notice</h3>
-              <p className="mb-4">Fullset is standard for sets older than 4 weeks.</p>
-              <button className="btn-gold w-100" onClick={() => setShowFullsetWarning(false)}>OK</button>
+              <h3 className="text-gold mb-3">Opmerking</h3>
+              <p className="mb-4">Een Fullset is de standaard voor sets die ouder zijn dan 4 weken.</p>
+              <button className="btn-gold w-100" onClick={() => setShowFullsetWarning(false)}>Begrepen</button>
             </div>
           </div>
         )}

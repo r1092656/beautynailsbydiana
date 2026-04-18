@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (password) => {
-    if (password === 'diana2026') {
+    if (password === 'dianaCIRP.2005') {
       setIsAdmin(true);
       localStorage.setItem('diana_admin_session', 'true');
       return true;

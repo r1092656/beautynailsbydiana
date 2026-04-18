@@ -6,7 +6,7 @@ import './Reviews.css';
 const badWordsList = ['badword', 'offensive', 'hate', 'stupid', 'ugly', 'vulgar', 'insult', 'bitch', 'fuck', 'shit', 'ass', 'damn'];
 
 const Reviews = () => {
-  useDocumentTitle('Beoordelingen');
+  useDocumentTitle('Klantervaringen & Reviews', 'Lees wat anderen zeggen over Beauty Nails by Diana. Eerlijke reviews over onze nagelservices en klantvriendelijkheid.');
   const [reviews, setReviews] = useState([]);
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);

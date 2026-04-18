@@ -3,7 +3,7 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import { Mail, Phone, MapPin, Camera, Music, Send, CircleCheck, Loader } from 'lucide-react';
 
 const Contact = () => {
-  useDocumentTitle('Contact');
+  useDocumentTitle('Contact & Afspraak Maken', 'Hebt u vragen of wilt u een afspraak maken bij Beauty Nails by Diana? Neem contact op via telefoon, WhatsApp of email in Laakdal.');
   const [isSending, setIsSending] = useState(false);
   const [complete, setComplete] = useState(false);
   const [formData, setFormData] = useState({

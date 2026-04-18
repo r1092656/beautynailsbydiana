@@ -9,7 +9,7 @@ const staticItems = Array.from({ length: 52 }, (_, i) => ({
 }));
 
 const Portfolio = () => {
-  useDocumentTitle('Portfolio');
+  useDocumentTitle('Portfolio & Inspiratie', 'Bekijk het vakmanschap van Beauty Nails by Diana. Laat u inspireren door onze unieke nageldesigns en kwalitatieve afwerkingen.');
   const { getPortfolioItems } = useContent();
   
   const dynamicItems = getPortfolioItems().map(item => ({

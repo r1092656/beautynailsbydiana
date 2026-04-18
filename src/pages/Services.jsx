@@ -87,7 +87,7 @@ const serviceCategories = [
 ];
 
 const Services = () => {
-  useDocumentTitle('Services');
+  useDocumentTitle('Nagelbehandelingen & Services', 'Bekijk onze uitgebreide nagelbehandelingen: van kunstnagels en BIAB tot pedicure en nail art. Ontdek wat Beauty Nails by Diana voor u kan betekenen.');
   const { openModal } = useBooking();
 
   return (

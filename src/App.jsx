@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { BookingProvider } from './context/BookingContext';
 import { AuthProvider } from './context/AuthContext';
 import { ContentProvider } from './context/ContentContext';
@@ -24,7 +25,8 @@ import './index.css';
 function App() {
   return (
     <AuthProvider>
-      <ContentProvider>
+      <HelmetProvider>
+        <ContentProvider>
         <BookingProvider>
           <Router>
             <Navbar />
@@ -60,7 +62,8 @@ function App() {
             <BookingModal />
           </Router>
         </BookingProvider>
-      </ContentProvider>
+        </ContentProvider>
+      </HelmetProvider>
     </AuthProvider>
   );
 }

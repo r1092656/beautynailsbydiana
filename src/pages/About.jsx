@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const About = () => {
-  useDocumentTitle('About');
+  useDocumentTitle('Over Diana', 'Leer Diana kennen, de expert achter Beauty Nails by Diana. Passie voor perfectie en jarenlange ervaring in de nagelindustrie.');
   return (
     <div className="fade-in">
       {/* Header */}
@@ -15,12 +15,12 @@ const About = () => {
           <div className="gold-line"></div>
         </div>
       </header>
-
+ 
       {/* Main Content */}
       <section className="container py-5">
         <div className="row align-items-center">
           <div className="col-lg-5 mb-5 text-center">
-            <img src="/assets/aboutpage.jpeg" alt="Diana BeautyNails" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+            <img src="/assets/aboutpage.jpeg" alt="Diana aan het werk in haar nagelstudio Beauty Nails by Diana" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
           </div>
           <div className="col-lg-7">
             <h2 className="fw-bold mb-4">Passie voor Perfectie</h2>

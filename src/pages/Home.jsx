@@ -4,7 +4,7 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useBooking } from '../context/BookingContext';
 
 const Home = () => {
-  useDocumentTitle('Diana');
+  useDocumentTitle('Professionele Nagelstudio Laakdal', 'Welkom bij Beauty Nails by Diana in Laakdal. Dé plek voor professionele nagelverzorging, BIAB, gellak en kunstnagels. Boek nu uw afspraak bij Diana.');
   const { openModal } = useBooking();
 
   return (
@@ -29,7 +29,7 @@ const Home = () => {
             {/* The original app used an asset, we'll point to public/assets */}
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <div style={{ position: 'absolute', top: '20px', left: '-20px', right: '20px', bottom: '-20px', border: '2px solid var(--gold)', borderRadius: '20px', zIndex: -1 }}></div>
-              <img src="/assets/homepage.jpeg" alt="Diana BeautyNails" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+              <img src="/assets/homepage.jpeg" alt="Sfeervolle interieur van Beauty Nails by Diana nagelstudio" style={{ width: '100%', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
             </div>
           </div>
         </div>

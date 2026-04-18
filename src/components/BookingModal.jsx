@@ -2,6 +2,7 @@ import { useBooking } from '../context/BookingContext';
 import { X, CircleCheck, Upload, FileImage, Loader, CreditCard, ChevronRight, ChevronLeft, Info, ExternalLink } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { compressImage } from '../utils/compressImage';
+import { supabase } from '../supabaseClient';
 import './BookingModal.css';
 
 const SERVICE_STRUCTURE = {
@@ -56,8 +57,39 @@ const BookingModal = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSending, setIsSending] = useState(false);
 
-  // Bookings State
+  // Bookings & Blocks State
   const [existingBookings, setExistingBookings] = useState([]);
+  const [adminBlocks, setAdminBlocks] = useState([]);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+
+  // Fetch real-time availability from Supabase
+  const fetchAvailability = async (selectedDate) => {
+    if (!selectedDate) return;
+    setIsLoadingAvailability(true);
+    try {
+      // 1. Fetch confirmed bookings
+      const { data: bookings, error: bError } = await supabase
+        .from('bookings')
+        .select('time, date')
+        .eq('date', selectedDate)
+        .eq('status', 'confirmed');
+
+      // 2. Fetch admin manual blocks
+      const { data: blocks, error: blockError } = await supabase
+        .from('availability_blocks')
+        .select('time_slot, date')
+        .eq('date', selectedDate);
+
+      if (bError || blockError) throw bError || blockError;
+
+      setExistingBookings(bookings || []);
+      setAdminBlocks(blocks || []);
+    } catch (err) {
+      console.error('Error fetching availability:', err);
+    } finally {
+      setIsLoadingAvailability(false);
+    }
+  };
 
   useEffect(() => {
     if (selectedService && isModalOpen) {
@@ -85,13 +117,10 @@ const BookingModal = () => {
   }, [selectedService, isModalOpen]);
 
   useEffect(() => {
-    if (isModalOpen) {
-      const saved = localStorage.getItem('bn_bookings');
-      if (saved) {
-        setExistingBookings(JSON.parse(saved));
-      }
+    if (isModalOpen && date) {
+      fetchAvailability(date);
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, date]);
 
   const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'Verlenging', [category]);
   const isPedicure = useMemo(() => category === 'Pedicure', [category]);
@@ -99,14 +128,33 @@ const BookingModal = () => {
   const availableSlots = useMemo(() => {
     const allSlots = generateTimeSlots();
     if (!date) return [];
-    const bookingsOnDate = existingBookings.filter(b => b.date === date);
+    
+    // Check if the whole day is blocked by admin
+    const isAllDayBlocked = adminBlocks.some(b => b.time_slot === 'all_day');
+    
     return allSlots.map(slot => {
-      const startSlot = timeToMins(slot);
-      const endSlot = startSlot + DURATION_MINS;
-      const isOverlapping = bookingsOnDate.some(booking => (startSlot < booking.endMins && endSlot > booking.startMins));
-      return { time: slot, blocked: isOverlapping };
+      if (isAllDayBlocked) return { time: slot, blocked: true };
+
+      const startSlotMins = timeToMins(slot);
+      const endSlotMins = startSlotMins + DURATION_MINS;
+      
+      // Slot is blocked if:
+      // 1. There is a confirmed booking that overlaps this time range
+      const isBooked = existingBookings.some(b => {
+        const bStart = timeToMins(b.time);
+        const bEnd = bStart + DURATION_MINS;
+        return (startSlotMins < bEnd && endSlotMins > bStart);
+      });
+      
+      // 2. Admin manually blocked this specific time slot
+      const isManuallyBlocked = adminBlocks.some(b => b.time_slot === slot);
+
+      return { 
+        time: slot, 
+        blocked: isBooked || isManuallyBlocked 
+      };
     });
-  }, [date, existingBookings]);
+  }, [date, existingBookings, adminBlocks]);
 
   if (!isModalOpen) return null;
 
@@ -167,16 +215,22 @@ const BookingModal = () => {
 
       const result = await response.json();
       if (result.success) {
-        const newBooking = {
-          date,
-          time,
-          location,
-          startMins: timeToMins(time),
-          endMins: timeToMins(time) + DURATION_MINS,
-          paymentStatus: 'paid'
-        };
-        const updatedBookings = [...existingBookings, newBooking];
-        localStorage.setItem('bn_bookings', JSON.stringify(updatedBookings));
+        // Save to Supabase (Double logic: Email + DB)
+        const { error: dbError } = await supabase
+          .from('bookings')
+          .insert([{
+            date,
+            time,
+            name,
+            email,
+            phone,
+            category,
+            sub_service: subService,
+            location,
+            status: 'confirmed'
+          }]);
+
+        if (dbError) throw dbError;
         setStep('complete');
       } else {
         throw new Error(result.error || "Fout bij verzenden van boeking.");

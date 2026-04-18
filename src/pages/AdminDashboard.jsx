@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User } from 'lucide-react';
+import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Calendar as CalendarIcon } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import AdminCalendar from '../components/AdminCalendar';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const AdminDashboard = () => {
@@ -68,7 +69,7 @@ const AdminDashboard = () => {
       <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
         <div>
           <h1 className="display-6 text-gold">Beheerpaneel</h1>
-          <p className="text-muted">Beheer hier je website content en reviews.</p>
+          <p className="text-muted">Beheer hier je website content, reviews en afspraken.</p>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
           <button onClick={logout} className="btn-outline-gold" style={{ display: 'flex', alignItems: 'center' }}>
@@ -86,6 +87,14 @@ const AdminDashboard = () => {
         >
           <Image size={18} style={{ marginRight: '8px' }} />
           Portfolio Content
+        </button>
+        <button 
+          onClick={() => setActiveTab('calendar')}
+          className={activeTab === 'calendar' ? 'btn-gold' : 'btn-outline-gold'}
+          style={{ padding: '10px 20px', borderRadius: '30px' }}
+        >
+          <CalendarIcon size={18} style={{ marginRight: '8px' }} />
+          Kalender & Afspraken
         </button>
         <button 
           onClick={() => setActiveTab('reviews')}
@@ -269,6 +278,10 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
+      )}
+
+      {activeTab === 'calendar' && (
+        <AdminCalendar />
       )}
     </div>
   );

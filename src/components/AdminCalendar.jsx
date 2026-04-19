@@ -222,7 +222,7 @@ const AdminCalendar = () => {
 
       // Send confirmation email (ALWAYS, even if customer email is missing)
       try {
-        const emailResponse = await fetch(window.location.origin + '/api/booking', {
+        const emailResponse = await fetch('/api/booking', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -253,7 +253,7 @@ const AdminCalendar = () => {
         }
       } catch (emailFetchError) {
         console.error('Email fetch error:', emailFetchError);
-        alert('Boeking opgeslagen, maar kon geen verbinding maken met e-mail server.');
+        alert(`Boeking opgeslagen, maar e-mail mislukt. Fout: ${emailFetchError.message || 'Verbindingsfout'}`);
       }
       
       setManualFormData({ 

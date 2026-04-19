@@ -6,17 +6,16 @@ import { supabase } from '../supabaseClient';
 import './BookingModal.css';
 
 const SERVICE_STRUCTURE = {
-  'Gel Overlay': ['Basis gel', 'Basis gel + gellak/french'],
-  'Verlenging': ['Basis Verlenging', 'Fullset', 'Fill In'],
-  'Manicure': ['Standaard Manicure'],
-  'Pedicure': ['Esthetische Pedicure', 'Medische Pedicure', 'Spa Pedicure']
+  'Gel Overlay': ['Fill In', 'Fullset'],
+  'Verlenging': ['Fill In', 'Fullset'],
+  'Manicure': [],
+  'Pedicure': ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak']
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
-const NAIL_SHAPES = ['Square', 'Round', 'Almond', 'Oval', 'Coffin', 'Stiletto'];
-const EXTRA_BEWERKINGEN = ['Removal old set (+€5)', 'Nail repair (+€5)', 'Extra long (+€5)'];
-const DESIGNS = ['No design', 'Basis', 'French design', 'Advanced design'];
-const PEDICURE_ADDONS = ['Gellak (+€15)', 'Full color (+€10)', 'French (+€15)'];
+const GEL_DESIGNS = ['No design', 'Simpel', 'Medium', 'Full'];
+const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
+const PEDICURE_DESIGNS = ['No design', 'French', 'Other'];
 
 const timeToMins = (timeStr) => {
   const [h, m] = timeStr.split(':').map(Number);
@@ -32,7 +31,12 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-const DURATION_MINS = 150; 
+const getDurationMins = (category) => {
+  if (category === 'Gel Overlay' || category === 'Verlenging') return 150; // 2.5h
+  if (category === 'Pedicure') return 90; // 1.5h
+  if (category === 'Manicure') return 60; // 1h
+  return 150; // default
+};
 
 const BookingModal = () => {
   const { isModalOpen, closeModal, selectedService } = useBooking();
@@ -137,7 +141,7 @@ const BookingModal = () => {
 
   const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'Verlenging', [category]);
   const isPedicure = useMemo(() => category === 'Pedicure', [category]);
-  const isNewSet = useMemo(() => subService === 'Fullset' || category === 'Verlenging', [subService, category]);
+  const durationMins = useMemo(() => getDurationMins(category), [category]);
 
   const availableSlots = useMemo(() => {
     const allSlots = generateTimeSlots();
@@ -150,13 +154,16 @@ const BookingModal = () => {
       if (isAllDayBlocked) return { time: slot, blocked: true };
 
       const startSlotMins = timeToMins(slot);
-      const endSlotMins = startSlotMins + DURATION_MINS;
+      const endSlotMins = startSlotMins + durationMins;
       
       // Slot is blocked if:
       // 1. There is a confirmed booking that overlaps this time range
+      // We check BOTH a) if a booking starts inside our new block, OR b) if our new block starts inside a booking
       const isBooked = existingBookings.some(b => {
         const bStart = timeToMins(b.time);
-        const bEnd = bStart + DURATION_MINS;
+        // Note: Real bookings currently assume a 2.5h duration in the system data,
+        // but for safety we check overlap.
+        const bEnd = bStart + 150; 
         return (startSlotMins < bEnd && endSlotMins > bStart);
       });
       
@@ -168,7 +175,7 @@ const BookingModal = () => {
         blocked: isBooked || isManuallyBlocked 
       };
     });
-  }, [date, existingBookings, adminBlocks]);
+  }, [date, existingBookings, adminBlocks, durationMins]);
 
   if (!isModalOpen) return null;
 
@@ -286,27 +293,27 @@ const BookingModal = () => {
 
         {step === 'details' && (
           <div className="booking-form-wrapper">
-            <h2 className="modal-title serif-title">Book Your Appointment</h2>
-            <p className="modal-subtitle">Experience luxury nail care. Note: Appointments are scheduled for ~2.5 hours.</p>
+            <h2 className="modal-title serif-title">Book your Appointment</h2>
+            <p className="modal-subtitle">Experience luxury nail care. Optimized scheduling for {category || 'your service'}.</p>
 
             <form onSubmit={goToPaymentInfo} className="booking-form">
-              {/* Personal Details - Desktop Row at top as per reference */}
+              {/* Step 1: Personal Info */}
+              <div className="form-group">
+                <label>Full Name</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+              </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Full Name</label>
-                  <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" required />
+                  <label>Email Address</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" required />
                 </div>
                 <div className="form-group">
                   <label>Contact Number</label>
                   <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32..." required />
                 </div>
               </div>
-              <div className="form-group">
-                <label>Email Address</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required />
-              </div>
 
-              {/* Location */}
+              {/* Step 2: Location & Category */}
               <div className="form-group mt-2">
                 <label>Select Location</label>
                 <div className="location-grid">
@@ -315,110 +322,84 @@ const BookingModal = () => {
                 </div>
               </div>
 
-              {/* Category */}
               <div className="form-group">
                 <label>Select Category</label>
                 <div className="category-grid">
                   {Object.keys(SERVICE_STRUCTURE).map((cat) => (
-                    <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => { setCategory(cat); setSubService(''); setNailLength(''); setDesign(''); setNailShape(''); setExtraBewerking(''); }}>{cat}</button>
+                    <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => { 
+                      setCategory(cat); 
+                      setSubService(''); 
+                      setNailLength(''); 
+                      setDesign(''); 
+                    }}>{cat}</button>
                   ))}
                 </div>
               </div>
 
-              {/* Dynamic Service Selection */}
-              {category && SERVICE_STRUCTURE[category].length > 0 && (
-                <div className="form-group fade-in">
-                  <label>Which {category.toLowerCase()} service do you want?</label>
-                  <select 
-                    value={subService} 
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSubService(val);
-                      if (val === 'Fullset' && (category === 'Gel Overlay' || category === 'Verlenging')) {
-                        setShowFullsetWarning(true);
-                      }
-                    }}
-                    required
-                  >
-                    <option value="" disabled>Select a treatment...</option>
-                    {SERVICE_STRUCTURE[category].map((srv, idx) => (
-                      <option key={idx} value={srv}>{srv}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Extra Bewerkingen (Conditional) */}
-              {isNewSet && (
-                <div className="form-group fade-in">
-                  <label>Extra Bewerkingen</label>
-                  <select value={extraBewerking} onChange={(e) => setExtraBewerking(e.target.value)}>
-                    <option value="">No extra treatment</option>
-                    {EXTRA_BEWERKINGEN.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Pedicure Specifics */}
-              {isPedicure && (
-                <div className="form-group fade-in">
-                  <label>Add-ons (Design)</label>
-                  <div className="option-grid">
-                    {PEDICURE_ADDONS.map((opt) => (
-                      <button key={opt} type="button" className={`mini-option-btn ${design === opt ? 'selected' : ''}`} onClick={() => setDesign(opt)}>{opt}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Design complexity (for Gel/Verlenging) */}
+              {/* Step 3: Category-Specific Options */}
               {needsNailOptions && (
-                <div className="form-group fade-in">
-                  <label>Design complexity</label>
-                  <select value={design} onChange={(e) => setDesign(e.target.value)}>
-                    <option value="">No design</option>
-                    {DESIGNS.map((opt, idx) => (
-                      <option key={idx} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Nail Shape and Length (Conditional) */}
-              {category === 'Verlenging' && (
                 <div className="fade-in">
                   <div className="form-group">
-                    <label>Select Nail Shape</label>
-                    <select value={nailShape} onChange={(e) => setNailShape(e.target.value)} required>
-                      <option value="" disabled>Choose a shape...</option>
-                      {NAIL_SHAPES.map((shape) => (
-                        <option key={shape} value={shape}>{shape}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Select Nail Length</label>
+                    <label>Choose Service</label>
                     <div className="option-grid">
-                      {NAIL_LENGTHS.map((len) => (
-                        <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>
+                      {['Fill In', 'Fullset'].map((opt) => (
+                        <button key={opt} type="button" className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} onClick={() => { 
+                          setSubService(opt); 
+                          if (opt === 'Fullset') setShowFullsetWarning(true); 
+                        }}>{opt}</button>
                       ))}
                     </div>
                   </div>
+                  
+                  {category === 'Verlenging' && (
+                    <div className="form-group">
+                      <label>Select Nail Length</label>
+                      <div className="option-grid">
+                        {NAIL_LENGTHS.map((len) => (
+                          <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label>Design</label>
+                    <select value={design} onChange={(e) => setDesign(e.target.value)}>
+                      <option value="">Select design...</option>
+                      {GEL_DESIGNS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
                 </div>
               )}
 
-              {/* Schedule Selection */}
+              {isPedicure && (
+                <div className="fade-in">
+                  <div className="form-group">
+                    <label>Choose Pedicure Service</label>
+                    <select value={subService} onChange={(e) => setSubService(e.target.value)} required>
+                      <option value="" disabled>Select treatment...</option>
+                      {PEDICURE_SERVICES.map((srv) => <option key={srv} value={srv}>{srv}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Design</label>
+                    <select value={design} onChange={(e) => setDesign(e.target.value)} required>
+                      <option value="" disabled>Select design...</option>
+                      {PEDICURE_DESIGNS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Schedule */}
               <div className="form-group mt-4" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                <label>Select Date</label>
+                <label>Preferred Date</label>
                 <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(''); }} min={new Date().toISOString().split("T")[0]} required />
               </div>
 
               {date && (
                 <div className="form-group fade-in">
-                  <label>Available Time Slots (2.5hr block)</label>
+                  <label>Available Times ({durationMins / 60}h block)</label>
                   <div className="time-grid">
                     {availableSlots.map((slot) => (
                       <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
@@ -427,9 +408,9 @@ const BookingModal = () => {
                 </div>
               )}
 
-              {/* Inspiration Image */}
+              {/* Step 5: Inspiration Photo */}
               <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                <label>If you have an inspo, drop an image</label>
+                <label>Upload inspiration image (optional)</label>
                 <div className="file-upload-wrapper">
                   {!imagePreview ? (
                     <label className="file-upload-label">
@@ -448,7 +429,7 @@ const BookingModal = () => {
 
               <div className="deposit-info-banner glass-panel" style={{ marginBottom: '20px' }}>
                 <Info size={18} color="var(--gold)" />
-                <p>Er wordt een aanbetaling van <strong>€10,00</strong> gevraagd.</p>
+                <p>Een aanbetaling van <strong>€10,00</strong> is vereist om je boeking te bevestigen.</p>
               </div>
 
               <button type="submit" className="btn-gold w-100" style={{ marginTop: '20px' }} disabled={isSending}>

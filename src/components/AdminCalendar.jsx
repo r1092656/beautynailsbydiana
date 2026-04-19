@@ -220,24 +220,33 @@ const AdminCalendar = () => {
         .insert(newBlockEntries);
       if (error) throw error;
 
-      // Send confirmation email (ALWAYS, even if customer email is missing)
+      // Send confirmation email (Match BookingModal.jsx payload exactly)
       try {
+        const emailPayload = {
+          type: 'manual',
+          name: manualFormData.name,
+          email: manualFormData.email,
+          phone: manualFormData.phone,
+          category: manualFormData.category,
+          sub_service: manualFormData.subService || manualFormData.category,
+          nail_shape: 'N.v.t.',
+          nail_length: 'N.v.t.',
+          design: 'N.v.t.',
+          extra_bewerking: 'N.v.t.',
+          location: manualFormData.location || 'Turnhout',
+          date: selectedDate.date,
+          time: startTimeStr,
+          inspiration_image: null,
+          payment_status: 'paid (manual)',
+          deposit_amount: 'N.v.t. (Handmatig)',
+          description: manualFormData.description || 'Geen extra notities',
+          duration_mins: manualFormData.duration
+        };
+
         const emailResponse = await fetch('/api/booking', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'manual',
-            name: manualFormData.name,
-            email: manualFormData.email,
-            phone: manualFormData.phone,
-            category: manualFormData.category,
-            sub_service: manualFormData.subService,
-            description: manualFormData.description,
-            date: selectedDate.date,
-            time: startTimeStr,
-            duration_mins: manualFormData.duration,
-            location: manualFormData.location || 'Turnhout'
-          })
+          body: JSON.stringify(emailPayload)
         });
 
         if (!emailResponse.ok) {

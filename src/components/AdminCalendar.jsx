@@ -39,8 +39,9 @@ const AdminCalendar = () => {
     name: '',
     email: '',
     phone: '',
+    category: 'Gel Overlay',
     description: '',
-    duration: 120 // 2h default as requested
+    duration: 120 // 2h default
   });
   const [viewingManualBlock, setViewingManualBlock] = useState(null);
 
@@ -200,6 +201,7 @@ const AdminCalendar = () => {
       client_name: manualFormData.name,
       client_email: manualFormData.email,
       client_phone: manualFormData.phone,
+      category: manualFormData.category,
       description: manualFormData.description,
       duration_mins: manualFormData.duration,
       group_id: groupId
@@ -227,6 +229,7 @@ const AdminCalendar = () => {
             name: manualFormData.name,
             email: manualFormData.email,
             phone: manualFormData.phone,
+            category: manualFormData.category,
             description: manualFormData.description,
             date: selectedDate.date,
             time: startTimeStr,
@@ -236,7 +239,7 @@ const AdminCalendar = () => {
         }).catch(err => console.error('Email error:', err));
       }
 
-      setManualFormData({ name: '', email: '', phone: '', description: '', duration: 120 });
+      setManualFormData({ name: '', email: '', phone: '', category: 'Gel Overlay', description: '', duration: 120 });
     } catch (err) {
       console.error('Error saving manual booking:', err);
       setBlocks(previousBlocks);
@@ -384,16 +387,8 @@ const AdminCalendar = () => {
                 const manualBlock = blocks.find(b => {
                   if (b.date !== selectedDate.date) return false;
                   if (b.time_slot === 'all_day') return true;
-                  if (b.group_id) {
-                    // This is a manual booking block with a duration
-                    const bStart = (() => {
-                      const [h, m] = b.time_slot.split(':').map(Number);
-                      return h * 60 + m;
-                    })();
-                    const bDuration = b.duration_mins || 30; // default to one slot if unknown
-                    const bEnd = bStart + bDuration;
-                    return slotMins >= bStart && slotMins < bEnd;
-                  }
+                  // Critical: Check exact slot match first to avoid "smearing" forward duration 
+                  // since blocks already contains multiple segments for grouped bookings.
                   return b.time_slot === slot;
                 });
                 
@@ -545,7 +540,21 @@ const AdminCalendar = () => {
                     <input type="email" value={manualFormData.email} onChange={e => setManualFormData({...manualFormData, email: e.target.value})} placeholder="email@voorbeeld.be" />
                   </div>
                   <div className="form-group full-width">
-                    <label>Omschrijving / Wens</label>
+                    <label>Categorie (Service)</label>
+                    <select 
+                      value={manualFormData.category} 
+                      onChange={e => setManualFormData({...manualFormData, category: e.target.value})}
+                      className="w-100"
+                      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                    >
+                      <option value="Gel Overlay">Gel Overlay</option>
+                      <option value="Verlenging">Verlenging</option>
+                      <option value="Manicure">Manicure</option>
+                      <option value="Pedicure">Pedicure</option>
+                    </select>
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Omschrijving / Wens (Notes)</label>
                     <textarea value={manualFormData.description} onChange={e => setManualFormData({...manualFormData, description: e.target.value})} placeholder="Wat wil de klant?" rows={2}></textarea>
                   </div>
                   <div className="form-group full-width">
@@ -590,6 +599,13 @@ const AdminCalendar = () => {
                 <div>
                   <label>Klant</label>
                   <span>{viewingManualBlock.client_name || 'Niet opgegeven'}</span>
+                </div>
+              </div>
+               <div className="info-item">
+                <ShoppingBag size={18} className="text-gold" />
+                <div>
+                  <label>Service</label>
+                  <span>{viewingManualBlock.category || 'Nagelbehandeling'}</span>
                 </div>
               </div>
               <div className="info-item">

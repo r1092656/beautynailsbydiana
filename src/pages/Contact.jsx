@@ -49,22 +49,19 @@ const Contact = () => {
       <div className="row" style={{ justifyContent: 'center' }}>
         <div className="col-lg-5 mb-5" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          <div className="glass-panel" style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <a 
+            href="mailto:info@beautynailsbydiana.be" 
+            className="glass-panel" 
+            style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px', textDecoration: 'none', color: 'inherit' }}
+          >
             <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>
               <Mail color="var(--gold)" size={24} />
             </div>
             <div>
               <h4 style={{ margin: '0 0 5px 0' }}>Email</h4>
-              <a 
-                href="mailto:info@beautynailsbydiana.be" 
-                style={{ margin: 0, color: 'var(--text-muted)', textDecoration: 'none', transition: '0.3s' }}
-                onMouseOver={(e) => e.target.style.color = 'var(--gold)'}
-                onMouseOut={(e) => e.target.style.color = 'var(--text-muted)'}
-              >
-                info@beautynailsbydiana.be
-              </a>
+              <p style={{ margin: 0, color: 'var(--text-muted)' }}>info@beautynailsbydiana.be</p>
             </div>
-          </div>
+          </a>
 
           <a href="https://www.instagram.com/beautynails_by_diana/" target="_blank" rel="noopener noreferrer" className="glass-panel" style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px', textDecoration: 'none', color: 'inherit' }}>
             <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>

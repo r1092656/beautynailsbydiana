@@ -191,11 +191,12 @@ export default async function handler(req, res) {
           <div class="section">
             <div class="section-title">Klantgegevens</div>
             <div class="detail-row"><span class="label">Naam:</span><span class="value">${name}</span></div>
-            <div class="detail-row"><span class="label">Email:</span><span class="value">${email}</span></div>
-            <div class="detail-row"><span class="label">Telefoon:</span><span class="value">${phone}</span></div>
+            <div class="detail-row"><span class="label">Email:</span><span class="value">${email || '-'}</span></div>
+            <div class="detail-row"><span class="label">Telefoon:</span><span class="value">${phone || '-'}</span></div>
           </div>
           <div class="section">
             <div class="section-title">Details</div>
+            <div class="detail-row"><span class="label">Service:</span><span class="value important-value">${category || 'Nagelbehandeling'}</span></div>
             <div class="detail-row"><span class="label">Omschrijving:</span><span class="value">${description || 'Eigen planning'}</span></div>
             <div class="detail-row"><span class="label">Duur:</span><span class="value">${duration_mins} min</span></div>
             <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
@@ -230,7 +231,8 @@ export default async function handler(req, res) {
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
             <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
-            <div class="detail-row"><span class="label">Service:</span><span class="value">${description || 'Nagelbehandeling'}</span></div>
+            <div class="detail-row"><span class="label">Service:</span><span class="value">${category || 'Nagelbehandeling'}</span></div>
+            ${description ? `<div class="detail-row"><span class="label">Opmerking:</span><span class="value">${description}</span></div>` : ''}
           </div>
 
           <div class="contact-box">

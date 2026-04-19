@@ -242,7 +242,8 @@ const AdminCalendar = () => {
     } catch (err) {
       console.error('Error saving manual booking:', err);
       setBlocks(previousBlocks);
-      alert('Fout bij het opslaan van de afspraak.');
+      const errorMsg = err.message || err.details || (typeof err === 'object' ? JSON.stringify(err) : String(err));
+      alert(`Fout bij het opslaan: ${errorMsg}`);
     } finally {
       setIsSavingData(false);
     }

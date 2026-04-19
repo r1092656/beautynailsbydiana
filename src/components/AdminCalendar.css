@@ -115,23 +115,35 @@
   border-radius: 50%;
 }
 
-.dot.booked { background-color: #3b82f6; } /* Blue */
-.dot.blocked { background-color: #ef4444; } /* Red */
-.dot.planned { background-color: #3b82f6; } /* Blue - same as booked */
+.dot.booked { background-color: #3b82f6; } /* Client Blue */
+.dot.planned { background-color: #f59e0b; } /* Admin Orange */
+.dot.blocked { background-color: #ef4444; } /* Unavailable Red */
 
 .calendar-legend {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
   margin-top: 25px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.available { background: #22c55e; }
+.legend-dot.booked { background: #3b82f6; }
+.legend-dot.planned { background: #f59e0b; }
+.legend-dot.blocked { background: #ef4444; }
 
 .saving-indicator {
   display: flex;
@@ -214,25 +226,35 @@
   opacity: 0.6;
 }
 
+/* Color Themes */
 .time-slot-card.available {
   background: #f0fdf4; /* Very light green */
   color: #166534;
   border-color: #dcfce7;
 }
-
 .time-slot-card.available:hover {
   background: #dcfce7;
   transform: scale(1.02);
 }
 
-.time-slot-card.booked, .time-slot-card.planned {
+.time-slot-card.booked {
   background: #eff6ff; /* Very light blue */
   color: #1e40af;
   border-color: #dbeafe;
 }
-
-.time-slot-card.booked:hover, .time-slot-card.planned:hover {
+.time-slot-card.booked:hover {
   background: #dbeafe;
+  transform: scale(1.02);
+}
+
+.time-slot-card.planned {
+  background: #fffbe6; /* Very light orange/yellow */
+  color: #856404;
+  border-color: #ffeeba;
+}
+.time-slot-card.planned:hover {
+  background: #fff3cd;
+  transform: scale(1.02);
 }
 
 .time-slot-card.blocked {
@@ -240,9 +262,9 @@
   color: #991b1b;
   border-color: #fee2e2;
 }
-
 .time-slot-card.blocked:hover {
   background: #fee2e2;
+  transform: scale(1.02);
 }
 
 .slot-time {

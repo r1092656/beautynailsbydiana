@@ -338,7 +338,8 @@ const AdminCalendar = () => {
                     <span className="day-number">{d.day}</span>
                     <div className="day-indicators">
                       {dayBookings.length > 0 && <span className="dot booked"></span>}
-                      {dayBlocks.length > 0 && <span className="dot blocked"></span>}
+                      {dayBlocks.some(b => b.status === 'planned') && <span className="dot planned"></span>}
+                      {dayBlocks.some(b => b.status === 'blocked' || !b.status) && <span className="dot blocked"></span>}
                     </div>
                   </>
                 )}
@@ -348,8 +349,10 @@ const AdminCalendar = () => {
         </div>
 
         <div className="calendar-legend">
-          <div className="legend-item"><span className="dot booked"></span> Gereserveerd</div>
-          <div className="legend-item"><span className="dot blocked"></span> Geblokkeerd</div>
+          <div className="legend-item"><span className="legend-dot available"></span> Beschikbaar</div>
+          <div className="legend-item"><span className="legend-dot booked"></span> Client Boeking</div>
+          <div className="legend-item"><span className="legend-dot planned"></span> Admin Boeking</div>
+          <div className="legend-item"><span className="legend-dot blocked"></span> Niet Beschikbaar</div>
         </div>
       </div>
 

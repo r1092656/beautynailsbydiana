@@ -263,7 +263,6 @@ const BookingModal = () => {
             category,
             sub_service: subService,
             location,
-            duration: durationMins,
             status: 'confirmed'
           }]);
 

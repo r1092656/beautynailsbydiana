@@ -265,10 +265,6 @@
 .remove-image-btn:hover {
   background: #ef4444;
 }
-}
-.remove-image-btn:hover {
-  background: rgba(255, 0, 0, 0.8);
-}
 
 /* Category Grid Styles */
 .category-grid {

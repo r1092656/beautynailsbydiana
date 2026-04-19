@@ -67,42 +67,52 @@ const AdminDashboard = () => {
   return (
     <div className="container py-5 mt-5 fade-in">
       <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
-        <div>
+        <div style={{ minWidth: '250px' }}>
           <h1 className="display-6 text-gold">Beheerpaneel</h1>
           <p className="text-muted">Beheer hier je website content, reviews en afspraken.</p>
         </div>
         <div style={{ display: 'flex', gap: '15px' }}>
-          <button onClick={logout} className="btn-outline-gold" style={{ display: 'flex', alignItems: 'center' }}>
+          <button onClick={logout} className="btn-outline-gold" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px' }}>
             <LogOut size={18} style={{ marginRight: '8px' }} />
             Uitloggen
           </button>
         </div>
       </div>
 
-      <div className="admin-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '30px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+      <div className="admin-tabs" style={{ 
+        display: 'flex', 
+        gap: '10px', 
+        marginBottom: '30px', 
+        borderBottom: '1px solid #eee', 
+        paddingBottom: '10px',
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+        WebkitOverflowScrolling: 'touch',
+        paddingRight: '10px'
+      }}>
         <button 
           onClick={() => setActiveTab('portfolio')}
           className={activeTab === 'portfolio' ? 'btn-gold' : 'btn-outline-gold'}
-          style={{ padding: '10px 20px', borderRadius: '30px' }}
+          style={{ padding: '10px 20px', borderRadius: '30px', flexShrink: 0 }}
         >
           <Image size={18} style={{ marginRight: '8px' }} />
-          Portfolio Content
+          Portfolio
         </button>
         <button 
           onClick={() => setActiveTab('calendar')}
           className={activeTab === 'calendar' ? 'btn-gold' : 'btn-outline-gold'}
-          style={{ padding: '10px 20px', borderRadius: '30px' }}
+          style={{ padding: '10px 20px', borderRadius: '30px', flexShrink: 0 }}
         >
           <CalendarIcon size={18} style={{ marginRight: '8px' }} />
-          Kalender & Afspraken
+          Kalender
         </button>
         <button 
           onClick={() => setActiveTab('reviews')}
           className={activeTab === 'reviews' ? 'btn-gold' : 'btn-outline-gold'}
-          style={{ padding: '10px 20px', borderRadius: '30px' }}
+          style={{ padding: '10px 20px', borderRadius: '30px', flexShrink: 0 }}
         >
           <MessageSquare size={18} style={{ marginRight: '8px' }} />
-          Reviews Beheren
+          Reviews
         </button>
       </div>
 
@@ -127,7 +137,7 @@ const AdminDashboard = () => {
               {content.map((item) => {
                 const isNew = Date.now() - item.createdAt < 48 * 60 * 60 * 1000;
                 return (
-                  <div key={item.id} className="col-md-4 mb-4">
+                  <div key={item.id} className="col-12 col-sm-6 col-md-4 mb-4">
                     <div className="glass-panel" style={{ height: '100%', overflow: 'hidden', padding: '15px' }}>
                       <div style={{ position: 'relative', height: '250px', borderRadius: '12px', overflow: 'hidden', marginBottom: '15px' }}>
                         <img 

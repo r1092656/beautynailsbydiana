@@ -105,9 +105,9 @@ const AddContent = () => {
       </Link>
 
       <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="glass-panel" style={{ padding: '40px' }}>
-            <h2 className="mb-4 text-gold">Nieuwe Content Toevoegen (LIVE)</h2>
+        <div className="col-12 col-md-8">
+          <div className="glass-panel" style={{ padding: '30px' }}>
+            <h2 className="mb-4 text-gold">Nieuwe Content Toevoegen</h2>
             <p className="text-muted mb-4">Upload een nieuwe foto naar Supabase. Deze verschijnt direct voor alle bezoekers.</p>
 
             <form onSubmit={handleSubmit}>

@@ -464,6 +464,28 @@
 @media (max-width: 992px) {
   .admin-calendar-container {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .calendar-details-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-grid-wrapper {
+    padding: 15px;
+  }
+  .calendar-grid {
+    gap: 5px;
+  }
+  .calendar-day {
+    border-radius: 8px;
+  }
+  .day-number {
+    font-size: 0.9rem;
+  }
+  .calendar-weekdays {
+    font-size: 0.7rem;
   }
 }
 
@@ -473,5 +495,27 @@
   }
   .booking-info-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .booking-details-modal {
+    padding: 20px;
+  }
+  .duration-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .calendar-grid {
+    gap: 3px;
+  }
+  .day-number {
+    font-size: 0.8rem;
   }
 }

@@ -24,8 +24,8 @@ const AdminLogin = () => {
   return (
     <div className="container py-5 mt-5 fade-in">
       <div className="row justify-content-center">
-        <div className="col-md-5">
-          <div className="glass-panel text-center" style={{ padding: '50px 30px' }}>
+        <div className="col-12 col-md-5">
+          <div className="glass-panel text-center" style={{ padding: '40px 20px' }}>
             <div style={{ backgroundColor: 'var(--gold)', width: '70px', height: '70px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 25px', color: 'white' }}>
               <Lock size={35} />
             </div>

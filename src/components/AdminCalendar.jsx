@@ -40,6 +40,8 @@ const AdminCalendar = () => {
     email: '',
     phone: '',
     category: 'Gel Overlay',
+    subService: '',
+    location: '',
     description: '',
     duration: 120 // 2h default
   });
@@ -218,27 +220,29 @@ const AdminCalendar = () => {
         .insert(newBlockEntries);
       if (error) throw error;
 
-      // Send confirmation email
-      if (manualFormData.email) {
-        fetch('/api/booking', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'manual',
-            name: manualFormData.name,
-            email: manualFormData.email,
-            phone: manualFormData.phone,
-            category: manualFormData.category,
-            description: manualFormData.description,
-            date: selectedDate.date,
-            time: startTimeStr,
-            duration_mins: manualFormData.duration,
-            location: 'Turnhout' // Default
-          })
-        }).catch(err => console.error('Email error:', err));
-      }
-
-      setManualFormData({ name: '', email: '', phone: '', category: 'Gel Overlay', description: '', duration: 120 });
+      // Send confirmation email (ALWAYS, even if customer email is missing)
+      fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'manual',
+          name: manualFormData.name,
+          email: manualFormData.email,
+          phone: manualFormData.phone,
+          category: manualFormData.category,
+          sub_service: manualFormData.subService, // NEW
+          description: manualFormData.description,
+          date: selectedDate.date,
+          time: startTimeStr,
+          duration_mins: manualFormData.duration,
+          location: manualFormData.location || 'Turnhout' // Selection based
+        })
+      }).catch(err => console.error('Email error:', err));
+      
+      setManualFormData({ 
+        name: '', email: '', phone: '', category: 'Gel Overlay', 
+        subService: '', location: '', description: '', duration: 120 
+      });
     } catch (err) {
       console.error('Error saving manual booking:', err);
       setBlocks(previousBlocks);
@@ -536,6 +540,21 @@ const AdminCalendar = () => {
                     <input type="tel" value={manualFormData.phone} onChange={e => setManualFormData({...manualFormData, phone: e.target.value})} placeholder="+32..." />
                   </div>
                   <div className="form-group full-width">
+                    <label>Locatie</label>
+                    <div className="location-grid">
+                      <button 
+                        type="button" 
+                        className={`location-btn ${manualFormData.location === 'Turnhout' ? 'selected' : ''}`} 
+                        onClick={() => setManualFormData({...manualFormData, location: 'Turnhout'})}
+                      >Turnhout</button>
+                      <button 
+                        type="button" 
+                        className={`location-btn ${manualFormData.location === 'Laakdal' ? 'selected' : ''}`} 
+                        onClick={() => setManualFormData({...manualFormData, location: 'Laakdal'})}
+                      >Laakdal</button>
+                    </div>
+                  </div>
+                  <div className="form-group full-width">
                     <label>E-mail (voor bevestiging)</label>
                     <input type="email" value={manualFormData.email} onChange={e => setManualFormData({...manualFormData, email: e.target.value})} placeholder="email@voorbeeld.be" />
                   </div>
@@ -552,6 +571,10 @@ const AdminCalendar = () => {
                       <option value="Manicure">Manicure</option>
                       <option value="Pedicure">Pedicure</option>
                     </select>
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Specifieke Service (bijv. Fullset, Opvullen...)</label>
+                    <input type="text" value={manualFormData.subService} onChange={e => setManualFormData({...manualFormData, subService: e.target.value})} placeholder="Service details..." />
                   </div>
                   <div className="form-group full-width">
                     <label>Omschrijving / Wens (Notes)</label>

@@ -191,15 +191,16 @@ export default async function handler(req, res) {
           <div class="section">
             <div class="section-title">Klantgegevens</div>
             <div class="detail-row"><span class="label">Naam:</span><span class="value">${name}</span></div>
-            <div class="detail-row"><span class="label">Email:</span><span class="value">${email || '-'}</span></div>
+            <div class="detail-row"><span class="label">Email:</span><span class="value">${email || 'Geen e-mail opgegeven'}</span></div>
             <div class="detail-row"><span class="label">Telefoon:</span><span class="value">${phone || '-'}</span></div>
           </div>
           <div class="section">
             <div class="section-title">Details</div>
             <div class="detail-row"><span class="label">Service:</span><span class="value important-value">${category || 'Nagelbehandeling'}</span></div>
-            <div class="detail-row"><span class="label">Omschrijving:</span><span class="value">${description || 'Eigen planning'}</span></div>
+            ${sub_service ? `<div class="detail-row"><span class="label">Specificatie:</span><span class="value">${sub_service}</span></div>` : ''}
             <div class="detail-row"><span class="label">Duur:</span><span class="value">${duration_mins} min</span></div>
             <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
+            <div class="detail-row"><span class="label">Omschrijving:</span><span class="value">${description || 'Eigen planning'}</span></div>
           </div>
           <div class="section">
             <div class="section-title">Datum & Tijd</div>
@@ -231,7 +232,7 @@ export default async function handler(req, res) {
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
             <div class="detail-row"><span class="label">Locatie:</span><span class="value">${location}</span></div>
-            <div class="detail-row"><span class="label">Service:</span><span class="value">${category || 'Nagelbehandeling'}</span></div>
+            <div class="detail-row"><span class="label">Service:</span><span class="value">${category || 'Nagelbehandeling'} ${sub_service ? `(${sub_service})` : ''}</span></div>
             ${description ? `<div class="detail-row"><span class="label">Opmerking:</span><span class="value">${description}</span></div>` : ''}
           </div>
 
@@ -240,7 +241,7 @@ export default async function handler(req, res) {
             <p style="margin: 5px 0 0 0;">WhatsApp: <strong>+32 465 62 06 88</strong></p>
           </div>
 
-          <p style="margin-top: 30px;">Tot snel!</p>
+          <p style="margin-top: 30px;">Ik kijk ernaar uit je te zien!</p>
           <p>Met vriendelijke groet,<br>Diana</p>
         </div>
         <div class="footer">&copy; 2026 Beauty Nails by Diana.</div>

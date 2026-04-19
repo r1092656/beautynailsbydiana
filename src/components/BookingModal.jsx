@@ -37,11 +37,19 @@ const generateTimeSlots = () => {
 };
 
 const getDurationMins = (category) => {
+  if (!category) return 150; // default backup
+  const cat = category.trim();
   // New durations including 15-minute buffer
-  if (category === 'Gel Overlay' || category === 'Verlenging') return 175; // 2h 40m + 15m = 2h 55m (175m)
-  if (category === 'Pedicure') return 105; // 1h 30m + 15m = 1h 45m (105m)
-  if (category === 'Manicure') return 75; // 1h + 15m = 1h 15m (75m)
-  return 150; // default backup
+  if (cat === 'Gel Overlay' || cat === 'Verlenging') return 175; // 2h 40m + 15m = 2h 55m (175m)
+  if (cat === 'Pedicure') return 105; // 1h 30m + 15m = 1h 45m (105m)
+  if (cat === 'Manicure') return 75; // 1h + 15m = 1h 15m (75m)
+  return 150; 
+};
+
+const formatDuration = (mins) => {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}u ${m > 0 ? m + 'm' : ''}`.trim();
 };
 
 const BookingModal = () => {
@@ -405,7 +413,7 @@ const BookingModal = () => {
 
               {date && (
                 <div className="form-group fade-in">
-                  <label>Available Times ({durationMins / 60}h block)</label>
+                  <label>Available Times ({formatDuration(durationMins)} block)</label>
                   <div className="time-grid">
                     {availableSlots.map((slot) => (
                       <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>

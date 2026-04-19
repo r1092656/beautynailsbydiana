@@ -18,9 +18,11 @@ const TIME_SLOTS = (() => {
 })();
 
 const getDurationMins = (category) => {
-  if (category === 'Gel Overlay' || category === 'Verlenging') return 175;
-  if (category === 'Pedicure') return 105;
-  if (category === 'Manicure') return 75;
+  if (!category) return 150;
+  const cat = category.trim();
+  if (cat === 'Gel Overlay' || cat === 'Verlenging') return 175;
+  if (cat === 'Pedicure') return 105;
+  if (cat === 'Manicure') return 75;
   return 150;
 };
 

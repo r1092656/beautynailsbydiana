@@ -37,7 +37,14 @@ export default async function handler(req, res) {
       const startDate = new Date(year, month - 1, day, hour, minute);
       const endDate = new Date(startDate.getTime() + duration_mins * 60000); 
 
-      const formatCalDate = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+      const formatCalDate = (d) => {
+        try {
+          if (!d || isNaN(d.getTime())) return "";
+          return d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+        } catch (e) {
+          return "";
+        }
+      };
 
       const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
       const details = [
@@ -250,10 +257,11 @@ export default async function handler(req, res) {
     </html>
   `;
 
-  const loggingPrefix = `[BOOKING ${type.toUpperCase()}]`;
-  console.log(`${loggingPrefix} Incoming request for ${name} (${email || 'no-email'}) at ${date} ${time}`);
-
   try {
+    const typeStr = (type || 'online').toString().toUpperCase();
+    const loggingPrefix = `[BOOKING ${typeStr}]`;
+    console.log(`${loggingPrefix} Incoming request for ${name} (${email || 'no-email'}) at ${date} ${time}`);
+
     const attachments = [];
     if (inspiration_image) {
       const base64Content = inspiration_image.split(',')[1];

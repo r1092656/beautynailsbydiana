@@ -32,8 +32,15 @@ export default async function handler(req, res) {
   // Generate Google Calendar Link
   const generateCalendarLink = () => {
     try {
-      const [year, month, day] = date.split('-');
-      const [hour, minute] = time.split(':');
+      if (!date || !time) return "#";
+      const dateParts = date.split('-');
+      if (dateParts.length !== 3) return "#";
+      const [year, month, day] = dateParts;
+
+      const timeParts = time.split(':');
+      if (timeParts.length < 2) return "#";
+      const [hour, minute] = timeParts;
+
       const startDate = new Date(year, month - 1, day, hour, minute);
       const endDate = new Date(startDate.getTime() + duration_mins * 60000); 
 
@@ -323,6 +330,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error(`${loggingPrefix} Top-level Server Error:`, error);
     return res.status(500).json({ 
+      success: false,
       error: 'Internal Server Error', 
       details: error.message 
     });

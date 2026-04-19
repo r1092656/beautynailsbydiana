@@ -239,7 +239,8 @@ const BookingModal = () => {
         time,
         inspiration_image: compressedImageBase64,
         payment_status: 'paid',
-        deposit_amount: '€10,00'
+        deposit_amount: '€10,00',
+        duration_mins: durationMins
       };
 
       const response = await fetch("/api/booking", {
@@ -273,7 +274,7 @@ const BookingModal = () => {
       }
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Er is iets misgegaan. Probeer het later opnieuw.");
+      alert(`Er is iets misgegaan: ${error.message || "Onbekende fout"}. Probeer het later opnieuw of neem contact op.`);
     } finally {
       setIsSending(false);
     }

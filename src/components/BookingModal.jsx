@@ -25,17 +25,23 @@ const timeToMins = (timeStr) => {
 const generateTimeSlots = () => {
   const slots = [];
   for (let h = 9; h <= 18; h++) {
-    slots.push(`${h.toString().padStart(2, '0')}:00`);
-    if (h < 18) slots.push(`${h.toString().padStart(2, '0')}:30`);
+    const hourStr = h.toString().padStart(2, '0');
+    slots.push(`${hourStr}:00`);
+    if (h < 18) {
+      slots.push(`${hourStr}:15`);
+      slots.push(`${hourStr}:30`);
+      slots.push(`${hourStr}:45`);
+    }
   }
   return slots;
 };
 
 const getDurationMins = (category) => {
-  if (category === 'Gel Overlay' || category === 'Verlenging') return 150; // 2.5h
-  if (category === 'Pedicure') return 90; // 1.5h
-  if (category === 'Manicure') return 60; // 1h
-  return 150; // default
+  // New durations including 15-minute buffer
+  if (category === 'Gel Overlay' || category === 'Verlenging') return 175; // 2h 40m + 15m = 2h 55m (175m)
+  if (category === 'Pedicure') return 105; // 1h 30m + 15m = 1h 45m (105m)
+  if (category === 'Manicure') return 75; // 1h + 15m = 1h 15m (75m)
+  return 150; // default backup
 };
 
 const BookingModal = () => {
@@ -158,12 +164,11 @@ const BookingModal = () => {
       
       // Slot is blocked if:
       // 1. There is a confirmed booking that overlaps this time range
-      // We check BOTH a) if a booking starts inside our new block, OR b) if our new block starts inside a booking
       const isBooked = existingBookings.some(b => {
         const bStart = timeToMins(b.time);
-        // Note: Real bookings currently assume a 2.5h duration in the system data,
-        // but for safety we check overlap.
-        const bEnd = bStart + 150; 
+        // Use stored duration if available, otherwise fallback to current category logic
+        const bDuration = b.duration || getDurationMins(b.category);
+        const bEnd = bStart + bDuration;
         return (startSlotMins < bEnd && endSlotMins > bStart);
       });
       
@@ -249,6 +254,7 @@ const BookingModal = () => {
             category,
             sub_service: subService,
             location,
+            duration: durationMins,
             status: 'confirmed'
           }]);
 

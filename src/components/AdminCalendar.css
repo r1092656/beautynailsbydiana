@@ -246,8 +246,34 @@
 }
 
 .slot-time {
-  font-weight: bold;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.subtle-slot {
+  background: white;
+  border-color: #f1f1f1;
+  color: #999;
+}
+
+.subtle-slot .slot-time {
+  font-weight: 400;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.subtle-slot .slot-status {
+  opacity: 0.5;
+}
+
+.subtle-slot:hover:not(.booked):not(.planned):not(.blocked) {
+  background: #f8fafc;
+}
+
+.time-slot-card.booked.subtle-slot, 
+.time-slot-card.planned.subtle-slot, 
+.time-slot-card.blocked.subtle-slot {
+  opacity: 1;
 }
 
 .slot-status {

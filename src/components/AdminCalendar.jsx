@@ -3,12 +3,26 @@ import { supabase } from '../supabaseClient';
 import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle, CalendarCheck, UserMinus, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
 import './AdminCalendar.css';
 
-const TIME_SLOTS = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-  '18:00'
-];
+const TIME_SLOTS = (() => {
+  const slots = [];
+  for (let h = 9; h <= 18; h++) {
+    const hour = h.toString().padStart(2, '0');
+    slots.push(`${hour}:00`);
+    if (h < 18) {
+      slots.push(`${hour}:15`);
+      slots.push(`${hour}:30`);
+      slots.push(`${hour}:45`);
+    }
+  }
+  return slots;
+})();
+
+const getDurationMins = (category) => {
+  if (category === 'Gel Overlay' || category === 'Verlenging') return 175;
+  if (category === 'Pedicure') return 105;
+  if (category === 'Manicure') return 75;
+  return 150;
+};
 
 const AdminCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -348,18 +362,49 @@ const AdminCalendar = () => {
 
             <div className="time-slots-grid">
               {TIME_SLOTS.map(slot => {
-                // Query LIVE state directly instead of selectedDate snapshot
-                const booking = bookings.find(b => b.date === selectedDate.date && b.time === slot);
-                const manualBlock = blocks.find(b => b.date === selectedDate.date && (b.time_slot === slot || b.time_slot === 'all_day'));
+                const slotMins = (() => {
+                  const [h, m] = slot.split(':').map(Number);
+                  return h * 60 + m;
+                })();
+
+                // Find if any booking OR block COVERS this slot
+                const booking = bookings.find(b => {
+                  if (b.date !== selectedDate.date) return false;
+                  const bStart = (() => {
+                    const [h, m] = b.time.split(':').map(Number);
+                    return h * 60 + m;
+                  })();
+                  const bDuration = b.duration || getDurationMins(b.category);
+                  const bEnd = bStart + bDuration;
+                  return slotMins >= bStart && slotMins < bEnd;
+                });
+
+                const manualBlock = blocks.find(b => {
+                  if (b.date !== selectedDate.date) return false;
+                  if (b.time_slot === 'all_day') return true;
+                  if (b.group_id) {
+                    // This is a manual booking block with a duration
+                    const bStart = (() => {
+                      const [h, m] = b.time_slot.split(':').map(Number);
+                      return h * 60 + m;
+                    })();
+                    const bDuration = b.duration_mins || 30; // default to one slot if unknown
+                    const bEnd = bStart + bDuration;
+                    return slotMins >= bStart && slotMins < bEnd;
+                  }
+                  return b.time_slot === slot;
+                });
                 
                 let state = 'available';
                 if (booking) state = 'booked';
-                else if (manualBlock) state = manualBlock.status || 'blocked'; // 'planned' or 'blocked'
+                else if (manualBlock) state = manualBlock.status || 'blocked';
+
+                const isIntermediate = !slot.endsWith(':00');
 
                 return (
                   <div 
                     key={slot} 
-                    className={`time-slot-card ${state} fade-in`}
+                    className={`time-slot-card ${state} ${isIntermediate ? 'subtle-slot' : ''} fade-in`}
                     onClick={() => {
                       if (booking) setActiveBooking(booking);
                       else if (manualBlock && manualBlock.status === 'planned') setViewingManualBlock(manualBlock);
@@ -504,14 +549,14 @@ const AdminCalendar = () => {
                   <div className="form-group full-width">
                     <label>Duur afspraak</label>
                     <div className="duration-grid">
-                      {[30, 60, 90, 120, 150, 180, 240].map(mins => (
+                      {[15, 30, 45, 60, 75, 90, 105, 120, 150, 180, 240].map(mins => (
                         <button 
                           key={mins}
                           type="button"
                           className={`duration-btn ${manualFormData.duration === mins ? 'selected' : ''}`}
                           onClick={() => setManualFormData({...manualFormData, duration: mins})}
                         >
-                          {mins / 60}u
+                          {mins < 60 ? `${mins}m` : `${Math.floor(mins/60)}u${mins%60 || ''}${mins%60 ? 'm' : ''}`}
                         </button>
                       ))}
                     </div>

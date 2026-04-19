@@ -250,6 +250,9 @@ export default async function handler(req, res) {
     </html>
   `;
 
+  const loggingPrefix = `[BOOKING ${type.toUpperCase()}]`;
+  console.log(`${loggingPrefix} Incoming request for ${name} (${email || 'no-email'}) at ${date} ${time}`);
+
   try {
     const attachments = [];
     if (inspiration_image) {
@@ -262,31 +265,58 @@ export default async function handler(req, res) {
       });
     }
 
-    // 1. Send to Admin (Your email)
-    await resend.emails.send({
-      from: 'Diana Booking <info@beautynailsbydiana.be>',
-      to: 'info@beautynailsbydiana.be',
-      subject: type === 'manual' ? `HANDMATIGE AFSPRAAK: ${name}` : `NIEUWE BOEKING: ${sub_service} - ${name}`,
-      html: type === 'manual' ? adminManualHtml : adminHtml,
-      attachments: attachments,
-    });
+    const emailResults = { admin: 'not-sent', customer: 'not-sent' };
 
-    // 2. Send to Customer
+    // 1. Send to Admin (Your email) - ALWAYS
     try {
-      await resend.emails.send({
-        from: 'Beauty Nails by Diana <info@beautynailsbydiana.be>',
-        to: email,
-        subject: `Je afspraak is bevestigd - Beauty Nails by Diana`,
-        html: type === 'manual' ? customerManualHtml : customerHtml,
+      console.log(`${loggingPrefix} Attempting to send admin notification to info@beautynailsbydiana.be...`);
+      const adminResult = await resend.emails.send({
+        from: 'Diana Booking <info@beautynailsbydiana.be>',
+        to: 'info@beautynailsbydiana.be',
+        subject: type === 'manual' ? `HANDMATIGE AFSPRAAK: ${name}` : `NIEUWE BOEKING: ${sub_service} - ${name}`,
+        html: type === 'manual' ? adminManualHtml : adminHtml,
         attachments: attachments,
       });
-    } catch (customerEmailError) {
-      console.warn('Customer confirmation email failed.', customerEmailError);
+      console.log(`${loggingPrefix} Admin email result:`, adminResult);
+      emailResults.admin = 'success';
+    } catch (adminError) {
+      console.error(`${loggingPrefix} CRITICAL: Admin email failed:`, adminError);
+      emailResults.admin = `failed: ${adminError.message}`;
+      // We don't throw here so we can still try the customer email
     }
 
-    return res.status(200).json({ success: true });
+    // 2. Send to Customer - IF PROVIDED
+    if (email && email.includes('@')) {
+      try {
+        console.log(`${loggingPrefix} Attempting to send customer confirmation to ${email}...`);
+        const customerResult = await resend.emails.send({
+          from: 'Beauty Nails by Diana <info@beautynailsbydiana.be>',
+          to: email,
+          subject: `Je afspraak is bevestigd - Beauty Nails by Diana`,
+          html: type === 'manual' ? customerManualHtml : customerHtml,
+          attachments: attachments,
+        });
+        console.log(`${loggingPrefix} Customer email result:`, customerResult);
+        emailResults.customer = 'success';
+      } catch (customerError) {
+        console.warn(`${loggingPrefix} Customer confirmation email failed:`, customerError);
+        emailResults.customer = `failed: ${customerError.message}`;
+      }
+    } else {
+      console.log(`${loggingPrefix} Skipping customer email (not provided or invalid: ${email})`);
+      emailResults.customer = 'skipped';
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Email processing complete',
+      details: emailResults
+    });
   } catch (error) {
-    console.error('Server Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error(`${loggingPrefix} Top-level Server Error:`, error);
+    return res.status(500).json({ 
+      error: 'Internal Server Error', 
+      details: error.message 
+    });
   }
 }

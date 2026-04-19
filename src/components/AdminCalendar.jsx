@@ -221,23 +221,40 @@ const AdminCalendar = () => {
       if (error) throw error;
 
       // Send confirmation email (ALWAYS, even if customer email is missing)
-      fetch('/api/booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'manual',
-          name: manualFormData.name,
-          email: manualFormData.email,
-          phone: manualFormData.phone,
-          category: manualFormData.category,
-          sub_service: manualFormData.subService, // NEW
-          description: manualFormData.description,
-          date: selectedDate.date,
-          time: startTimeStr,
-          duration_mins: manualFormData.duration,
-          location: manualFormData.location || 'Turnhout' // Selection based
-        })
-      }).catch(err => console.error('Email error:', err));
+      try {
+        const emailResponse = await fetch(window.location.origin + '/api/booking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'manual',
+            name: manualFormData.name,
+            email: manualFormData.email,
+            phone: manualFormData.phone,
+            category: manualFormData.category,
+            sub_service: manualFormData.subService,
+            description: manualFormData.description,
+            date: selectedDate.date,
+            time: startTimeStr,
+            duration_mins: manualFormData.duration,
+            location: manualFormData.location || 'Turnhout'
+          })
+        });
+
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.json();
+          console.error('Email API Error:', errorData);
+          alert(`Boeking opgeslagen, maar e-mail verzenden mislukt: ${errorData.details || errorData.error}`);
+        } else {
+          const result = await emailResponse.json();
+          console.log('Email sent successfully:', result);
+          if (result.details?.admin.startsWith('failed') || result.details?.customer.startsWith('failed')) {
+             alert(`Let op: ${result.details.admin.startsWith('failed') ? 'Admin e-mail mislukt. ' : ''}${result.details.customer.startsWith('failed') ? 'Klant e-mail mislukt.' : ''}`);
+          }
+        }
+      } catch (emailFetchError) {
+        console.error('Email fetch error:', emailFetchError);
+        alert('Boeking opgeslagen, maar kon geen verbinding maken met e-mail server.');
+      }
       
       setManualFormData({ 
         name: '', email: '', phone: '', category: 'Gel Overlay', 

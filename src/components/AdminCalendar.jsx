@@ -201,8 +201,7 @@ const AdminCalendar = () => {
       client_name: manualFormData.name,
       client_email: manualFormData.email,
       client_phone: manualFormData.phone,
-      category: manualFormData.category,
-      description: manualFormData.description,
+      description: `[${manualFormData.category}] ${manualFormData.description || ''}`.trim(),
       duration_mins: manualFormData.duration,
       group_id: groupId
     }));

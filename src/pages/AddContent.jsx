@@ -11,7 +11,7 @@ const AddContent = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [caption, setCaption] = useState('');
-  const [category, setCategory] = useState('BIAB');
+  const [category, setCategory] = useState('Gel Overlay');
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef(null);
@@ -95,7 +95,7 @@ const AddContent = () => {
     }
   };
 
-  const categories = ['BIAB', 'Pedicure', 'Gel Overlay', 'Fullset', 'Nail Art', 'Verlenging'];
+  const categories = ['Pedicure', 'Gel Overlay', 'Fullset', 'Nail Art', 'Verlenging'];
 
   return (
     <div className="container py-5 mt-5 fade-in">

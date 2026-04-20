@@ -1,12 +1,19 @@
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useContent } from '../context/ContentContext';
 
-// Generate static numbered files 52 down to 1
-const staticItems = Array.from({ length: 52 }, (_, i) => ({
-  id: `static-${52 - i}`,
-  img: `/assets/portfolio/${52 - i}.jpeg`,
-  category: 'All'
-}));
+// List of image numbers to remove
+const removedImageNumbers = [1, 2, 3, 5, 7, 9, 10, 11, 16, 17, 22, 25, 28, 34, 43];
+
+// Generate static numbered files 52 down to 1, filtered by removal list
+const staticItems = Array.from({ length: 52 }, (_, i) => {
+  const num = 52 - i;
+  return {
+    id: `static-${num}`,
+    img: `/assets/portfolio/${num}.jpeg`,
+    category: 'All',
+    num
+  };
+}).filter(item => !removedImageNumbers.includes(item.num));
 
 const Portfolio = () => {
   useDocumentTitle('Portfolio & Inspiratie', 'Bekijk het vakmanschap van Beauty Nails by Diana. Laat u inspireren door onze unieke nageldesigns en kwalitatieve afwerkingen.');

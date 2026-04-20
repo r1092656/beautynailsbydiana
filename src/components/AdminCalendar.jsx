@@ -26,6 +26,13 @@ const getDurationMins = (category) => {
   return 150;
 };
 
+const getInitials = (name) => {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 const AdminCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -46,6 +53,8 @@ const AdminCalendar = () => {
     duration: 120 // 2h default
   });
   const [viewingManualBlock, setViewingManualBlock] = useState(null);
+  const [bulkBlockType, setBulkBlockType] = useState(null); // null | 'range' | 'day'
+  const [blockRange, setBlockRange] = useState({ from: '09:00', to: '18:00' });
 
   const monthYear = currentDate.toLocaleString('nl-BE', { month: 'long', year: 'numeric' });
 
@@ -139,6 +148,11 @@ const AdminCalendar = () => {
       return;
     }
 
+    if (status === 'bulk_options') {
+      setBulkBlockType(slot === 'all_day' ? 'day' : 'range');
+      return;
+    }
+
     // 1. Pessimistic backup for rollback
     const previousBlocks = [...blocks];
     
@@ -173,6 +187,71 @@ const AdminCalendar = () => {
       console.error('Error updating status:', err);
       setBlocks(previousBlocks);
       alert('Fout bij het wijzigen van beschikbaarheid.');
+    } finally {
+      setIsSavingData(false);
+    }
+  };
+
+  const handleBulkBlockConfirm = async () => {
+    if (!selectedDate) return;
+    
+    setIsSavingData(true);
+    let slotsToBlock = [];
+    
+    if (bulkBlockType === 'day') {
+      slotsToBlock = [...TIME_SLOTS];
+    } else {
+      const [fH, fM] = blockRange.from.split(':').map(Number);
+      const [tH, tM] = blockRange.to.split(':').map(Number);
+      const fromMins = fH * 60 + fM;
+      const toMins = tH * 60 + tM;
+      
+      slotsToBlock = TIME_SLOTS.filter(s => {
+        const [sH, sM] = s.split(':').map(Number);
+        const sMins = sH * 60 + sM;
+        return sMins >= fromMins && sMins <= toMins;
+      });
+    }
+
+    if (slotsToBlock.length === 0) {
+      alert('Geen tijdsloten geselecteerd.');
+      setIsSavingData(false);
+      return;
+    }
+
+    const previousBlocks = [...blocks];
+    const newEntries = slotsToBlock.map(s => ({
+      date: selectedDate.date,
+      time_slot: s,
+      status: 'blocked'
+    }));
+
+    // Optimistic Update
+    const filteredBlocks = blocks.filter(b => !(b.date === selectedDate.date && slotsToBlock.includes(b.time_slot)));
+    setBlocks([...filteredBlocks, ...newEntries]);
+    setBulkBlockType(null);
+    setSlotSelector(null);
+
+    try {
+      // 1. Delete existing for these slots to avoid duplication
+      for (const slot of slotsToBlock) {
+        await supabase
+          .from('availability_blocks')
+          .delete()
+          .eq('date', selectedDate.date)
+          .eq('time_slot', slot);
+      }
+
+      // 2. Insert new blocks
+      const { error } = await supabase
+        .from('availability_blocks')
+        .insert(newEntries);
+      
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error bulk blocking:', err);
+      setBlocks(previousBlocks);
+      alert('Fout bij bulk blokkeren.');
     } finally {
       setIsSavingData(false);
     }
@@ -443,9 +522,19 @@ const AdminCalendar = () => {
                   >
                     <div className="slot-main">
                       <div className="slot-time">{slot}</div>
-                      {state === 'booked' && <User size={14} className="slot-icon" />}
-                      {state === 'planned' && <CalendarCheck size={14} className="slot-icon" />}
-                      {state === 'blocked' && <UserMinus size={14} className="slot-icon" />}
+                      <div className="slot-indicators">
+                        {state === 'booked' && (
+                          <div className="client-initials-badge booked" title={booking.name}>
+                            {getInitials(booking.name)}
+                          </div>
+                        )}
+                        {state === 'planned' && (
+                          <div className="client-initials-badge planned" title={manualBlock.client_name}>
+                            {getInitials(manualBlock.client_name)}
+                          </div>
+                        )}
+                        {state === 'blocked' && <UserMinus size={14} className="slot-icon" />}
+                      </div>
                     </div>
                     <div className="slot-status">
                       {booking ? 'Gereserveerd' : state === 'planned' ? 'Ingepland' : state === 'blocked' ? 'Geblokkeerd' : 'Beschikbaar'}
@@ -552,8 +641,24 @@ const AdminCalendar = () => {
                 <button className="status-btn blocked" onClick={() => updateSlotStatus(slotSelector.slot, 'blocked')}>
                   <UserMinus size={20} />
                   <div>
-                    <strong>Handmatig blokkeren</strong>
-                    <span>Rood (zonder klantinfo)</span>
+                    <strong>Blokkeren (Enkel slot)</strong>
+                    <span>Enkel {slotSelector.slot} blokkeren</span>
+                  </div>
+                </button>
+
+                <button className="status-btn range" onClick={() => updateSlotStatus(null, 'bulk_options')}>
+                  <Clock size={20} />
+                  <div>
+                    <strong>Tijdsperiode</strong>
+                    <span>Kies van-tot range</span>
+                  </div>
+                </button>
+
+                <button className="status-btn all-day" onClick={() => { setBulkBlockType('day'); handleBulkBlockConfirm(); }}>
+                  <ShoppingBag size={20} />
+                  <div>
+                    <strong>Hele dag</strong>
+                    <span>Hele dag blokkeren</span>
                   </div>
                 </button>
               </div>
@@ -633,6 +738,39 @@ const AdminCalendar = () => {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {bulkBlockType === 'range' && (
+        <div className="booking-details-modal-overlay" onClick={() => setBulkBlockType(null)}>
+          <div className="booking-details-modal glass-panel bulk-block-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Tijdsperiode blokkeren</h3>
+              <p className="text-muted">Selecteer de range voor {new Date(selectedDate.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+            </div>
+            
+            <div className="range-picker-grid">
+              <div className="form-group">
+                <label>Vanaf</label>
+                <select value={blockRange.from} onChange={e => setBlockRange({...blockRange, from: e.target.value})}>
+                  {TIME_SLOTS.map(s => <option key={`from-${s}`} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Tot en met</label>
+                <select value={blockRange.to} onChange={e => setBlockRange({...blockRange, to: e.target.value})}>
+                  {TIME_SLOTS.map(s => <option key={`to-${s}`} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-actions mt-4">
+              <button className="btn-gold w-100" onClick={handleBulkBlockConfirm} disabled={isSavingData}>
+                {isSavingData ? <Loader className="spin" /> : 'Periode Blokkeren'}
+              </button>
+              <button className="btn-outline-gold w-100 mt-2" onClick={() => setBulkBlockType(null)}>Annuleren</button>
+            </div>
           </div>
         </div>
       )}

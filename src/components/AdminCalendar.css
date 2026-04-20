@@ -637,3 +637,34 @@
     font-size: 0.8rem;
   }
 }
+
+.btn-red, .btn-green {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  color: white;
+  width: 100%;
+}
+
+.btn-red {
+  background: #ef4444;
+}
+
+.btn-red:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.btn-green {
+  background: #22c55e;
+}
+
+.btn-green:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}

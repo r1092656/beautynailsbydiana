@@ -192,49 +192,51 @@ const AdminCalendar = () => {
     }
   };
 
-  const handleBulkBlockConfirm = async () => {
+  const handleBulkBlockConfirm = async (targetStatus = 'blocked') => {
     if (!selectedDate) return;
     
     setIsSavingData(true);
-    let slotsToBlock = [];
+    let slotsToUpdate = [];
     
-    if (bulkBlockType === 'day') {
-      slotsToBlock = [...TIME_SLOTS];
-    } else {
-      const [fH, fM] = blockRange.from.split(':').map(Number);
-      const [tH, tM] = blockRange.to.split(':').map(Number);
-      const fromMins = fH * 60 + fM;
-      const toMins = tH * 60 + tM;
-      
-      slotsToBlock = TIME_SLOTS.filter(s => {
-        const [sH, sM] = s.split(':').map(Number);
-        const sMins = sH * 60 + sM;
-        return sMins >= fromMins && sMins <= toMins;
-      });
-    }
+    const [fH, fM] = blockRange.from.split(':').map(Number);
+    const [tH, tM] = blockRange.to.split(':').map(Number);
+    const fromMins = fH * 60 + fM;
+    const toMins = tH * 60 + tM;
+    
+    slotsToUpdate = TIME_SLOTS.filter(s => {
+      const [sH, sM] = s.split(':').map(Number);
+      const sMins = sH * 60 + sM;
+      return sMins >= fromMins && sMins <= toMins;
+    });
 
-    if (slotsToBlock.length === 0) {
+    if (slotsToUpdate.length === 0) {
       alert('Geen tijdsloten geselecteerd.');
       setIsSavingData(false);
       return;
     }
 
     const previousBlocks = [...blocks];
-    const newEntries = slotsToBlock.map(s => ({
-      date: selectedDate.date,
-      time_slot: s,
-      status: 'blocked'
-    }));
-
+    
     // Optimistic Update
-    const filteredBlocks = blocks.filter(b => !(b.date === selectedDate.date && slotsToBlock.includes(b.time_slot)));
-    setBlocks([...filteredBlocks, ...newEntries]);
+    const filteredBlocks = blocks.filter(b => !(b.date === selectedDate.date && slotsToUpdate.includes(b.time_slot)));
+    
+    if (targetStatus === 'available') {
+      setBlocks(filteredBlocks);
+    } else {
+      const newEntries = slotsToUpdate.map(s => ({
+        date: selectedDate.date,
+        time_slot: s,
+        status: targetStatus
+      }));
+      setBlocks([...filteredBlocks, ...newEntries]);
+    }
+    
     setBulkBlockType(null);
     setSlotSelector(null);
 
     try {
       // 1. Delete existing for these slots to avoid duplication
-      for (const slot of slotsToBlock) {
+      for (const slot of slotsToUpdate) {
         await supabase
           .from('availability_blocks')
           .delete()
@@ -242,16 +244,23 @@ const AdminCalendar = () => {
           .eq('time_slot', slot);
       }
 
-      // 2. Insert new blocks
-      const { error } = await supabase
-        .from('availability_blocks')
-        .insert(newEntries);
-      
-      if (error) throw error;
+      // 2. Insert new blocks if status is not available
+      if (targetStatus !== 'available') {
+        const newEntries = slotsToUpdate.map(s => ({
+          date: selectedDate.date,
+          time_slot: s,
+          status: targetStatus
+        }));
+        const { error } = await supabase
+          .from('availability_blocks')
+          .insert(newEntries);
+        
+        if (error) throw error;
+      }
     } catch (err) {
-      console.error('Error bulk blocking:', err);
+      console.error('Error bulk updating:', err);
       setBlocks(previousBlocks);
-      alert('Fout bij bulk blokkeren.');
+      alert('Fout bij bulk actie.');
     } finally {
       setIsSavingData(false);
     }
@@ -654,11 +663,11 @@ const AdminCalendar = () => {
                   </div>
                 </button>
 
-                <button className="status-btn all-day" onClick={() => { setBulkBlockType('day'); handleBulkBlockConfirm(); }}>
+                <button className="status-btn all-day" onClick={() => { setBulkBlockType('range'); setBlockRange({ from: '09:00', to: '18:00' }); }}>
                   <ShoppingBag size={20} />
                   <div>
-                    <strong>Hele dag</strong>
-                    <span>Hele dag blokkeren</span>
+                    <strong>Hele dag acties</strong>
+                    <span>Alles blokkeren of vrijgeven</span>
                   </div>
                 </button>
               </div>
@@ -742,12 +751,12 @@ const AdminCalendar = () => {
         </div>
       )}
 
-      {bulkBlockType === 'range' && (
+       {bulkBlockType === 'range' && (
         <div className="booking-details-modal-overlay" onClick={() => setBulkBlockType(null)}>
           <div className="booking-details-modal glass-panel bulk-block-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Tijdsperiode blokkeren</h3>
-              <p className="text-muted">Selecteer de range voor {new Date(selectedDate.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+              <h3>Bulk Acties</h3>
+              <p className="text-muted" style={{ fontSize: '0.9rem' }}>Selecteer range voor {new Date(selectedDate.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
             </div>
             
             <div className="range-picker-grid">
@@ -765,11 +774,16 @@ const AdminCalendar = () => {
               </div>
             </div>
 
-            <div className="form-actions mt-4">
-              <button className="btn-gold w-100" onClick={handleBulkBlockConfirm} disabled={isSavingData}>
-                {isSavingData ? <Loader className="spin" /> : 'Periode Blokkeren'}
-              </button>
-              <button className="btn-outline-gold w-100 mt-2" onClick={() => setBulkBlockType(null)}>Annuleren</button>
+            <div className="form-actions mt-4" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button className="btn-red" onClick={() => handleBulkBlockConfirm('blocked')} disabled={isSavingData} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {isSavingData ? <Loader className="spin" size={16} /> : <><UserMinus size={16} /> Blokkeren</>}
+                </button>
+                <button className="btn-green" onClick={() => handleBulkBlockConfirm('available')} disabled={isSavingData} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {isSavingData ? <Loader className="spin" size={16} /> : <><CheckCircle size={16} /> Vrijgeven</>}
+                </button>
+              </div>
+              <button className="btn-outline-gold w-100" onClick={() => setBulkBlockType(null)}>Annuleren</button>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import { syncClientData } from '../utils/clientSync';
 import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle, CalendarCheck, UserMinus, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
 import './AdminCalendar.css';
 
@@ -307,6 +308,18 @@ const AdminCalendar = () => {
         .from('availability_blocks')
         .insert(newBlockEntries);
       if (error) throw error;
+
+      // Sync to Client database
+      if (manualFormData.email) {
+        await syncClientData({
+          name: manualFormData.name,
+          email: manualFormData.email,
+          phone: manualFormData.phone,
+          category: manualFormData.category,
+          sub_service: manualFormData.subService || manualFormData.category,
+          date: selectedDate.date
+        });
+      }
 
       // Send confirmation email (Match BookingModal.jsx payload exactly)
       try {

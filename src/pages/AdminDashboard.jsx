@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Users, Calendar as CalendarIcon } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import AdminCalendar from '../components/AdminCalendar';
+import AdminClients from '../components/AdminClients';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const AdminDashboard = () => {
@@ -113,6 +114,14 @@ const AdminDashboard = () => {
         >
           <MessageSquare size={18} style={{ marginRight: '8px' }} />
           Reviews
+        </button>
+        <button 
+          onClick={() => setActiveTab('clients')}
+          className={activeTab === 'clients' ? 'btn-gold' : 'btn-outline-gold'}
+          style={{ padding: '10px 20px', borderRadius: '30px', flexShrink: 0 }}
+        >
+          <Users size={18} style={{ marginRight: '8px' }} />
+          Klanten
         </button>
       </div>
 
@@ -292,6 +301,10 @@ const AdminDashboard = () => {
 
       {activeTab === 'calendar' && (
         <AdminCalendar />
+      )}
+      
+      {activeTab === 'clients' && (
+        <AdminClients />
       )}
     </div>
   );

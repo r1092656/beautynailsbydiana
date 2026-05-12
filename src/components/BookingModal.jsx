@@ -3,6 +3,7 @@ import { X, CircleCheck, Upload, FileImage, Loader, CreditCard, ChevronRight, Ch
 import { useState, useEffect, useMemo } from 'react';
 import { compressImage } from '../utils/compressImage';
 import { supabase } from '../supabaseClient';
+import { syncClientData } from '../utils/clientSync';
 import './BookingModal.css';
 
 const SERVICE_STRUCTURE = {
@@ -267,6 +268,17 @@ const BookingModal = () => {
           }]);
 
         if (dbError) throw dbError;
+
+        // Sync to Client database
+        await syncClientData({
+          name,
+          email,
+          phone,
+          category,
+          sub_service: subService,
+          date
+        });
+
         setStep('complete');
       } else {
         throw new Error(result.error || "Fout bij verzenden van boeking.");

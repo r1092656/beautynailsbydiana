@@ -35,6 +35,41 @@
   color: #aaa;
 }
 
+.filters-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 8px 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  color: var(--gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  transition: 0.3s;
+}
+
+.refresh-btn:hover {
+  transform: rotate(180deg);
+}
+
+.refresh-btn .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .clients-table-wrapper {
   border-radius: 15px;
   overflow: hidden;

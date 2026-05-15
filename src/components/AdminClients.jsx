@@ -44,12 +44,19 @@ const AdminClients = () => {
 
   const filteredClients = useMemo(() => {
     return clients.filter(client => {
-      const searchMatch = 
-        client.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.phone?.toLowerCase().includes(searchQuery.toLowerCase());
+      // Clean query and fields for comparison
+      const q = searchQuery.toLowerCase().trim();
+      const name = client.full_name?.toLowerCase() || '';
+      const email = client.email?.toLowerCase() || '';
+      const phone = client.phone?.replace(/[\s\-\(\)]/g, '') || ''; // Remove formatting for search
+      const qPhone = q.replace(/[\s\-\(\)]/g, '');
 
-      if (!searchMatch) return false;
+      const searchMatch = 
+        name.includes(q) ||
+        email.includes(q) ||
+        (qPhone && phone.includes(qPhone));
+
+      if (!searchMatch && q !== '') return false;
 
       if (visitFilter === '1-5') return client.total_visits >= 1 && client.total_visits <= 5;
       if (visitFilter === '5-10') return client.total_visits > 5 && client.total_visits <= 10;
@@ -149,6 +156,9 @@ const AdminClients = () => {
             <option value="5-10">5–10 visits</option>
             <option value="10+">10+ visits</option>
           </select>
+          <button className="refresh-btn" onClick={fetchClients} title="Gegevens vernieuwen">
+            <TrendingUp size={18} className={loading ? 'spin' : ''} />
+          </button>
         </div>
       </div>
 

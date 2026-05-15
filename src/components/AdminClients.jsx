@@ -11,6 +11,8 @@ const AdminClients = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [clientHistory, setClientHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('');
 
   useEffect(() => {
     fetchClients();
@@ -33,12 +35,69 @@ const AdminClients = () => {
         .select('*')
         .order('last_booking_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST204') {
+          console.error('Table "clients" does not exist. Please create it in Supabase.');
+        } else {
+          throw error;
+        }
+      }
       setClients(data || []);
     } catch (err) {
       console.error('Error fetching clients:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncAllClients = async () => {
+    if (!window.confirm('Wilt u alle bestaande boekingen synchroniseren met de klantendatabase? Dit kan even duren.')) return;
+    
+    setSyncing(true);
+    setSyncStatus('Bezig met ophalen van boekingen...');
+    
+    try {
+      // 1. Fetch all unique emails from bookings and blocks
+      const { data: bData } = await supabase.from('bookings').select('name, email, phone, category, sub_service, date');
+      const { data: aData } = await supabase.from('availability_blocks').select('client_name, client_email, client_phone, description, date').eq('status', 'planned');
+      
+      const allEntries = [
+        ...(bData || []).map(b => ({ ...b })),
+        ...(aData || []).map(a => {
+          const match = a.description?.match(/\[(.*?)\]/);
+          return {
+            name: a.client_name,
+            email: a.client_email,
+            phone: a.client_phone,
+            category: match ? match[1] : 'Manual',
+            sub_service: match ? match[1] : 'Manual',
+            date: a.date
+          };
+        })
+      ].filter(e => e.email);
+
+      const uniqueEmails = [...new Set(allEntries.map(e => e.email.toLowerCase().trim()))];
+      
+      setSyncStatus(`Synchroniseren van ${uniqueEmails.length} klanten...`);
+      
+      const { syncClientData } = await import('../utils/clientSync');
+      
+      for (let i = 0; i < uniqueEmails.length; i++) {
+        const email = uniqueEmails[i];
+        const latestEntry = allEntries.filter(e => e.email.toLowerCase().trim() === email).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+        
+        setSyncStatus(`Bezig met ${i+1}/${uniqueEmails.length}: ${latestEntry.name}`);
+        await syncClientData(latestEntry);
+      }
+      
+      setSyncStatus('Klaar! Klantendatabase is bijgewerkt.');
+      setTimeout(() => setSyncStatus(''), 3000);
+      fetchClients();
+    } catch (err) {
+      console.error('Migration failed:', err);
+      setSyncStatus('Fout bij synchronisatie: ' + err.message);
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -159,7 +218,16 @@ const AdminClients = () => {
           <button className="refresh-btn" onClick={fetchClients} title="Gegevens vernieuwen">
             <TrendingUp size={18} className={loading ? 'spin' : ''} />
           </button>
+          <button 
+            className="btn-outline-gold sync-all-btn" 
+            onClick={syncAllClients} 
+            disabled={syncing}
+            style={{ padding: '8px 15px', borderRadius: '10px', fontSize: '0.8rem' }}
+          >
+            {syncing ? <Loader className="animate-spin" size={14} /> : 'Sync All Data'}
+          </button>
         </div>
+        {syncStatus && <div className="sync-status-toast">{syncStatus}</div>}
       </div>
 
       {loading ? (

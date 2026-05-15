@@ -1,135 +1,147 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
-import { Search, Filter, Mail, Phone, Calendar, Star, ChevronRight, User, Loader, TrendingUp, Clock, MapPin, X } from 'lucide-react';
+import { Search, Filter, Mail, Phone, Calendar, Star, ChevronRight, User, Loader, Clock, MapPin, X, History } from 'lucide-react';
 import './AdminClients.css';
 
 const AdminClients = () => {
-  const [clients, setClients] = useState([]);
+  const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [visitFilter, setVisitFilter] = useState('all');
   const [selectedClient, setSelectedClient] = useState(null);
-  const [clientHistory, setClientHistory] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('');
+  const [allDataForSelected, setAllDataForSelected] = useState([]);
 
   useEffect(() => {
-    fetchClients();
+    fetchData();
 
-    const channel = supabase
-      .channel('clients-updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, () => fetchClients())
+    // Subscribe to both tables for real-time updates
+    const bChannel = supabase
+      .channel('booking-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchData())
+      .subscribe();
+
+    const aChannel = supabase
+      .channel('block-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'availability_blocks' }, () => fetchData())
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(bChannel);
+      supabase.removeChannel(aChannel);
     };
   }, []);
 
-  const fetchClients = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('clients')
+      // 1. Fetch online bookings
+      const { data: online, error: e1 } = await supabase
+        .from('bookings')
         .select('*')
-        .order('last_booking_date', { ascending: false });
+        .order('date', { ascending: false });
 
-      if (error) {
-        if (error.code === 'PGRST204') {
-          console.error('Table "clients" does not exist. Please create it in Supabase.');
-        } else {
-          throw error;
-        }
-      }
-      setClients(data || []);
+      // 2. Fetch manual bookings
+      const { data: manual, error: e2 } = await supabase
+        .from('availability_blocks')
+        .select('*')
+        .eq('status', 'planned')
+        .order('date', { ascending: false });
+
+      if (e1 || e2) throw e1 || e2;
+
+      // 3. Normalize and combine
+      const combined = [
+        ...(online || []).map(b => ({
+          id: `online-${b.id}`,
+          rawId: b.id,
+          name: b.name || 'Onbekende Klant',
+          email: b.email?.toLowerCase().trim() || 'geen-email@test.com',
+          phone: b.phone || '',
+          date: b.date,
+          time: b.time,
+          service: b.sub_service || b.category || 'Behandeling',
+          category: b.category,
+          location: b.location || 'Turnhout',
+          type: 'Online',
+          createdAt: b.created_at
+        })),
+        ...(manual || []).map(b => {
+          const match = b.description?.match(/\[(.*?)\]/);
+          return {
+            id: `manual-${b.id}`,
+            rawId: b.id,
+            name: b.client_name || 'Handmatige Boeking',
+            email: b.client_email?.toLowerCase().trim() || 'geen-email@test.com',
+            phone: b.client_phone || '',
+            date: b.date,
+            time: b.time_slot,
+            service: match ? match[1] : (b.description || 'Admin Boeking'),
+            category: match ? match[1] : 'Admin',
+            location: 'Turnhout', // Default for manual
+            type: 'Admin',
+            createdAt: b.created_at
+          };
+        })
+      ];
+
+      // 4. Group by email to limit to 10 per person
+      const grouped = combined.reduce((acc, visit) => {
+        const email = visit.email;
+        if (!acc[email]) acc[email] = [];
+        acc[email].push(visit);
+        return acc;
+      }, {});
+
+      // Sort each group and take top 10
+      const limitedVisits = [];
+      Object.keys(grouped).forEach(email => {
+        const clientVisits = grouped[email].sort((a, b) => {
+          // Sort by date desc, then time desc
+          if (b.date !== a.date) return new Date(b.date) - new Date(a.date);
+          return b.time.localeCompare(a.time);
+        });
+        
+        // Take 10 most recent
+        limitedVisits.push(...clientVisits.slice(0, 10));
+      });
+
+      // Final sort of the whole list by date desc
+      setVisits(limitedVisits.sort((a, b) => new Date(b.date) - new Date(a.date)));
     } catch (err) {
-      console.error('Error fetching clients:', err);
+      console.error('Error fetching visits:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const syncAllClients = async () => {
-    if (!window.confirm('Wilt u alle bestaande boekingen synchroniseren met de klantendatabase? Dit kan even duren.')) return;
+  const filteredVisits = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return visits;
+
+    return visits.filter(v => 
+      v.name.toLowerCase().includes(q) ||
+      v.email.toLowerCase().includes(q) ||
+      v.phone.replace(/[^0-9]/g, '').includes(q.replace(/[^0-9]/g, ''))
+    );
+  }, [visits, searchQuery]);
+
+  const openClientDetail = (visit) => {
+    // Get all visits for this specific client email
+    const history = visits.filter(v => v.email === visit.email).sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    setSyncing(true);
-    setSyncStatus('Bezig met ophalen van boekingen...');
-    
-    try {
-      // 1. Fetch all unique emails from bookings and blocks
-      const { data: bData } = await supabase.from('bookings').select('name, email, phone, category, sub_service, date');
-      const { data: aData } = await supabase.from('availability_blocks').select('client_name, client_email, client_phone, description, date').eq('status', 'planned');
-      
-      const allEntries = [
-        ...(bData || []).map(b => ({ ...b })),
-        ...(aData || []).map(a => {
-          const match = a.description?.match(/\[(.*?)\]/);
-          return {
-            name: a.client_name,
-            email: a.client_email,
-            phone: a.client_phone,
-            category: match ? match[1] : 'Manual',
-            sub_service: match ? match[1] : 'Manual',
-            date: a.date
-          };
-        })
-      ].filter(e => e.email);
+    // Calculate stats
+    const serviceCounts = history.reduce((acc, v) => {
+      acc[v.service] = (acc[v.service] || 0) + 1;
+      return acc;
+    }, {});
+    const favorite = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
 
-      const uniqueEmails = [...new Set(allEntries.map(e => e.email.toLowerCase().trim()))];
-      
-      setSyncStatus(`Synchroniseren van ${uniqueEmails.length} klanten...`);
-      
-      const { syncClientData } = await import('../utils/clientSync');
-      
-      for (let i = 0; i < uniqueEmails.length; i++) {
-        const email = uniqueEmails[i];
-        const latestEntry = allEntries.filter(e => e.email.toLowerCase().trim() === email).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        
-        setSyncStatus(`Bezig met ${i+1}/${uniqueEmails.length}: ${latestEntry.name}`);
-        await syncClientData(latestEntry);
-      }
-      
-      setSyncStatus('Klaar! Klantendatabase is bijgewerkt.');
-      setTimeout(() => setSyncStatus(''), 3000);
-      fetchClients();
-    } catch (err) {
-      console.error('Migration failed:', err);
-      setSyncStatus('Fout bij synchronisatie: ' + err.message);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  const filteredClients = useMemo(() => {
-    return clients.filter(client => {
-      // Clean query and fields for comparison
-      const q = searchQuery.toLowerCase().trim();
-      const name = client.full_name?.toLowerCase() || '';
-      const email = client.email?.toLowerCase() || '';
-      const phone = client.phone?.replace(/[\s\-\(\)]/g, '') || ''; // Remove formatting for search
-      const qPhone = q.replace(/[\s\-\(\)]/g, '');
-
-      const searchMatch = 
-        name.includes(q) ||
-        email.includes(q) ||
-        (qPhone && phone.includes(qPhone));
-
-      if (!searchMatch && q !== '') return false;
-
-      if (visitFilter === '1-5') return client.total_visits >= 1 && client.total_visits <= 5;
-      if (visitFilter === '5-10') return client.total_visits > 5 && client.total_visits <= 10;
-      if (visitFilter === '10+') return client.total_visits > 10;
-
-      return true;
+    setSelectedClient({
+      ...visit,
+      totalVisits: history.length,
+      favoriteService: favorite,
+      lastVisit: history[0].date
     });
-  }, [clients, searchQuery, visitFilter]);
-
-  const getVisitBadgeClass = (count) => {
-    if (count <= 3) return 'low';
-    if (count <= 7) return 'medium';
-    if (count <= 15) return 'high';
-    return 'vip';
+    setAllDataForSelected(history);
   };
 
   const getInitials = (name) => {
@@ -139,61 +151,9 @@ const AdminClients = () => {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
-  const openClientDetail = async (client) => {
-    setSelectedClient(client);
-    setHistoryLoading(true);
-    try {
-      // Fetch online bookings
-      const { data: onlineBookings } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('email', client.email)
-        .order('date', { ascending: false })
-        .limit(10);
-
-      // Fetch manual bookings
-      const { data: manualBookings } = await supabase
-        .from('availability_blocks')
-        .select('*')
-        .eq('client_email', client.email)
-        .eq('status', 'planned')
-        .order('date', { ascending: false })
-        .limit(10);
-
-      // Merge and sort
-      const merged = [
-        ...(onlineBookings || []).map(b => ({
-          id: b.id,
-          date: b.date,
-          time: b.time,
-          service: b.sub_service || b.category,
-          location: b.location,
-          type: 'Online'
-        })),
-        ...(manualBookings || []).map(b => {
-          const match = b.description?.match(/\[(.*?)\]/);
-          return {
-            id: b.id,
-            date: b.date,
-            time: b.time_slot,
-            service: match ? match[1] : 'Manual Entry',
-            location: 'Turnhout', // Default for manual
-            type: 'Admin'
-          };
-        })
-      ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
-
-      setClientHistory(merged);
-    } catch (err) {
-      console.error('Error fetching client history:', err);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
   return (
     <div className="admin-clients-container fade-in">
-      <div className="clients-controls">
+      <div className="clients-header-section">
         <div className="search-wrapper">
           <Search className="search-icon" size={20} />
           <input 
@@ -203,98 +163,68 @@ const AdminClients = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="filters-wrapper">
-          <Filter size={18} className="text-gold" />
-          <select 
-            className="filter-select"
-            value={visitFilter}
-            onChange={(e) => setVisitFilter(e.target.value)}
-          >
-            <option value="all">All Visits</option>
-            <option value="1-5">1–5 visits</option>
-            <option value="5-10">5–10 visits</option>
-            <option value="10+">10+ visits</option>
-          </select>
-          <button className="refresh-btn" onClick={fetchClients} title="Gegevens vernieuwen">
-            <TrendingUp size={18} className={loading ? 'spin' : ''} />
-          </button>
-          <button 
-            className="btn-outline-gold sync-all-btn" 
-            onClick={syncAllClients} 
-            disabled={syncing}
-            style={{ padding: '8px 15px', borderRadius: '10px', fontSize: '0.8rem' }}
-          >
-            {syncing ? <Loader className="animate-spin" size={14} /> : 'Sync All Data'}
-          </button>
-        </div>
-        {syncStatus && <div className="sync-status-toast">{syncStatus}</div>}
+        <button className="refresh-btn-large" onClick={fetchData} disabled={loading}>
+          {loading ? <Loader className="animate-spin" size={18} /> : <History size={18} />}
+          <span>Refresh List</span>
+        </button>
       </div>
 
-      {loading ? (
+      {loading && visits.length === 0 ? (
         <div className="text-center py-5">
           <Loader className="animate-spin text-gold" size={40} />
-          <p className="mt-2 text-muted">Loading client database...</p>
+          <p className="mt-2 text-muted">Fetching bookings...</p>
         </div>
-      ) : filteredClients.length === 0 ? (
+      ) : filteredVisits.length === 0 ? (
         <div className="glass-panel text-center py-5">
           <User size={48} className="text-muted mb-3" style={{ opacity: 0.3 }} />
-          <h3>No clients found</h3>
-          <p className="text-muted">Try adjusting your search or filters.</p>
+          <h3>No clients or bookings found</h3>
+          <p className="text-muted">Every confirmed booking will appear here automatically.</p>
         </div>
       ) : (
         <div className="clients-table-wrapper">
           <table className="clients-table">
             <thead>
               <tr>
-                <th>Client Name</th>
-                <th>Contact Details</th>
-                <th>Visits</th>
-                <th>Last Booking</th>
-                <th>Top Service</th>
-                <th></th>
+                <th>Client / Visit Date</th>
+                <th>Contact</th>
+                <th>Service</th>
+                <th>Details</th>
+                <th>Type</th>
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map((client) => (
-                <tr key={client.id} onClick={() => openClientDetail(client)}>
-                  <td data-label="Klant">
+              {filteredVisits.map((v) => (
+                <tr key={v.id} onClick={() => openClientDetail(v)}>
+                  <td data-label="Client">
                     <div className="client-name-cell">
-                      <div className="client-avatar">{getInitials(client.full_name)}</div>
+                      <div className="client-avatar">{getInitials(v.name)}</div>
                       <div className="client-info">
-                        <h4>{client.full_name}</h4>
-                        <span>Sinds {new Date(client.created_at).getFullYear()}</span>
+                        <h4>{v.name}</h4>
+                        <span className="visit-date-badge">
+                          <Calendar size={12} /> {new Date(v.date).toLocaleDateString('nl-BE')}
+                        </span>
                       </div>
                     </div>
                   </td>
                   <td data-label="Contact">
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-end' }}>
-                      <a href={`mailto:${client.email}`} className="contact-link" onClick={e => e.stopPropagation()}>
-                        <Mail size={14} /> {client.email}
-                      </a>
-                      <a href={`tel:${client.phone}`} className="contact-link" onClick={e => e.stopPropagation()}>
-                        <Phone size={14} /> {client.phone}
-                      </a>
-                    </div>
-                  </td>
-                  <td data-label="Bezoeken">
-                    <span className={`visit-badge ${getVisitBadgeClass(client.total_visits)}`}>
-                      <Star size={12} fill="currentColor" />
-                      {client.total_visits}
-                    </span>
-                  </td>
-                  <td data-label="Laatste">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#555', justifyContent: 'flex-end' }}>
-                      <Calendar size={14} className="text-gold" />
-                      {new Date(client.last_booking_date).toLocaleDateString('nl-BE')}
+                    <div className="contact-column">
+                      <span className="contact-mini"><Mail size={12} /> {v.email}</span>
+                      {v.phone && <span className="contact-mini"><Phone size={12} /> {v.phone}</span>}
                     </div>
                   </td>
                   <td data-label="Service">
-                    <span style={{ fontSize: '0.85rem', color: '#666' }}>
-                      {client.most_booked_service || 'N/A'}
-                    </span>
+                    <div className="service-info">
+                      <span className="service-name">{v.service}</span>
+                    </div>
                   </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <ChevronRight size={18} className="text-muted" />
+                  <td data-label="Details">
+                    <div className="details-mini">
+                      <span><Clock size={12} /> {v.time}</span>
+                      <span><MapPin size={12} /> {v.location}</span>
+                    </div>
+                  </td>
+                  <td data-label="Type">
+                    <span className={`type-badge ${v.type.toLowerCase()}`}>{v.type}</span>
                   </td>
                 </tr>
               ))}
@@ -309,63 +239,56 @@ const AdminClients = () => {
             <button className="close-btn" onClick={() => setSelectedClient(null)}><X size={24} /></button>
             
             <div className="client-profile-header">
-              <div className="profile-avatar-large">{getInitials(selectedClient.full_name)}</div>
+              <div className="profile-avatar-large">{getInitials(selectedClient.name)}</div>
               <div className="profile-main-info">
-                <h2>{selectedClient.full_name}</h2>
-                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                <h2>{selectedClient.name}</h2>
+                <div className="contact-links-row">
                   <a href={`mailto:${selectedClient.email}`} className="contact-link">
                     <Mail size={16} /> {selectedClient.email}
                   </a>
-                  <a href={`tel:${selectedClient.phone}`} className="contact-link">
-                    <Phone size={16} /> {selectedClient.phone}
-                  </a>
+                  {selectedClient.phone && (
+                    <a href={`tel:${selectedClient.phone}`} className="contact-link">
+                      <Phone size={16} /> {selectedClient.phone}
+                    </a>
+                  )}
                 </div>
                 
                 <div className="profile-stats">
                   <div className="stat-card">
-                    <label><TrendingUp size={12} style={{ marginRight: '5px' }} /> Total Visits</label>
-                    <span>{selectedClient.total_visits} sessions</span>
+                    <label>Total Sessions</label>
+                    <span>{selectedClient.totalVisits}</span>
                   </div>
                   <div className="stat-card">
-                    <label><Clock size={12} style={{ marginRight: '5px' }} /> Last Visit</label>
-                    <span>{new Date(selectedClient.last_booking_date).toLocaleDateString('nl-BE')}</span>
+                    <label>Favorite Service</label>
+                    <span>{selectedClient.favoriteService || 'N/A'}</span>
                   </div>
                   <div className="stat-card">
-                    <label><Star size={12} style={{ marginRight: '5px' }} /> Favorite Service</label>
-                    <span>{selectedClient.most_booked_service || 'N/A'}</span>
+                    <label>Last Visit</label>
+                    <span>{new Date(selectedClient.lastVisit).toLocaleDateString('nl-BE')}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="history-section mt-4">
-              <h3><Clock size={20} className="text-gold" /> Visit History (Last 10)</h3>
-              
-              {historyLoading ? (
-                <div className="text-center py-4">
-                  <Loader className="animate-spin text-gold" size={30} />
-                </div>
-              ) : clientHistory.length === 0 ? (
-                <p className="text-muted text-center py-4">No booking history found.</p>
-              ) : (
-                <div className="visit-history-list">
-                  {clientHistory.map((visit, idx) => (
-                    <div key={`${visit.id}-${idx}`} className="history-item">
-                      <div className="history-info">
-                        <div className="history-date">
-                          {new Date(visit.date).toLocaleDateString('nl-BE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
-                        </div>
-                        <div className="history-service">{visit.service}</div>
+              <h3><History size={20} className="text-gold" /> Booking History (Max 10)</h3>
+              <div className="visit-history-list">
+                {allDataForSelected.map((visit, idx) => (
+                  <div key={`${visit.id}-${idx}`} className="history-item">
+                    <div className="history-info">
+                      <div className="history-date">
+                        {new Date(visit.date).toLocaleDateString('nl-BE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
                       </div>
-                      <div className="history-meta">
-                        <span><Clock size={14} /> {visit.time}</span>
-                        <span><MapPin size={14} /> {visit.location}</span>
-                        <span className={`badge-${visit.type.toLowerCase()}`} style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', background: visit.type === 'Online' ? '#e3f2fd' : '#f3e5f5', color: visit.type === 'Online' ? '#1976d2' : '#7b1fa2' }}>{visit.type}</span>
-                      </div>
+                      <div className="history-service">{visit.service}</div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div className="history-meta">
+                      <span><Clock size={14} /> {visit.time}</span>
+                      <span><MapPin size={14} /> {visit.location}</span>
+                      <span className={`type-badge-mini ${visit.type.toLowerCase()}`}>{visit.type}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

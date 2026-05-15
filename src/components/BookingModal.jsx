@@ -9,7 +9,7 @@ import './BookingModal.css';
 const SERVICE_STRUCTURE = {
   'Gel Overlay': ['Fill In', 'Fullset'],
   'Verlenging': ['Fill In', 'Fullset'],
-  'Manicure': [],
+  'Manicure': ['Manicure', 'Manicure + Gellak'],
   'Pedicure': ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak']
 };
 
@@ -37,13 +37,20 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-const getDurationMins = (category) => {
+const getDurationMins = (category, subSrv = '') => {
   if (!category) return 150; // default backup
   const cat = category.trim();
+  const sub = subSrv?.trim() || '';
+  
   // New durations including 15-minute buffer
   if (cat === 'Gel Overlay' || cat === 'Verlenging') return 175; // 2h 40m + 15m = 2h 55m (175m)
   if (cat === 'Pedicure') return 105; // 1h 30m + 15m = 1h 45m (105m)
-  if (cat === 'Manicure') return 75; // 1h + 15m = 1h 15m (75m)
+  
+  if (cat === 'Manicure') {
+    if (sub.includes('Gellak')) return 105; // 1h 30m + 15m buffer = 105m
+    return 75; // 1h + 15m = 1h 15m (75m)
+  }
+  
   return 150; 
 };
 
@@ -129,7 +136,11 @@ const BookingModal = () => {
         setSubService('Fullset');
       } else if (s.includes('manicure')) {
         setCategory('Manicure');
-        setSubService('Standaard Manicure');
+        if (s.includes('gellak')) {
+          setSubService('Manicure + Gellak');
+        } else {
+          setSubService('Manicure');
+        }
       } else if (s.includes('pedicure')) {
         setCategory('Pedicure');
         setSubService('Gellak Pedicure');
@@ -156,7 +167,8 @@ const BookingModal = () => {
 
   const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'Verlenging', [category]);
   const isPedicure = useMemo(() => category === 'Pedicure', [category]);
-  const durationMins = useMemo(() => getDurationMins(category), [category]);
+  const isManicure = useMemo(() => category === 'Manicure', [category]);
+  const durationMins = useMemo(() => getDurationMins(category, subService), [category, subService]);
 
   const availableSlots = useMemo(() => {
     const allSlots = generateTimeSlots();
@@ -176,7 +188,7 @@ const BookingModal = () => {
       const isBooked = existingBookings.some(b => {
         const bStart = timeToMins(b.time);
         // Use stored duration if available, otherwise fallback to current category logic
-        const bDuration = b.duration || getDurationMins(b.category);
+        const bDuration = b.duration || getDurationMins(b.category, b.sub_service);
         const bEnd = bStart + bDuration;
         return (startSlotMins < bEnd && endSlotMins > bStart);
       });
@@ -413,6 +425,27 @@ const BookingModal = () => {
                       <option value="" disabled>Select design...</option>
                       {PEDICURE_DESIGNS.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
+                  </div>
+                </div>
+              )}
+
+              {isManicure && (
+                <div className="fade-in">
+                  <div className="form-group">
+                    <label>Kies Manicure Optie</label>
+                    <div className="option-grid">
+                      {SERVICE_STRUCTURE['Manicure'].map((opt) => (
+                        <button 
+                          key={opt} 
+                          type="button" 
+                          className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} 
+                          onClick={() => setSubService(opt)}
+                          style={{ minHeight: '50px' }}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

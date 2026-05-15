@@ -66,18 +66,10 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container py-5 mt-5 fade-in">
-      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '20px' }}>
-        <div style={{ minWidth: '250px' }}>
-          <h1 className="display-6 text-gold">Beheerpaneel</h1>
-          <p className="text-muted">Beheer hier je website content, reviews en afspraken.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <button onClick={logout} className="btn-outline-gold" style={{ display: 'flex', alignItems: 'center', padding: '10px 20px' }}>
-            <LogOut size={18} style={{ marginRight: '8px' }} />
-            Uitloggen
-          </button>
-        </div>
+    <div className="fade-in">
+      <div className="admin-header-modern" style={{ marginBottom: '30px' }}>
+        <h1 className="display-6 text-gold" style={{ fontSize: '1.8rem', fontWeight: '700' }}>Welkom terug!</h1>
+        <p className="text-muted">Beheer hier je website content, reviews en afspraken.</p>
       </div>
 
       <div className="admin-tabs" style={{ 

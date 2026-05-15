@@ -415,21 +415,41 @@
 }
 
 .booking-details-modal {
-  width: 90%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 550px;
   background: white;
-  padding: 35px;
+  padding: 30px;
   border-radius: 25px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) #f1f1f1;
+}
+
+.booking-details-modal::-webkit-scrollbar {
+  width: 6px;
+}
+.booking-details-modal::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 10px;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 25px;
+  position: sticky;
+  top: -30px;
+  background: white;
+  padding: 10px 0;
+  z-index: 10;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.modal-header h3 { margin: 0; color: var(--gold); }
+.modal-header h3 { margin: 0; color: var(--gold); font-size: 1.5rem; }
 
 .status-options-list {
   display: flex;
@@ -539,11 +559,24 @@
 .status-btn.mini.blocked { background: #fef2f2; border: 1px solid #fee2e2; }
 
 .close-btn {
-  background: none;
+  background: #f1f5f9;
   border: none;
-  font-size: 2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
   cursor: pointer;
-  color: var(--text-muted);
+  color: #64748b;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+
+.close-btn:hover {
+  background: #e2e8f0;
+  color: var(--gold);
 }
 
 .booking-info-grid {
@@ -667,4 +700,52 @@
   background: #16a34a;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 30px;
+  position: sticky;
+  bottom: -30px;
+  background: white;
+  padding: 20px 0 0 0;
+  z-index: 10;
+  border-top: 1px solid #f1f5f9;
+}
+
+.modal-footer {
+  position: sticky;
+  bottom: -30px;
+  background: white;
+  padding: 15px 0 0 0;
+  z-index: 10;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between !important;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .booking-details-modal {
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .modal-header, .form-actions, .modal-footer {
+    position: sticky;
+    background: white;
+  }
+  
+  .modal-header {
+    top: -20px;
+  }
+  
+  .form-actions, .modal-footer {
+    bottom: -20px;
+  }
 }

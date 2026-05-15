@@ -52,6 +52,11 @@ const serviceCategories = [
         icon: Hand 
       },
       { 
+        name: 'Manicure Gellak', 
+        desc: 'Een complete manicure verzorging gecombineerd met een duurzame gellak voor een perfect resultaat.', 
+        icon: Sparkles 
+      },
+      { 
         name: 'Pedicure met gel lak', 
         desc: 'Grondige verzorging van de voeten en nagels, afgewerkt met een duurzame gellak.', 
         icon: Footprints 

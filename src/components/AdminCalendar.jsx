@@ -18,12 +18,19 @@ const TIME_SLOTS = (() => {
   return slots;
 })();
 
-const getDurationMins = (category) => {
+const getDurationMins = (category, subSrv = '') => {
   if (!category) return 150;
   const cat = category.trim();
+  const sub = subSrv?.trim() || '';
+
   if (cat === 'Gel Overlay' || cat === 'Verlenging') return 175;
   if (cat === 'Pedicure') return 105;
-  if (cat === 'Manicure') return 75;
+  
+  if (cat === 'Manicure') {
+    if (sub.includes('Gellak')) return 105;
+    return 75;
+  }
+  
   return 150;
 };
 
@@ -513,7 +520,7 @@ const AdminCalendar = () => {
                     const [h, m] = b.time.split(':').map(Number);
                     return h * 60 + m;
                   })();
-                  const bDuration = b.duration || getDurationMins(b.category);
+                  const bDuration = b.duration || getDurationMins(b.category, b.sub_service);
                   const bEnd = bStart + bDuration;
                   return slotMins >= bStart && slotMins < bEnd;
                 });

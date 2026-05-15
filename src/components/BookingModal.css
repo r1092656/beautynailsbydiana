@@ -14,13 +14,14 @@
 
 .modal-content {
   background: white;
-  width: 90%;
-  max-width: 550px;
+  width: 95%;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
   padding: 40px;
-  /* Make sure scrolling feels nice */
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   scrollbar-width: thin;
   scrollbar-color: var(--gold) #f1f1f1;
 }

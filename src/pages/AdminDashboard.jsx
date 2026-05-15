@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Users, Calendar as CalendarIcon } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import AdminCalendar from '../components/AdminCalendar';
@@ -12,7 +12,13 @@ const AdminDashboard = () => {
   useDocumentTitle('Admin Dashboard');
   const { content, deleteContent } = useContent();
   const { logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('portfolio');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'portfolio';
+  
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab });
+  };
+
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 

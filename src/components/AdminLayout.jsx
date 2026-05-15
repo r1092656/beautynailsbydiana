@@ -23,10 +23,10 @@ const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const navItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard', tab: 'portfolio' },
-    { name: 'Kalender', icon: <CalendarIcon size={20} />, path: '/admin/dashboard', tab: 'calendar' },
-    { name: 'Klanten', icon: <Users size={20} />, path: '/admin/dashboard', tab: 'clients' },
-    { name: 'Reviews', icon: <MessageSquare size={20} />, path: '/admin/dashboard', tab: 'reviews' },
+    { name: 'Portfolio', icon: <ImageIcon size={20} />, path: '/admin/dashboard?tab=portfolio', tab: 'portfolio' },
+    { name: 'Kalender', icon: <CalendarIcon size={20} />, path: '/admin/dashboard?tab=calendar', tab: 'calendar' },
+    { name: 'Klanten', icon: <Users size={20} />, path: '/admin/dashboard?tab=clients', tab: 'clients' },
+    { name: 'Reviews', icon: <MessageSquare size={20} />, path: '/admin/dashboard?tab=reviews', tab: 'reviews' },
   ];
 
   const handleLogout = () => {
@@ -61,7 +61,7 @@ const AdminLayout = ({ children }) => {
             <Link 
               key={item.name} 
               to={item.path} 
-              className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+              className={`nav-item ${location.pathname + location.search === item.path ? 'active' : ''}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',

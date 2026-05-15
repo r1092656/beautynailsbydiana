@@ -222,14 +222,7 @@ const BookingModal = () => {
     setStep('payment_info');
   };
 
-  const startPayment = () => {
-    // Open payment link in new window
-    window.open("https://pay.bancontact.com/p2p/c5513885-77a5-43ee-91d0-d748c4c9d678", "_blank");
-    // Transition to waiting step
-    setStep('awaiting_confirmation');
-  };
-
-  const finalizeBooking = async () => {
+  const startPayment = async () => {
     setIsSending(true);
     try {
       let compressedImageBase64 = null;
@@ -237,71 +230,42 @@ const BookingModal = () => {
         compressedImageBase64 = await compressImage(selectedFile, 800, 0.7);
       }
 
-      const emailPayload = {
+      const payload = {
         name,
         email,
         phone,
         category,
         sub_service: subService,
-        nail_shape: nailShape,
-        nail_length: nailLength,
-        design: design,
-        extra_bewerking: extraBewerking,
         location,
         date,
         time,
-        inspiration_image: compressedImageBase64,
-        payment_status: 'paid',
-        deposit_amount: '€10,00',
-        duration_mins: durationMins
+        duration_mins: durationMins,
+        inspiration_image: compressedImageBase64
       };
 
-      const response = await fetch("/api/booking", {
+      const response = await fetch("/api/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(emailPayload),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
-      if (result.success) {
-        // Save to Supabase (Double logic: Email + DB)
-        const { error: dbError } = await supabase
-          .from('bookings')
-          .insert([{
-            date,
-            time,
-            name,
-            email,
-            phone,
-            category,
-            sub_service: subService,
-            location,
-            status: 'confirmed'
-          }]);
-
-        if (dbError) throw dbError;
-
-        // Sync to Client database
-        await syncClientData({
-          name,
-          email,
-          phone,
-          category,
-          sub_service: subService,
-          date
-        });
-
-        setStep('complete');
+      if (result.success && result.checkoutUrl) {
+        // Redirect directly to Mollie/Payconiq
+        window.location.href = result.checkoutUrl;
       } else {
-        throw new Error(result.error || "Fout bij verzenden van boeking.");
+        throw new Error(result.error || "Fout bij initialiseren van betaling.");
       }
     } catch (error) {
-      console.error("Booking error:", error);
-      alert(`Er is iets misgegaan: ${error.message || "Onbekende fout"}. Probeer het later opnieuw of neem contact op.`);
+      console.error("Payment error:", error);
+      alert(`Er is iets misgegaan: ${error.message}`);
     } finally {
       setIsSending(false);
     }
   };
+
+  // Note: finalizeBooking is now handled server-side via webhook.
+  // The client will be redirected back to a success page.
 
   const handleClose = () => {
     setStep('details');
@@ -532,20 +496,8 @@ const BookingModal = () => {
               <Loader size={48} className="animate-spin text-gold" />
             </div>
             <h2 className="modal-title">Betaling Bezig...</h2>
-            <p className="mb-4">Je wordt/bent doorverwezen naar de Payconiq/Bancontact app om de betaling van €10,00 te voltooien.</p>
-            
-            <div className="glass-panel" style={{ padding: '20px', marginBottom: '30px', borderLeft: '4px solid var(--gold)' }}>
-              <p style={{ margin: 0, fontSize: '0.95rem' }}><strong>Keer hier terug</strong> na je betaling en klik op de knop hieronder om je boeking te voltooien.</p>
-            </div>
-
-            <button className="btn-gold w-100 mb-3" onClick={finalizeBooking} disabled={isSending}>
-              {isSending ? <Loader className="animate-spin" size={20} /> : <CircleCheck size={20} style={{ marginRight: '10px' }} />}
-              {isSending ? "Verifiëren..." : "Ik heb betaald, bevestig mijn boeking"}
-            </button>
-
-            <button className="btn-text-gold" onClick={() => window.open("https://pay.bancontact.com/p2p/c5513885-77a5-43ee-91d0-d748c4c9d678", "_blank")}>
-              <ExternalLink size={16} style={{ marginRight: '6px' }} /> Link opnieuw openen
-            </button>
+            <p className="mb-4">Je wordt doorverwezen naar de beveiligde betaalomgeving om je boeking te bevestigen.</p>
+            <p className="text-muted small">Sluit dit venster niet.</p>
           </div>
         )}
 

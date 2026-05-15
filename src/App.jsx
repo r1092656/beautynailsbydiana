@@ -15,6 +15,7 @@ import Services from './pages/Services';
 import Portfolio from './pages/Portfolio';
 import Contact from './pages/Contact';
 import Reviews from './pages/Reviews';
+import BookingSuccess from './pages/BookingSuccess';
 
 // Admin Pages
 import AdminLogin from './pages/AdminLogin';
@@ -38,6 +39,7 @@ const AppContent = () => {
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/reviews" element={<Reviews />} />
+        <Route path="/booking-success" element={<BookingSuccess />} />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />

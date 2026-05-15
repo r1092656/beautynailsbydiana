@@ -354,80 +354,6 @@
   padding: 40px 20px;
 }
 
-/* Deposit/Payment Styles */
-.deposit-info-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px 20px;
-  background: var(--soft-pink);
-  border-left: 4px solid var(--gold);
-  border-radius: 12px;
-  margin-top: 20px;
-}
-
-.deposit-info-banner p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--dark-text);
-  line-height: 1.4;
-}
-
-.payment-step {
-  padding: 20px 0;
-}
-
-.policy-list {
-  padding-left: 20px;
-  margin: 0;
-  color: #666;
-  font-size: 0.95rem;
-}
-
-.policy-list li {
-  margin-bottom: 8px;
-}
-
-.awaiting-confirmation {
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.loader-ring {
-  padding: 20px;
-  background: #fffaf5;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.btn-text-gold {
-  background: transparent;
-  border: none;
-  color: var(--gold);
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.9rem;
-  transition: 0.3s;
-  padding: 10px;
-}
-
-.btn-text-gold:hover {
-  color: var(--dark-gold);
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 /* Base button overrides for modal */
 .btn-gold, .btn-outline-gold {
   display: flex;
@@ -469,4 +395,13 @@
 .btn-outline-gold:hover {
   background: #fffaf5;
   transform: translateY(-2px);
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

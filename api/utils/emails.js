@@ -10,8 +10,6 @@ export const sendBookingEmails = async (bookingData) => {
     location,
     date,
     time,
-    deposit_amount = '€10,00',
-    payment_status = 'paid',
     duration_mins = 150,
     type = 'online',
     description
@@ -39,8 +37,7 @@ export const sendBookingEmails = async (bookingData) => {
         `Phone: ${phone}`,
         `Category: ${category}`,
         `Service: ${sub_service}`,
-        `Location: ${location}`,
-        `Aanbetaling: ${deposit_amount} (${payment_status})`
+        `Location: ${location}`
       ].join('\n');
 
       const params = new URLSearchParams({
@@ -118,7 +115,6 @@ export const sendBookingEmails = async (bookingData) => {
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
           </div>
-          <p>We hebben je aanbetaling van ${deposit_amount} goed ontvangen.</p>
         </div>
       </div>
     </body></html>

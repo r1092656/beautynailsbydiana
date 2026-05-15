@@ -63,7 +63,7 @@ const formatDuration = (mins) => {
 const BookingModal = () => {
   const { isModalOpen, closeModal, selectedService } = useBooking();
 
-  // Booking Flow State: 'details' | 'payment_info' | 'awaiting_confirmation' | 'complete'
+  // Booking Flow State: 'details' | 'complete'
   const [step, setStep] = useState('details');
   
   // Form State
@@ -215,14 +215,11 @@ const BookingModal = () => {
     }
   };
 
-  const goToPaymentInfo = (e) => {
-    e.preventDefault();
+  const confirmBooking = async (e) => {
+    if (e) e.preventDefault();
     if (!location) { alert("Selecteer een locatie."); return; }
     if (!time) { alert("Selecteer een tijdslot."); return; }
-    setStep('payment_info');
-  };
 
-  const startPayment = async () => {
     setIsSending(true);
     try {
       let compressedImageBase64 = null;
@@ -230,7 +227,7 @@ const BookingModal = () => {
         compressedImageBase64 = await compressImage(selectedFile, 800, 0.7);
       }
 
-      const payload = {
+      const emailPayload = {
         name,
         email,
         phone,
@@ -239,26 +236,52 @@ const BookingModal = () => {
         location,
         date,
         time,
-        duration_mins: durationMins,
-        inspiration_image: compressedImageBase64
+        inspiration_image: compressedImageBase64,
+        duration_mins: durationMins
       };
 
-      const response = await fetch("/api/create-payment", {
+      const response = await fetch("/api/booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(emailPayload),
       });
 
       const result = await response.json();
-      if (result.success && result.checkoutUrl) {
-        // Redirect directly to Mollie/Payconiq
-        window.location.href = result.checkoutUrl;
+      if (result.success) {
+        // Save to Supabase
+        const { error: dbError } = await supabase
+          .from('bookings')
+          .insert([{
+            date,
+            time,
+            name,
+            email,
+            phone,
+            category,
+            sub_service: subService,
+            location,
+            status: 'confirmed'
+          }]);
+
+        if (dbError) throw dbError;
+
+        // Sync to Client database
+        await syncClientData({
+          name,
+          email,
+          phone,
+          category,
+          sub_service: subService,
+          date
+        });
+
+        setStep('complete');
       } else {
-        throw new Error(result.error || "Fout bij initialiseren van betaling.");
+        throw new Error(result.error || "Fout bij verzenden van boeking.");
       }
     } catch (error) {
-      console.error("Payment error:", error);
-      alert(`Er is iets misgegaan: ${error.message}`);
+      console.error("Booking error:", error);
+      alert(`Er is iets misgegaan: ${error.message || "Onbekende fout"}. Probeer het later opnieuw.`);
     } finally {
       setIsSending(false);
     }
@@ -298,7 +321,7 @@ const BookingModal = () => {
             <h2 className="modal-title serif-title">Book your Appointment</h2>
             <p className="modal-subtitle">Experience luxury nail care. Optimized scheduling for {category || 'your service'}.</p>
 
-            <form onSubmit={goToPaymentInfo} className="booking-form">
+            <form onSubmit={confirmBooking} className="booking-form">
               {/* Step 1: Personal Info */}
               <div className="form-group">
                 <label>Full Name</label>
@@ -450,56 +473,14 @@ const BookingModal = () => {
                 </div>
               </div>
 
-              <div className="deposit-info-banner glass-panel" style={{ marginBottom: '20px' }}>
-                <Info size={18} color="var(--gold)" />
-                <p>Een aanbetaling van <strong>€10,00</strong> is vereist om je boeking te bevestigen.</p>
-              </div>
-
               <button type="submit" className="btn-gold w-100" style={{ marginTop: '20px' }} disabled={isSending}>
-                {isSending ? <Loader className="animate-spin" size={20} /> : "Confirm Booking"}
+                {isSending ? <Loader className="animate-spin" size={20} /> : "Afspraak Bevestigen"}
               </button>
             </form>
           </div>
         )}
 
-        {step === 'payment_info' && (
-          <div className="payment-step fade-in">
-            <h2 className="modal-title">Aanbetaling & Beleid</h2>
-            <div className="payment-details glass-panel" style={{ padding: '25px', marginBottom: '30px' }}>
-              <div className="payment-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-                <span style={{ fontWeight: '600' }}>Voorschot Beauty Nails</span>
-                <span className="text-gold" style={{ fontWeight: 'bold' }}>€10,00</span>
-              </div>
-              
-              <div className="cancellation-policy">
-                <h4 style={{ color: 'var(--dark-text)', fontSize: '1rem', marginBottom: '10px' }}>Annuleringsbeleid</h4>
-                <ul className="policy-list">
-                  <li>Annuleren <strong>&gt; 48 uur</strong>: Aanbetaling wordt teruggestort.</li>
-                  <li>Annuleren <strong>&lt; 48 uur</strong>: Aanbetaling wordt <strong>niet</strong> terugbetaald.</li>
-                </ul>
-              </div>
-            </div>
 
-            <button className="btn-gold w-100 mb-3" onClick={startPayment}>
-              <CreditCard size={20} style={{ marginRight: '10px' }} /> Start Betaling via Payconiq
-            </button>
-            
-            <button className="btn-outline-gold w-100" onClick={() => setStep('details')}>
-              <ChevronLeft size={20} style={{ marginRight: '8px' }} /> Terug naar gegevens
-            </button>
-          </div>
-        )}
-
-        {step === 'awaiting_confirmation' && (
-          <div className="awaiting-confirmation fade-in text-center">
-            <div className="loader-ring mb-4">
-              <Loader size={48} className="animate-spin text-gold" />
-            </div>
-            <h2 className="modal-title">Betaling Bezig...</h2>
-            <p className="mb-4">Je wordt doorverwezen naar de beveiligde betaalomgeving om je boeking te bevestigen.</p>
-            <p className="text-muted small">Sluit dit venster niet.</p>
-          </div>
-        )}
 
         {step === 'complete' && (
           <div className="booking-success fade-in">

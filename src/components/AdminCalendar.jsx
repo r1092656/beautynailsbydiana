@@ -499,11 +499,11 @@ const AdminCalendar = () => {
         ) : (
           <div className="day-view">
             <div className="day-header">
-              <div className="day-header-top">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <h3>{new Date(selectedDate.date).toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
                 {isSavingData && <div className="saving-indicator"><Loader size={12} className="spin" /> Opslaan...</div>}
               </div>
-              <p className="text-muted">Klik op een slot om de status te wijzigen of details te zien.</p>
+              <p className="text-muted">Klik op een groen vakje om het te blokkeren (rood), of andersom.</p>
             </div>
 
             <div className="time-slots-grid">
@@ -629,9 +629,9 @@ const AdminCalendar = () => {
               </div>
             </div>
 
-            <div className="modal-footer">
-              <div className="footer-actions">
-                <button className="status-btn mini blocked" onClick={() => handleBookingStatusChange('blocked')} title="Blokkeren"><XCircle size={16} /></button>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="status-btn mini blocked" onClick={() => handleBookingStatusChange('blocked')} title="Wijzig naar Geblokkeerd"><XCircle size={16} /></button>
                 <button className="status-btn mini available" onClick={() => handleBookingStatusChange('available')} title="Vrijgeven"><CheckCircle size={16} /></button>
               </div>
               <button className="btn-outline-gold" onClick={() => setActiveBooking(null)}>Sluiten</button>
@@ -862,10 +862,11 @@ const AdminCalendar = () => {
               </div>
             </div>
 
-            <div className="modal-footer">
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
               <button 
                 className="btn-outline-red" 
                 onClick={() => handleDeleteManualGroup(viewingManualBlock.group_id)}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444', border: '1px solid #ef4444', padding: '8px 15px', borderRadius: '8px', background: 'none', cursor: 'pointer' }}
               >
                 <Trash2 size={16} /> Verwijderen
               </button>

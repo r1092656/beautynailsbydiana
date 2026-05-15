@@ -179,17 +179,17 @@ const AdminClients = () => {
             <tbody>
               {filteredClients.map((client) => (
                 <tr key={client.id} onClick={() => openClientDetail(client)}>
-                  <td>
+                  <td data-label="Klant">
                     <div className="client-name-cell">
                       <div className="client-avatar">{getInitials(client.full_name)}</div>
                       <div className="client-info">
                         <h4>{client.full_name}</h4>
-                        <span>Client since {new Date(client.created_at).getFullYear()}</span>
+                        <span>Sinds {new Date(client.created_at).getFullYear()}</span>
                       </div>
                     </div>
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <td data-label="Contact">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-end' }}>
                       <a href={`mailto:${client.email}`} className="contact-link" onClick={e => e.stopPropagation()}>
                         <Mail size={14} /> {client.email}
                       </a>
@@ -198,22 +198,24 @@ const AdminClients = () => {
                       </a>
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Bezoeken">
                     <span className={`visit-badge ${getVisitBadgeClass(client.total_visits)}`}>
                       <Star size={12} fill="currentColor" />
-                      {client.total_visits} visits
+                      {client.total_visits}
                     </span>
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#555' }}>
+                  <td data-label="Laatste">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#555', justifyContent: 'flex-end' }}>
                       <Calendar size={14} className="text-gold" />
                       {new Date(client.last_booking_date).toLocaleDateString('nl-BE')}
                     </div>
                   </td>
-                  <td style={{ fontSize: '0.85rem', color: '#666', fontWeight: '500' }}>
-                    {client.most_booked_service || 'N/A'}
+                  <td data-label="Service">
+                    <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                      {client.most_booked_service || 'N/A'}
+                    </span>
                   </td>
-                  <td>
+                  <td style={{ textAlign: 'right' }}>
                     <ChevronRight size={18} className="text-muted" />
                   </td>
                 </tr>

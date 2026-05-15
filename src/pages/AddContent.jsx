@@ -115,33 +115,20 @@ const AddContent = () => {
                 <div className="col-md-6 mb-4">
                   <div 
                     onClick={() => fileInputRef.current.click()}
-                    style={{ 
-                      width: '100%', 
-                      aspectRatio: '1/1', 
-                      border: '2px dashed var(--gold)', 
-                      borderRadius: '20px', 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      backgroundColor: '#fff'
-                    }}
+                    className="upload-dropzone"
                   >
                     {imagePreview ? (
                       <>
-                        <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={imagePreview} alt="Preview" />
                         {!uploading && (
-                          <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', width: '30px', height: '30px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(''); }}>
+                          <div className="remove-preview" onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(''); }}>
                             <X size={16} />
                           </div>
                         )}
                       </>
                     ) : (
-                      <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <Upload size={40} style={{ color: 'var(--gold)', marginBottom: '15px' }} />
+                      <div className="upload-placeholder">
+                        <Upload size={40} className="text-gold mb-3" />
                         <p style={{ fontWeight: '600' }}>Klik om een foto te uploaden</p>
                         <p className="text-muted" style={{ fontSize: '0.85rem' }}>PNG, JPG of WEBP (Max 10MB)</p>
                       </div>
@@ -221,12 +208,58 @@ const AddContent = () => {
       </div>
       
       <style jsx>{`
+        .upload-dropzone {
+          width: 100%;
+          aspect-ratio: 1/1;
+          border: 2px dashed var(--gold);
+          border-radius: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          overflow: hidden;
+          position: relative;
+          background-color: #fff;
+          transition: 0.3s;
+        }
+        .upload-dropzone:hover {
+          background-color: #fffaf5;
+          border-color: var(--dark-gold);
+        }
+        .upload-dropzone img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .remove-preview {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: rgba(0,0,0,0.5);
+          color: white;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .upload-placeholder {
+          text-align: center;
+          padding: 20px;
+        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
         .spin {
           animation: spin 1s linear infinite;
+        }
+        @media (max-width: 768px) {
+          .upload-dropzone {
+            aspect-ratio: 16/9;
+          }
         }
       `}</style>
     </div>

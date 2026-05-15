@@ -219,6 +219,53 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Global Responsive Table (Cards on Mobile) */
+@media (max-width: 992px) {
+  .custom-table thead {
+    display: none;
+  }
+  
+  .custom-table tbody tr {
+    display: block;
+    margin-bottom: 20px;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 10px;
+    background: white !important;
+  }
+  
+  .custom-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #f8fafc;
+    text-align: right;
+  }
+  
+  .custom-table td:last-child {
+    border-bottom: none;
+  }
+  
+  .custom-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    text-align: left;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .justify-content-end-mobile {
+    justify-content: flex-end !important;
+  }
+}
+
+.d-flex { display: flex; }
+.align-items-center { align-items: center; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+
 .btn-delete-small:hover {
   background-color: #d9534f !important;
   color: white !important;

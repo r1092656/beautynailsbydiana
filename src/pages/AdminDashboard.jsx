@@ -243,17 +243,17 @@ const AdminDashboard = () => {
                 <tbody>
                   {reviews.map((review) => (
                     <tr key={review.id} className="fade-in">
-                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                      <td data-label="Datum" style={{ whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
                         {new Date(review.created_at).toLocaleDateString('nl-BE')}
                       </td>
-                      <td style={{ fontWeight: '600' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <td data-label="Naam" style={{ fontWeight: '600' }}>
+                        <div className="d-flex align-items-center gap-2 justify-content-end-mobile">
                           <User size={14} className="text-gold" />
                           {review.name}
                         </div>
                       </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '2px' }}>
+                      <td data-label="Rating">
+                        <div className="d-flex gap-1 justify-content-end-mobile">
                           {[...Array(5)].map((_, i) => (
                             <Star 
                               key={i} 
@@ -264,10 +264,10 @@ const AdminDashboard = () => {
                           ))}
                         </div>
                       </td>
-                      <td style={{ maxWidth: '300px' }}>
+                      <td data-label="Bericht" style={{ maxWidth: '300px' }}>
                         <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.4' }}>{review.text}</p>
                       </td>
-                      <td>
+                      <td style={{ textAlign: 'right' }}>
                         <button 
                           onClick={() => handleDeleteReview(review.id)}
                           className="btn-delete-small"
@@ -277,7 +277,7 @@ const AdminDashboard = () => {
                             border: '1px solid rgba(217, 83, 79, 0.2)',
                             padding: '5px 10px',
                             borderRadius: '8px',
-                            display: 'flex',
+                            display: 'inline-flex',
                             alignItems: 'center',
                             gap: '5px',
                             fontSize: '0.85rem',

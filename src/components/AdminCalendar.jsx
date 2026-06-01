@@ -645,8 +645,11 @@ const AdminCalendar = () => {
         <div className="booking-details-modal-overlay" onClick={() => setSlotSelector(null)}>
           <div className="booking-details-modal glass-panel status-selector-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{slotSelector.step === 'form' ? 'Klantgegevens' : 'Status selecteren'}</h3>
-              <p className="text-muted" style={{ fontSize: '0.9rem' }}>{slotSelector.slot} op {new Date(slotSelector.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+              <div>
+                <h3 style={{ margin: 0 }}>{slotSelector.step === 'form' ? 'Klantgegevens' : 'Status selecteren'}</h3>
+                <p className="text-muted" style={{ fontSize: '0.9rem', margin: '5px 0 0 0' }}>{slotSelector.slot} op {new Date(slotSelector.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+              </div>
+              <button className="close-btn" onClick={() => setSlotSelector(null)}>&times;</button>
             </div>
             
             {slotSelector.step === 'choice' ? (
@@ -775,8 +778,11 @@ const AdminCalendar = () => {
         <div className="booking-details-modal-overlay" onClick={() => setBulkBlockType(null)}>
           <div className="booking-details-modal glass-panel bulk-block-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Bulk Acties</h3>
-              <p className="text-muted" style={{ fontSize: '0.9rem' }}>Selecteer range voor {new Date(selectedDate.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+              <div>
+                <h3 style={{ margin: 0 }}>Bulk Acties</h3>
+                <p className="text-muted" style={{ fontSize: '0.9rem', margin: '5px 0 0 0' }}>Selecteer range voor {new Date(selectedDate.date).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long' })}</p>
+              </div>
+              <button className="close-btn" onClick={() => setBulkBlockType(null)}>&times;</button>
             </div>
             
             <div className="range-picker-grid">

@@ -49,6 +49,19 @@ const AdminClients = () => {
 
       if (e1 || e2) throw e1 || e2;
 
+      // Deduplicate manual bookings by group_id (or name/email/date if no group_id)
+      const uniqueManualMap = {};
+      (manual || []).forEach(b => {
+        const key = b.group_id ? b.group_id : `${b.client_name || ''}_${b.client_email || ''}_${b.date}`;
+        const existing = uniqueManualMap[key];
+        if (!existing) {
+          uniqueManualMap[key] = b;
+        } else if (b.time_slot && existing.time_slot && b.time_slot.localeCompare(existing.time_slot) < 0) {
+          uniqueManualMap[key] = b;
+        }
+      });
+      const uniqueManual = Object.values(uniqueManualMap);
+
       // 3. Normalize and combine
       const combined = [
         ...(online || []).map(b => ({
@@ -65,7 +78,7 @@ const AdminClients = () => {
           type: 'Online',
           createdAt: b.created_at
         })),
-        ...(manual || []).map(b => {
+        ...uniqueManual.map(b => {
           const match = b.description?.match(/\[(.*?)\]/);
           return {
             id: `manual-${b.id}`,

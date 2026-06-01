@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../supabaseClient';
 import { syncClientData } from '../utils/clientSync';
 import { ChevronLeft, ChevronRight, Clock, User, Phone, Mail, ShoppingBag, MapPin, Loader, AlertCircle, CalendarCheck, UserMinus, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
@@ -576,7 +577,7 @@ const AdminCalendar = () => {
         )}
       </div>
 
-      {activeBooking && (
+      {activeBooking && createPortal(
         <div className="booking-details-modal-overlay" onClick={() => setActiveBooking(null)}>
           <div className="booking-details-modal glass-panel" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -637,11 +638,12 @@ const AdminCalendar = () => {
               <button className="btn-outline-gold" onClick={() => setActiveBooking(null)}>Sluiten</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
 
-      {slotSelector && (
+      {slotSelector && createPortal(
         <div className="booking-details-modal-overlay" onClick={() => setSlotSelector(null)}>
           <div className="booking-details-modal glass-panel status-selector-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -771,10 +773,11 @@ const AdminCalendar = () => {
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-       {bulkBlockType === 'range' && (
+       {bulkBlockType === 'range' && createPortal(
         <div className="booking-details-modal-overlay" onClick={() => setBulkBlockType(null)}>
           <div className="booking-details-modal glass-panel bulk-block-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -812,10 +815,11 @@ const AdminCalendar = () => {
               <button className="btn-outline-gold w-100" onClick={() => setBulkBlockType(null)}>Annuleren</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {viewingManualBlock && (
+      {viewingManualBlock && createPortal(
         <div className="booking-details-modal-overlay" onClick={() => setViewingManualBlock(null)}>
           <div className="booking-details-modal glass-panel" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -879,7 +883,8 @@ const AdminCalendar = () => {
               <button className="btn-outline-gold" onClick={() => setViewingManualBlock(null)}>Sluiten</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

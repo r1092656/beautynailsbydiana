@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../supabaseClient';
 import { Search, Filter, Mail, Phone, Calendar, Star, ChevronRight, User, Loader, Clock, MapPin, X, History } from 'lucide-react';
 import './AdminClients.css';
@@ -233,7 +234,7 @@ const AdminClients = () => {
         </div>
       )}
 
-      {selectedClient && (
+      {selectedClient && createPortal(
         <div className="booking-details-modal-overlay" onClick={() => setSelectedClient(null)}>
           <div className="booking-details-modal glass-panel client-detail-modal" onClick={e => e.stopPropagation()}>
             <button className="close-btn" onClick={() => setSelectedClient(null)}><X size={24} /></button>
@@ -291,7 +292,8 @@ const AdminClients = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

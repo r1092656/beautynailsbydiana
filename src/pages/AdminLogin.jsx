@@ -8,16 +8,24 @@ const AdminLogin = () => {
   useDocumentTitle('Admin Login');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (login(password)) {
-      navigate('/admin/dashboard');
-    } else {
-      setError('Verkeerd wachtwoord. Probeer het opnieuw.');
-      setPassword('');
+    setIsSubmitting(true);
+    setError('');
+    try {
+      const success = await login(password);
+      if (success) {
+        navigate('/admin/dashboard');
+      } else {
+        setError('Verkeerd wachtwoord. Probeer het opnieuw.');
+        setPassword('');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -58,7 +66,9 @@ const AdminLogin = () => {
               
               {error && <p style={{ color: '#d9534f', fontSize: '0.9rem', marginBottom: '20px' }}>{error}</p>}
               
-              <button type="submit" className="btn-gold" style={{ width: '100%' }}>Inloggen</button>
+              <button type="submit" className="btn-gold" style={{ width: '100%' }} disabled={isSubmitting}>
+                {isSubmitting ? 'Bezig...' : 'Inloggen'}
+              </button>
             </form>
           </div>
         </div>

@@ -60,7 +60,7 @@ const AddContent = () => {
       const filePath = `uploads/${fileName}`;
 
       // 2. Upload to Supabase Storage (Bucket: 'photos')
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('photos')
         .upload(filePath, blob);
 

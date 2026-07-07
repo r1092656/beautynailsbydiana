@@ -15,7 +15,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container nav-container">
         <Link to="/" className="navbar-brand">
-          <span className="text-gold">BEAUTYNAILS</span> DIANA
+          <img src="/assets/logo-navbar.png" alt="Beauty Nails by Diana" className="navbar-logo" />
         </Link>
         
         <div className="menu-icon" onClick={toggleMenu}>

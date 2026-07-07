@@ -1,4 +1,6 @@
 import { Resend } from 'resend';
+import { escapeHtml } from './utils/escapeHtml.js';
+import { checkSpam } from './utils/spamGuard.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -6,6 +8,21 @@ export default async function handler(req, res) {
   }
 
   const { name, email, phone, message } = req.body;
+
+  const spamCheck = checkSpam(req.body);
+  if (spamCheck.spam) {
+    // Pretend success so bots don't learn anything from the response.
+    return res.status(200).json({ success: true });
+  }
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: 'Naam, e-mail en bericht zijn verplicht.' });
+  }
+
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safePhone = escapeHtml(phone);
+  const safeMessage = escapeHtml(message);
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -35,22 +52,22 @@ export default async function handler(req, res) {
         <div class="header">
           <h1>NEW MESSAGE</h1>
         </div>
-        
+
         <div class="content">
           <div class="section">
             <div class="section-title">Contact Information</div>
             <div class="detail-row">
               <span class="label">Name:</span>
-              <span class="value">${name}</span>
+              <span class="value">${safeName}</span>
             </div>
             <div class="detail-row">
               <span class="label">Email:</span>
-              <span class="value">${email}</span>
+              <span class="value">${safeEmail}</span>
             </div>
-            ${phone ? `
+            ${safePhone ? `
             <div class="detail-row">
               <span class="label">Phone:</span>
-              <span class="value">${phone}</span>
+              <span class="value">${safePhone}</span>
             </div>
             ` : ''}
           </div>
@@ -58,7 +75,7 @@ export default async function handler(req, res) {
           <div class="section">
             <div class="section-title">Message</div>
             <div class="message-box">
-              "${message}"
+              "${safeMessage}"
             </div>
           </div>
         </div>
@@ -75,7 +92,7 @@ export default async function handler(req, res) {
     const { data, error } = await resend.emails.send({
       from: 'Diana Contact <info@beautynailsbydiana.be>',
       to: ['info@beautynailsbydiana.be'],
-      subject: `New Message from ${name}`,
+      subject: `New Message from ${safeName}`,
       html: html,
     });
 

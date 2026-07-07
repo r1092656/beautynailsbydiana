@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useContent } from '../context/ContentContext';
-import { useAuth } from '../context/AuthContext';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Users, Calendar as CalendarIcon } from 'lucide-react';
 import { supabase } from '../supabaseClient';
@@ -11,7 +10,8 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 const AdminDashboard = () => {
   useDocumentTitle('Admin Dashboard');
   const { content, deleteContent } = useContent();
-  const { logout } = useAuth();
+  // Computed once per content refresh rather than on every render.
+  const now = useMemo(() => Date.now(), [content]);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'portfolio';
   
@@ -22,10 +22,25 @@ const AdminDashboard = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
+  const fetchReviews = useCallback(async () => {
+    setReviewsLoading(true);
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching reviews:', error);
+    } else {
+      setReviews(data || []);
+    }
+    setReviewsLoading(false);
+  }, []);
+
   useEffect(() => {
     if (activeTab === 'reviews') {
       fetchReviews();
-      
+
       const subscription = supabase
         .channel('admin:reviews')
         .on('postgres_changes', { event: '*', table: 'reviews', schema: 'public' }, (payload) => {
@@ -41,22 +56,7 @@ const AdminDashboard = () => {
         supabase.removeChannel(subscription);
       };
     }
-  }, [activeTab]);
-
-  const fetchReviews = async () => {
-    setReviewsLoading(true);
-    const { data, error } = await supabase
-      .from('reviews')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching reviews:', error);
-    } else {
-      setReviews(data || []);
-    }
-    setReviewsLoading(false);
-  };
+  }, [activeTab, fetchReviews]);
 
   const handleDeleteReview = async (id) => {
     if (window.confirm('Weet je zeker dat je deze review wilt verwijderen?')) {
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
           ) : (
             <div className="row">
               {content.map((item) => {
-                const isNew = Date.now() - item.createdAt < 48 * 60 * 60 * 1000;
+                const isNew = now - item.createdAt < 48 * 60 * 60 * 1000;
                 return (
                   <div key={item.id} className="col-12 col-sm-6 col-md-4 mb-4">
                     <div className="glass-panel" style={{ height: '100%', overflow: 'hidden', padding: '15px' }}>

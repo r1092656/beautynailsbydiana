@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 
 const ContentContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook is intentionally colocated with its provider
 export const useContent = () => {
   const context = useContext(ContentContext);
   if (!context) {
@@ -44,10 +45,11 @@ export const ContentProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial data fetch on mount
     fetchContent();
   }, []);
 
-  const addContent = async (newItem) => {
+  const addContent = async () => {
     // This will now be handled inside AddContent.jsx with image upload
     // but we can refresh the list here
     await fetchContent();

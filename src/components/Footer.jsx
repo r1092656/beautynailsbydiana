@@ -18,7 +18,13 @@ const Footer = () => {
           </a>
         </div>
 
-        <div style={{ marginTop: '20px', fontSize: '0.75rem', opacity: 0.4 }}>
+        <div style={{ marginTop: '20px', fontSize: '0.8rem', opacity: 0.7, display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+          <Link to="/privacy" style={{ color: 'inherit', textDecoration: 'none' }}>Privacyverklaring</Link>
+          <span>·</span>
+          <Link to="/terms" style={{ color: 'inherit', textDecoration: 'none' }}>Algemene Voorwaarden</Link>
+        </div>
+
+        <div style={{ marginTop: '15px', fontSize: '0.75rem', opacity: 0.4 }}>
           <Link to="/admin/login" style={{ color: 'inherit', textDecoration: 'none' }}>Admin Login</Link>
         </div>
       </div>

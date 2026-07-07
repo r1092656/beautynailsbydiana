@@ -47,7 +47,7 @@ const AdminCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [blocks, setBlocks] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [isSavingData, setIsSavingData] = useState(false);
   const [activeBooking, setActiveBooking] = useState(null);
   const [slotSelector, setSlotSelector] = useState(null); // { slot, date, step: 'choice' | 'form' }
@@ -80,6 +80,9 @@ const AdminCalendar = () => {
     return () => {
       supabase.removeChannel(channel);
     };
+    // fetchData is intentionally omitted: it's redefined each render but only
+    // needs to re-run when the visible month (currentDate) changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate]);
 
   const fetchData = async () => {
@@ -403,6 +406,7 @@ const AdminCalendar = () => {
         .eq('group_id', groupId);
       if (error) throw error;
     } catch (err) {
+      console.error('Error deleting block group:', err);
       setBlocks(previousBlocks);
       alert('Fout bij het verwijderen.');
     } finally {
@@ -434,6 +438,7 @@ const AdminCalendar = () => {
       setActiveBooking(null);
       fetchData();
     } catch (err) {
+      console.error('Error changing booking status:', err);
       alert('Fout bij het wijzigen van boeking status');
     }
   };

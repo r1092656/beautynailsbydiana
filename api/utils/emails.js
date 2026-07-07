@@ -1,19 +1,29 @@
 import { Resend } from 'resend';
+import { escapeHtml } from './escapeHtml.js';
 
 export const sendBookingEmails = async (bookingData) => {
   const {
-    name,
-    email,
-    phone,
-    category,
-    sub_service,
-    location,
+    name: rawName,
+    email: rawEmail,
+    phone: rawPhone,
+    category: rawCategory,
+    sub_service: rawSubService,
+    location: rawLocation,
     date,
     time,
     duration_mins = 150,
     type = 'online',
-    description
+    description: rawDescription
   } = bookingData;
+
+  // Escape everything that originated from user input before it goes into HTML emails.
+  const name = escapeHtml(rawName);
+  const email = escapeHtml(rawEmail);
+  const phone = escapeHtml(rawPhone);
+  const category = escapeHtml(rawCategory);
+  const sub_service = escapeHtml(rawSubService);
+  const location = escapeHtml(rawLocation);
+  const description = escapeHtml(rawDescription);
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const needsNailOptions = category === 'Gel Overlay' || category === 'Verlenging';

@@ -12,6 +12,8 @@ const Contact = () => {
     phone: '',
     message: ''
   });
+  const [honeypot, setHoneypot] = useState('');
+  const [renderedAt] = useState(() => Date.now());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ const Contact = () => {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, _hp: honeypot, _ts: renderedAt })
       });
 
       const result = await response.json();
@@ -90,6 +92,17 @@ const Contact = () => {
               <>
                 <h3 className="mb-4 text-center">Stuur een Bericht</h3>
                 <form onSubmit={handleSubmit}>
+                  {/* Honeypot field: hidden from real visitors, often auto-filled by bots */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex="-1"
+                    autoComplete="off"
+                    style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                    aria-hidden="true"
+                  />
                   <div style={{ marginBottom: '20px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Naam</label>
                     <input 

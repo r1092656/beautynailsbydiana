@@ -23,6 +23,7 @@ const AdminLayout = ({ children }) => {
 
   // Close mobile sidebar on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: reset UI state on navigation
     setIsMobileOpen(false);
   }, [location]);
 

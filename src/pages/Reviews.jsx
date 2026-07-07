@@ -14,6 +14,9 @@ const Reviews = () => {
   const [text, setText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [renderedAt] = useState(() => Date.now());
   
   const fetchReviews = async () => {
     const { data, error } = await supabase
@@ -30,6 +33,7 @@ const Reviews = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial data fetch on mount
     fetchReviews();
 
     // Subscribe to real-time changes
@@ -55,7 +59,8 @@ const Reviews = () => {
     e.preventDefault();
     setErrorMsg('');
 
-    const containsBadWords = text.toLowerCase().split(/\s+/).some(word => 
+    // Quick client-side check for instant feedback; the server re-validates this properly.
+    const containsBadWords = text.toLowerCase().split(/\s+/).some(word =>
       badWordsList.some(bad => word.includes(bad))
     );
 
@@ -64,24 +69,33 @@ const Reviews = () => {
       return;
     }
 
-    const newReview = {
-      name: name.trim() === '' ? 'Anoniem' : name.trim(),
-      rating: rating,
-      text: text,
-      verified: false
-    };
+    setSubmitting(true);
+    try {
+      const response = await fetch('/api/submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          rating,
+          text,
+          _hp: honeypot,
+          _ts: renderedAt,
+        }),
+      });
+      const result = await response.json();
 
-    const { error } = await supabase
-      .from('reviews')
-      .insert([newReview]);
-
-    if (error) {
+      if (result.success) {
+        setName('');
+        setRating(5);
+        setText('');
+      } else {
+        setErrorMsg(result.error || 'Er is iets misgegaan bij het plaatsen van je review.');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
       setErrorMsg('Er is iets misgegaan bij het plaatsen van je review. Probeer het later opnieuw.');
-      console.error('Submission error:', error);
-    } else {
-      setName('');
-      setRating(5);
-      setText('');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -109,6 +123,17 @@ const Reviews = () => {
             )}
 
             <form onSubmit={handleSubmit}>
+              {/* Honeypot field: hidden from real visitors, often auto-filled by bots */}
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex="-1"
+                autoComplete="off"
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                aria-hidden="true"
+              />
               <div className="custom-form-group">
                 <label className="custom-form-label">Naam (Optioneel)</label>
                 <input 
@@ -149,8 +174,8 @@ const Reviews = () => {
                 />
               </div>
 
-              <button type="submit" className="btn-gold w-100 py-3 mt-2 fw-bold">
-                Review Plaatsen
+              <button type="submit" className="btn-gold w-100 py-3 mt-2 fw-bold" disabled={submitting}>
+                {submitting ? 'Bezig...' : 'Review Plaatsen'}
               </button>
             </form>
           </div>

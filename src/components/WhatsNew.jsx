@@ -40,10 +40,12 @@ const WhatsNew = () => {
         }}>
           {items.map((item) => (
             <div key={item.id} style={{ minWidth: '100%', position: 'relative' }}>
-              <img 
-                src={item.image} 
-                alt={item.caption} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              <img
+                src={item.image}
+                alt={item.caption}
+                loading="lazy"
+                decoding="async"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
               <div style={{ 
                 position: 'absolute', 

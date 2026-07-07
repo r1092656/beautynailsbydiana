@@ -2,6 +2,7 @@ import { createContext, useState, useContext } from 'react';
 
 const BookingContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components -- hook is intentionally colocated with its provider
 export const useBooking = () => useContext(BookingContext);
 
 export const BookingProvider = ({ children }) => {

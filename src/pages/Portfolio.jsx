@@ -45,10 +45,12 @@ const Portfolio = () => {
         {allItems.map(item => (
           <div key={item.id} className="col-6 col-md-4 col-lg-3 mb-4 fade-in">
             <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '15px', boxShadow: '0 5px 15px rgba(0,0,0,0.1)' }}>
-              <img 
-                src={item.img} 
-                alt={item.caption || "Nagel Portfolio"} 
-                style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block' }} 
+              <img
+                src={item.img}
+                alt={item.caption || "Nagel Portfolio"}
+                loading="lazy"
+                decoding="async"
+                style={{ width: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block' }}
               />
               {item.caption && (
                 <div style={{ 

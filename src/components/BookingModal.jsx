@@ -69,12 +69,11 @@ const BookingModal = () => {
   // Form State
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
-  const [gelOverlayService, setGelOverlayService] = useState('');
   const [nailLength, setNailLength] = useState('');
-  const [nailShape, setNailShape] = useState('');
   const [design, setDesign] = useState('');
-  const [extraBewerking, setExtraBewerking] = useState('');
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [renderedAt] = useState(() => Date.now());
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [name, setName] = useState('');
@@ -237,7 +236,9 @@ const BookingModal = () => {
         date,
         time,
         inspiration_image: compressedImageBase64,
-        duration_mins: durationMins
+        duration_mins: durationMins,
+        _hp: honeypot,
+        _ts: renderedAt
       };
 
       const response = await fetch("/api/booking", {
@@ -294,11 +295,8 @@ const BookingModal = () => {
     setStep('details');
     setCategory('');
     setSubService('');
-    setGelOverlayService('');
     setNailLength('');
-    setNailShape('');
     setDesign('');
-    setExtraBewerking('');
     setShowFullsetWarning(false);
     setDate('');
     setTime('');
@@ -322,6 +320,17 @@ const BookingModal = () => {
             <p className="modal-subtitle">Experience luxury nail care. Optimized scheduling for {category || 'your service'}.</p>
 
             <form onSubmit={confirmBooking} className="booking-form">
+              {/* Honeypot field: hidden from real visitors, often auto-filled by bots */}
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex="-1"
+                autoComplete="off"
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                aria-hidden="true"
+              />
               {/* Step 1: Personal Info */}
               <div className="form-group">
                 <label>Full Name</label>
@@ -446,11 +455,18 @@ const BookingModal = () => {
               {date && (
                 <div className="form-group fade-in">
                   <label>Available Times ({formatDuration(durationMins)} block)</label>
-                  <div className="time-grid">
-                    {availableSlots.map((slot) => (
-                      <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
-                    ))}
-                  </div>
+                  {isLoadingAvailability ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px 0', color: 'var(--dark-text)', opacity: 0.7 }}>
+                      <Loader className="animate-spin" size={18} />
+                      <span>Beschikbaarheid laden...</span>
+                    </div>
+                  ) : (
+                    <div className="time-grid">
+                      {availableSlots.map((slot) => (
+                        <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -506,4 +522,3 @@ const BookingModal = () => {
   );
 };
 export default BookingModal;
-BookingModal;

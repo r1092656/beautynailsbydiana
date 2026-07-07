@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Star, AlertCircle, Quote, User, Clock, CheckCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import ConsentCheckbox from '../components/ConsentCheckbox';
 import './Reviews.css';
 
 const badWordsList = ['badword', 'offensive', 'hate', 'stupid', 'ugly', 'vulgar', 'insult', 'bitch', 'fuck', 'shit', 'ass', 'damn'];
@@ -17,6 +18,7 @@ const Reviews = () => {
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [renderedAt] = useState(() => Date.now());
+  const [consentGiven, setConsentGiven] = useState(false);
   
   const fetchReviews = async () => {
     const { data, error } = await supabase
@@ -69,6 +71,11 @@ const Reviews = () => {
       return;
     }
 
+    if (!consentGiven) {
+      setErrorMsg('Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const response = await fetch('/api/submit-review', {
@@ -88,6 +95,7 @@ const Reviews = () => {
         setName('');
         setRating(5);
         setText('');
+        setConsentGiven(false);
       } else {
         setErrorMsg(result.error || 'Er is iets misgegaan bij het plaatsen van je review.');
       }
@@ -173,6 +181,8 @@ const Reviews = () => {
                   style={{ resize: 'none' }}
                 />
               </div>
+
+              <ConsentCheckbox checked={consentGiven} onChange={setConsentGiven} id="review-consent" />
 
               <button type="submit" className="btn-gold w-100 py-3 mt-2 fw-bold" disabled={submitting}>
                 {submitting ? 'Bezig...' : 'Review Plaatsen'}

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { compressImage } from '../utils/compressImage';
 import { supabase } from '../supabaseClient';
 import { syncClientData } from '../utils/clientSync';
+import ConsentCheckbox from './ConsentCheckbox';
 import './BookingModal.css';
 
 const SERVICE_STRUCTURE = {
@@ -74,6 +75,7 @@ const BookingModal = () => {
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [renderedAt] = useState(() => Date.now());
+  const [consentGiven, setConsentGiven] = useState(false);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [name, setName] = useState('');
@@ -218,6 +220,7 @@ const BookingModal = () => {
     if (e) e.preventDefault();
     if (!location) { alert("Selecteer een locatie."); return; }
     if (!time) { alert("Selecteer een tijdslot."); return; }
+    if (!consentGiven) { alert("Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden."); return; }
 
     setIsSending(true);
     try {
@@ -306,6 +309,7 @@ const BookingModal = () => {
     setLocation('');
     setImagePreview(null);
     setSelectedFile(null);
+    setConsentGiven(false);
     closeModal();
   };
 
@@ -489,7 +493,11 @@ const BookingModal = () => {
                 </div>
               </div>
 
-              <button type="submit" className="btn-gold w-100" style={{ marginTop: '20px' }} disabled={isSending}>
+              <div style={{ marginTop: '20px' }}>
+                <ConsentCheckbox checked={consentGiven} onChange={setConsentGiven} id="booking-consent" />
+              </div>
+
+              <button type="submit" className="btn-gold w-100" disabled={isSending}>
                 {isSending ? <Loader className="animate-spin" size={20} /> : "Afspraak Bevestigen"}
               </button>
             </form>

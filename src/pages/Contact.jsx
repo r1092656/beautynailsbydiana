@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { Mail, Phone, MapPin, Camera, Music, Send, CircleCheck, Loader } from 'lucide-react';
+import ConsentCheckbox from '../components/ConsentCheckbox';
 
 const Contact = () => {
   useDocumentTitle('Contact & Afspraak Maken', 'Hebt u vragen of wilt u een afspraak maken bij Beauty Nails by Diana? Neem contact op via WhatsApp of email in Laakdal.');
@@ -14,9 +15,16 @@ const Contact = () => {
   });
   const [honeypot, setHoneypot] = useState('');
   const [renderedAt] = useState(() => Date.now());
+  const [consentGiven, setConsentGiven] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!consentGiven) {
+      alert('Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden.');
+      return;
+    }
+
     setIsSending(true);
 
     try {
@@ -29,6 +37,7 @@ const Contact = () => {
       const result = await response.json();
       if (result.success) {
         setComplete(true);
+        setConsentGiven(false);
       } else {
         throw new Error(result.error || 'Failed to send message');
       }
@@ -148,6 +157,7 @@ const Contact = () => {
                       style={{ width: '100%', padding: '15px', borderRadius: '10px', border: '1px solid #ddd', resize: 'none' }}
                     ></textarea>
                   </div>
+                  <ConsentCheckbox checked={consentGiven} onChange={setConsentGiven} id="contact-consent" />
                   <button type="submit" className="btn-gold" style={{ width: '100%' }} disabled={isSending}>
                     {isSending ? (
                       <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>

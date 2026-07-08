@@ -332,7 +332,8 @@ const AdminCalendar = () => {
         });
       }
 
-      // Send confirmation email (Match BookingModal.jsx payload exactly)
+      // Send confirmation email (Match BookingModal.jsx payload exactly).
+      // Notifies Diana either way; only emails the customer if an address was filled in.
       try {
         const emailPayload = {
           type: 'manual',
@@ -364,19 +365,13 @@ const AdminCalendar = () => {
         if (!emailResponse.ok) {
           const errorData = await emailResponse.json();
           console.error('Email API Error:', errorData);
-          alert(`Boeking opgeslagen, maar e-mail verzenden mislukt: ${errorData.details || errorData.error}`);
-        } else {
-          const result = await emailResponse.json();
-          console.log('Email sent successfully:', result);
-          if (result.details?.admin.startsWith('failed') || result.details?.customer.startsWith('failed')) {
-             alert(`Let op: ${result.details.admin.startsWith('failed') ? 'Admin e-mail mislukt. ' : ''}${result.details.customer.startsWith('failed') ? 'Klant e-mail mislukt.' : ''}`);
-          }
+          alert(`Boeking is opgeslagen, maar de meldingsmail kon niet verstuurd worden: ${errorData.error || 'onbekende fout'}.`);
         }
       } catch (emailFetchError) {
         console.error('Email fetch error:', emailFetchError);
-        alert(`Boeking opgeslagen, maar e-mail mislukt. Fout: ${emailFetchError.message || 'Verbindingsfout'}`);
+        alert(`Boeking is opgeslagen, maar de meldingsmail kon niet verstuurd worden (verbindingsfout).`);
       }
-      
+
       setManualFormData({ 
         name: '', email: '', phone: '', category: 'Gel Overlay', 
         subService: '', location: '', description: '', duration: 120 
@@ -709,7 +704,7 @@ const AdminCalendar = () => {
                     <input type="text" value={manualFormData.name} onChange={e => setManualFormData({...manualFormData, name: e.target.value})} required placeholder="Naam..." />
                   </div>
                   <div className="form-group">
-                    <label>Telefoon</label>
+                    <label>Telefoon (optioneel)</label>
                     <input type="tel" value={manualFormData.phone} onChange={e => setManualFormData({...manualFormData, phone: e.target.value})} placeholder="+32..." />
                   </div>
                   <div className="form-group full-width">
@@ -728,7 +723,7 @@ const AdminCalendar = () => {
                     </div>
                   </div>
                   <div className="form-group full-width">
-                    <label>E-mail (voor bevestiging)</label>
+                    <label>E-mail (optioneel — enkel nodig als je een bevestigingsmail wil sturen)</label>
                     <input type="email" value={manualFormData.email} onChange={e => setManualFormData({...manualFormData, email: e.target.value})} placeholder="email@voorbeeld.be" />
                   </div>
                   <div className="form-group full-width">

@@ -62,13 +62,23 @@ const AdminClients = () => {
       });
       const uniqueManual = Object.values(uniqueManualMap);
 
+      // Groups clients by email when we have one. When there's no email (e.g. a
+      // manual admin booking without an address), fall back to grouping by name
+      // instead of lumping every email-less client into one shared bucket.
+      const buildGroupKey = (email, name) => {
+        const cleanEmail = email?.toLowerCase().trim();
+        if (cleanEmail) return `email:${cleanEmail}`;
+        const cleanName = name?.toLowerCase().trim() || 'onbekende klant';
+        return `name:${cleanName}`;
+      };
+
       // 3. Normalize and combine
       const combined = [
         ...(online || []).map(b => ({
           id: `online-${b.id}`,
           rawId: b.id,
           name: b.name || 'Onbekende Klant',
-          email: b.email?.toLowerCase().trim() || 'geen-email@test.com',
+          email: b.email?.toLowerCase().trim() || '',
           phone: b.phone || '',
           date: b.date,
           time: b.time,
@@ -76,7 +86,8 @@ const AdminClients = () => {
           category: b.category,
           location: b.location || 'Turnhout',
           type: 'Online',
-          createdAt: b.created_at
+          createdAt: b.created_at,
+          groupKey: buildGroupKey(b.email, b.name)
         })),
         ...uniqueManual.map(b => {
           const match = b.description?.match(/\[(.*?)\]/);
@@ -84,7 +95,7 @@ const AdminClients = () => {
             id: `manual-${b.id}`,
             rawId: b.id,
             name: b.client_name || 'Handmatige Boeking',
-            email: b.client_email?.toLowerCase().trim() || 'geen-email@test.com',
+            email: b.client_email?.toLowerCase().trim() || '',
             phone: b.client_phone || '',
             date: b.date,
             time: b.time_slot,
@@ -92,28 +103,29 @@ const AdminClients = () => {
             category: match ? match[1] : 'Admin',
             location: 'Turnhout', // Default for manual
             type: 'Admin',
-            createdAt: b.created_at
+            createdAt: b.created_at,
+            groupKey: buildGroupKey(b.client_email, b.client_name)
           };
         })
       ];
 
-      // 4. Group by email to limit to 10 per person
+      // 4. Group by groupKey (email, or name as fallback) to limit to 10 per person
       const grouped = combined.reduce((acc, visit) => {
-        const email = visit.email;
-        if (!acc[email]) acc[email] = [];
-        acc[email].push(visit);
+        const key = visit.groupKey;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(visit);
         return acc;
       }, {});
 
       // Sort each group and take top 10
       const limitedVisits = [];
-      Object.keys(grouped).forEach(email => {
-        const clientVisits = grouped[email].sort((a, b) => {
+      Object.keys(grouped).forEach(key => {
+        const clientVisits = grouped[key].sort((a, b) => {
           // Sort by date desc, then time desc
           if (b.date !== a.date) return new Date(b.date) - new Date(a.date);
           return b.time.localeCompare(a.time);
         });
-        
+
         // Take 10 most recent
         limitedVisits.push(...clientVisits.slice(0, 10));
       });
@@ -131,16 +143,16 @@ const AdminClients = () => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return visits;
 
-    return visits.filter(v => 
+    return visits.filter(v =>
       v.name.toLowerCase().includes(q) ||
-      v.email.toLowerCase().includes(q) ||
+      (v.email || '').toLowerCase().includes(q) ||
       v.phone.replace(/[^0-9]/g, '').includes(q.replace(/[^0-9]/g, ''))
     );
   }, [visits, searchQuery]);
 
   const openClientDetail = (visit) => {
-    // Get all visits for this specific client email
-    const history = visits.filter(v => v.email === visit.email).sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Get all visits for this specific client (grouped by email, or by name when there's no email)
+    const history = visits.filter(v => v.groupKey === visit.groupKey).sort((a, b) => new Date(b.date) - new Date(a.date));
     
     // Calculate stats
     const serviceCounts = history.reduce((acc, v) => {
@@ -222,7 +234,7 @@ const AdminClients = () => {
                   </td>
                   <td data-label="Contact">
                     <div className="contact-column">
-                      <span className="contact-mini"><Mail size={12} /> {v.email}</span>
+                      <span className="contact-mini"><Mail size={12} /> {v.email || 'Geen e-mail'}</span>
                       {v.phone && <span className="contact-mini"><Phone size={12} /> {v.phone}</span>}
                     </div>
                   </td>
@@ -257,9 +269,15 @@ const AdminClients = () => {
               <div className="profile-main-info">
                 <h2>{selectedClient.name}</h2>
                 <div className="contact-links-row">
-                  <a href={`mailto:${selectedClient.email}`} className="contact-link">
-                    <Mail size={16} /> {selectedClient.email}
-                  </a>
+                  {selectedClient.email ? (
+                    <a href={`mailto:${selectedClient.email}`} className="contact-link">
+                      <Mail size={16} /> {selectedClient.email}
+                    </a>
+                  ) : (
+                    <span className="contact-link">
+                      <Mail size={16} /> Geen e-mail
+                    </span>
+                  )}
                   {selectedClient.phone && (
                     <a href={`tel:${selectedClient.phone}`} className="contact-link">
                       <Phone size={16} /> {selectedClient.phone}

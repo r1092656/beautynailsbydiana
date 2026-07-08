@@ -41,23 +41,38 @@ const serviceCategories = [
     title: 'Verzorging & Natuurlijk',
     icon: <Heart size={24} />,
     items: [
-      { 
-        name: 'Gel Overlay', 
-        desc: 'Hoogwaardige gel op de natuurlijke nagel voor extra stevigheid en een prachtige glans.', 
-        icon: ShieldCheck 
+      {
+        name: 'Gel Overlay',
+        desc: 'Hoogwaardige gel op de natuurlijke nagel voor extra stevigheid en een prachtige glans.',
+        icon: ShieldCheck
       },
-      { 
-        name: 'Manicure', 
-        desc: 'Een complete verzorging van de natuurlijke nagels en nagelriemen voor een gezonde uitstraling.', 
-        icon: Hand 
+      {
+        name: 'BIAB',
+        desc: 'Builder in a Bottle: een flexibele, sterke gel-versteviging op de natuurlijke nagel voor extra kracht met een natuurlijke look.',
+        icon: ShieldCheck
       },
-      { 
-        name: 'Manicure Gellak', 
-        desc: 'Een complete manicure verzorging gecombineerd met een duurzame gellak voor een perfect resultaat.', 
-        icon: Sparkles 
+      {
+        name: 'Manicure',
+        desc: 'Een complete verzorging van de natuurlijke nagels en nagelriemen voor een gezonde uitstraling.',
+        icon: Hand
       },
-      { 
-        name: 'Pedicure met gel lak', 
+      {
+        name: 'Manicure Gellak',
+        desc: 'Een complete manicure verzorging gecombineerd met een duurzame gellak voor een perfect resultaat.',
+        icon: Sparkles
+      },
+      {
+        name: 'Spa Manicure',
+        desc: 'Een luxueuze manicure met extra verwennende stappen zoals een verzachtende scrub en handmassage.',
+        icon: Hand
+      },
+      {
+        name: 'Spa Manicure Gellak',
+        desc: 'Dezelfde luxueuze spa-manicure, afgewerkt met een duurzame gellak voor langdurig mooie nagels.',
+        icon: Sparkles
+      },
+      {
+        name: 'Pedicure met gel lak',
         desc: 'Grondige verzorging van de voeten en nagels, afgewerkt met een duurzame gellak.', 
         icon: Footprints 
       },

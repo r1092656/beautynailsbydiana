@@ -9,13 +9,20 @@ import './BookingModal.css';
 
 const SERVICE_STRUCTURE = {
   'Gel Overlay': ['Fill In', 'Fullset'],
+  'BIAB': ['Fill In', 'Fullset'],
   'Verlenging': ['Fill In', 'Fullset'],
-  'Manicure': ['Manicure', 'Manicure + Gellak'],
+  'Manicure': ['Manicure', 'Manicure + Gellak', 'Spa Manicure', 'Spa Manicure + Gellak'],
   'Pedicure': ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak']
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
-const GEL_DESIGNS = ['No design', 'Simpel', 'Medium', 'Full'];
+const NATURAL_NAIL_LENGTHS = ['Korte natuurlijke nagels', 'Lange natuurlijke nagels'];
+const GEL_DESIGNS = [
+  { name: 'No design', desc: '' },
+  { name: 'Simpel', desc: 'French - enkele stenen - one nail design' },
+  { name: 'Medium', desc: 'French met design - meerdere stenen - 2 of 3 nails design' },
+  { name: 'Full', desc: 'French met design + add-ons - meerdere technieken - full charm nail - 3+ nails design' },
+];
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
 const PEDICURE_DESIGNS = ['No design', 'French', 'Other'];
 
@@ -44,7 +51,7 @@ const getDurationMins = (category, subSrv = '') => {
   const sub = subSrv?.trim() || '';
   
   // New durations including 15-minute buffer
-  if (cat === 'Gel Overlay' || cat === 'Verlenging') return 175; // 2h 40m + 15m = 2h 55m (175m)
+  if (cat === 'Gel Overlay' || cat === 'Verlenging' || cat === 'BIAB') return 175; // 2h 40m + 15m = 2h 55m (175m)
   if (cat === 'Pedicure') return 105; // 1h 30m + 15m = 1h 45m (105m)
   
   if (cat === 'Manicure') {
@@ -71,6 +78,7 @@ const BookingModal = () => {
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
   const [nailLength, setNailLength] = useState('');
+  const [naturalNailLength, setNaturalNailLength] = useState('');
   const [design, setDesign] = useState('');
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
   const [honeypot, setHoneypot] = useState('');
@@ -123,7 +131,10 @@ const BookingModal = () => {
   useEffect(() => {
     if (selectedService && isModalOpen) {
       const s = selectedService.toLowerCase();
-      if (s.includes('verlengen') || s.includes('verlenging')) {
+      if (s.includes('biab')) {
+        setCategory('BIAB');
+        setSubService('Fullset');
+      } else if (s.includes('verlengen') || s.includes('verlenging')) {
         setCategory('Verlenging');
         setSubService('Fullset');
       } else if (s.includes('overlay')) {
@@ -137,7 +148,11 @@ const BookingModal = () => {
         setSubService('Fullset');
       } else if (s.includes('manicure')) {
         setCategory('Manicure');
-        if (s.includes('gellak')) {
+        if (s.includes('spa') && s.includes('gellak')) {
+          setSubService('Spa Manicure + Gellak');
+        } else if (s.includes('spa')) {
+          setSubService('Spa Manicure');
+        } else if (s.includes('gellak')) {
           setSubService('Manicure + Gellak');
         } else {
           setSubService('Manicure');
@@ -166,7 +181,8 @@ const BookingModal = () => {
     }
   }, [isModalOpen, date]);
 
-  const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'Verlenging', [category]);
+  const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'BIAB' || category === 'Verlenging', [category]);
+  const needsNaturalNailLength = useMemo(() => category === 'Gel Overlay' || category === 'BIAB', [category]);
   const isPedicure = useMemo(() => category === 'Pedicure', [category]);
   const isManicure = useMemo(() => category === 'Manicure', [category]);
   const durationMins = useMemo(() => getDurationMins(category, subService), [category, subService]);
@@ -229,12 +245,20 @@ const BookingModal = () => {
         compressedImageBase64 = await compressImage(selectedFile, 800, 0.7);
       }
 
+      // Fold the extra choices (nail length, design) into the service label that
+      // actually gets emailed/stored, so Diana sees them without changing the
+      // underlying value used for duration calculations.
+      const extraDetails = [nailLength, naturalNailLength, design && design !== 'No design' ? `${design} design` : '']
+        .filter(Boolean)
+        .join(', ');
+      const fullSubService = extraDetails ? `${subService} (${extraDetails})` : subService;
+
       const emailPayload = {
         name,
         email,
         phone,
         category,
-        sub_service: subService,
+        sub_service: fullSubService,
         location,
         date,
         time,
@@ -262,7 +286,7 @@ const BookingModal = () => {
             email,
             phone,
             category,
-            sub_service: subService,
+            sub_service: fullSubService,
             location,
             status: 'confirmed'
           }]);
@@ -275,7 +299,7 @@ const BookingModal = () => {
           email,
           phone,
           category,
-          sub_service: subService,
+          sub_service: fullSubService,
           date
         });
 
@@ -299,6 +323,7 @@ const BookingModal = () => {
     setCategory('');
     setSubService('');
     setNailLength('');
+    setNaturalNailLength('');
     setDesign('');
     setShowFullsetWarning(false);
     setDate('');
@@ -364,11 +389,12 @@ const BookingModal = () => {
                 <label>Select Category</label>
                 <div className="category-grid">
                   {Object.keys(SERVICE_STRUCTURE).map((cat) => (
-                    <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => { 
-                      setCategory(cat); 
-                      setSubService(''); 
-                      setNailLength(''); 
-                      setDesign(''); 
+                    <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => {
+                      setCategory(cat);
+                      setSubService('');
+                      setNailLength('');
+                      setNaturalNailLength('');
+                      setDesign('');
                     }}>{cat}</button>
                   ))}
                 </div>
@@ -400,12 +426,32 @@ const BookingModal = () => {
                     </div>
                   )}
 
+                  {needsNaturalNailLength && (
+                    <div className="form-group">
+                      <label>Lengte natuurlijke nagel</label>
+                      <div className="option-grid">
+                        {NATURAL_NAIL_LENGTHS.map((len) => (
+                          <button key={len} type="button" className={`mini-option-btn ${naturalNailLength === len ? 'selected' : ''}`} onClick={() => setNaturalNailLength(len)}>{len}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="form-group">
                     <label>Design</label>
-                    <select value={design} onChange={(e) => setDesign(e.target.value)}>
-                      <option value="">Select design...</option>
-                      {GEL_DESIGNS.map((d) => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                    <div className="design-option-list">
+                      {GEL_DESIGNS.map((d) => (
+                        <button
+                          key={d.name}
+                          type="button"
+                          className={`design-option-card ${design === d.name ? 'selected' : ''}`}
+                          onClick={() => setDesign(d.name)}
+                        >
+                          <span className="design-option-name">{d.name}</span>
+                          {d.desc && <span className="design-option-desc">{d.desc}</span>}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

@@ -17,12 +17,16 @@ const SERVICE_STRUCTURE = {
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
 const NATURAL_NAIL_LENGTHS = ['Korte natuurlijke nagels', 'Lange natuurlijke nagels'];
+const BIAB_TYPES = ['Basic BIAB', 'BIAB met French/kleur'];
 const GEL_DESIGNS = [
   { name: 'No design', desc: '' },
   { name: 'Simpel', desc: 'French - enkele stenen - one nail design' },
   { name: 'Medium', desc: 'French met design - meerdere stenen - 2 of 3 nails design' },
   { name: 'Full', desc: 'French met design + add-ons - meerdere technieken - full charm nail - 3+ nails design' },
 ];
+// BIAB doesn't offer the "Full" design tier — only Gel Overlay/Verlenging do.
+const getDesignOptions = (category) =>
+  category === 'BIAB' ? GEL_DESIGNS.filter((d) => d.name !== 'Full') : GEL_DESIGNS;
 const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
 const PEDICURE_DESIGNS = ['No design', 'French', 'Other'];
 
@@ -79,6 +83,7 @@ const BookingModal = () => {
   const [subService, setSubService] = useState('');
   const [nailLength, setNailLength] = useState('');
   const [naturalNailLength, setNaturalNailLength] = useState('');
+  const [biabType, setBiabType] = useState('');
   const [design, setDesign] = useState('');
   const [notes, setNotes] = useState('');
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
@@ -249,7 +254,7 @@ const BookingModal = () => {
       // Fold the extra choices (nail length, design) into the service label that
       // actually gets emailed/stored, so Diana sees them without changing the
       // underlying value used for duration calculations.
-      const extraDetails = [nailLength, naturalNailLength, design && design !== 'No design' ? `${design} design` : '']
+      const extraDetails = [nailLength, naturalNailLength, biabType, design && design !== 'No design' ? `${design} design` : '']
         .filter(Boolean)
         .join(', ');
       const fullSubService = extraDetails ? `${subService} (${extraDetails})` : subService;
@@ -326,6 +331,7 @@ const BookingModal = () => {
     setSubService('');
     setNailLength('');
     setNaturalNailLength('');
+    setBiabType('');
     setDesign('');
     setNotes('');
     setShowFullsetWarning(false);
@@ -397,6 +403,7 @@ const BookingModal = () => {
                       setSubService('');
                       setNailLength('');
                       setNaturalNailLength('');
+                      setBiabType('');
                       setDesign('');
                     }}>{cat}</button>
                   ))}
@@ -440,10 +447,21 @@ const BookingModal = () => {
                     </div>
                   )}
 
+                  {category === 'BIAB' && (
+                    <div className="form-group">
+                      <label>BIAB Type</label>
+                      <div className="option-grid">
+                        {BIAB_TYPES.map((t) => (
+                          <button key={t} type="button" className={`mini-option-btn ${biabType === t ? 'selected' : ''}`} onClick={() => setBiabType(t)}>{t}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="form-group">
                     <label>Design</label>
                     <div className="design-option-list">
-                      {GEL_DESIGNS.map((d) => (
+                      {getDesignOptions(category).map((d) => (
                         <button
                           key={d.name}
                           type="button"

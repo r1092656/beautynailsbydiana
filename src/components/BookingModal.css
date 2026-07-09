@@ -106,7 +106,8 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 12px 15px;
   border: 1px solid #e0e0e0;
@@ -115,6 +116,17 @@
   font-family: var(--font-body);
   transition: 0.3s;
   appearance: none;
+}
+
+.notes-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
 }
 
 .form-group select {

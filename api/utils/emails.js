@@ -105,6 +105,12 @@ export const sendBookingEmails = async (bookingData) => {
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value">${time}</span></div>
           </div>
+          ${description ? `
+          <div class="section">
+            <div class="section-title">Opmerkingen van klant</div>
+            <div style="white-space: pre-wrap;">${description}</div>
+          </div>
+          ` : ''}
           <div style="text-align: center;"><a href="${calendarLink}" class="btn">TOEVOEGEN AAN CALENDAR</a></div>
         </div>
       </div>

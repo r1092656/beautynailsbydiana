@@ -80,6 +80,7 @@ const BookingModal = () => {
   const [nailLength, setNailLength] = useState('');
   const [naturalNailLength, setNaturalNailLength] = useState('');
   const [design, setDesign] = useState('');
+  const [notes, setNotes] = useState('');
   const [showFullsetWarning, setShowFullsetWarning] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [renderedAt] = useState(() => Date.now());
@@ -262,6 +263,7 @@ const BookingModal = () => {
         location,
         date,
         time,
+        description: notes,
         inspiration_image: compressedImageBase64,
         duration_mins: durationMins,
         _hp: honeypot,
@@ -325,6 +327,7 @@ const BookingModal = () => {
     setNailLength('');
     setNaturalNailLength('');
     setDesign('');
+    setNotes('');
     setShowFullsetWarning(false);
     setDate('');
     setTime('');
@@ -537,6 +540,18 @@ const BookingModal = () => {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Step 6: Optional notes */}
+              <div className="form-group" style={{ borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                <label>Extra opmerkingen of vragen (optioneel)</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Weet je niet goed wat je precies wil, of wil je iets extra uitleggen? Typ het hier."
+                  rows={3}
+                  className="notes-textarea"
+                />
               </div>
 
               <div style={{ marginTop: '20px' }}>

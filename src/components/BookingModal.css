@@ -126,7 +126,7 @@
 .form-group textarea:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 0 3px rgba(122, 34, 69, 0.2);
 }
 
 .form-group select {
@@ -140,7 +140,7 @@
 .form-group select:focus {
   outline: none;
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 0 3px rgba(122, 34, 69, 0.2);
 }
 
 /* Time Grid Styles */
@@ -215,7 +215,7 @@
   color: white;
   border-color: var(--gold);
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 12px rgba(122, 34, 69, 0.3);
 }
 
 /* File Upload Styles */
@@ -264,7 +264,7 @@
   position: absolute;
   top: 15px;
   right: 15px;
-  background: rgba(212, 175, 55, 0.9);
+  background: rgba(122, 34, 69, 0.9);
   color: white;
   border: none;
   border-radius: 6px;
@@ -310,7 +310,7 @@
   background: var(--gold);
   color: white;
   border-color: var(--gold);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 12px rgba(122, 34, 69, 0.3);
 }
 
 /* Option Grid (Shape/Length) */
@@ -375,7 +375,7 @@
 .design-option-card.selected {
   background: #fffaf0;
   border-color: var(--dark-gold);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 0 2px rgba(122, 34, 69, 0.25);
 }
 
 .design-option-name {
@@ -435,7 +435,7 @@
 .btn-gold:hover:not(:disabled) {
   background: var(--dark-gold);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 15px rgba(122, 34, 69, 0.4);
 }
 
 .btn-gold:disabled {

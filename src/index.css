@@ -1,13 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
 
 :root {
-  --soft-pink: #fdf0f0;
-  --bg-light: #fcf8f9;
-  --gold: #e8cca2;      /* Softer, pastel-like gold */
-  --dark-gold: #d4b585; /* Slightly deeper soft gold */
-  --dark-text: #4a3b4e; /* Dark, soft purple/taupe replacing harsh black */
-  --dark-bg: #fdfafdf0;   /* Very soft light purple/white replacing black backgrounds */
-  
+  /* Blush palette — matches the homepage redesign */
+  --soft-pink: #FFF6FA;   /* main light background */
+  --bg-light: #FFE4EF;    /* blush accent tone */
+  --gold: #7A2245;        /* main accent (was gold, now wine) */
+  --dark-gold: #4A1230;   /* darker accent / hover */
+  --dark-text: #3A1626;   /* main text on light surfaces */
+  --dark-bg: #7A2245;     /* dark surfaces (navbar, footer) — lighter wine so the logo stays readable */
+  --text-on-dark: #FFE4EF; /* text on dark-bg surfaces */
+  --wine-gradient: linear-gradient(120deg, #4A1230 0%, #7A2245 40%, #B15C86 60%, #7A2245 100%);
+
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Poppins', sans-serif;
 }
@@ -43,7 +46,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Buttons */
 .btn-gold {
-  background-color: var(--gold);
+  background: var(--wine-gradient);
   color: white;
   border-radius: 50px;
   padding: 12px 35px;
@@ -56,10 +59,11 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
   font-weight: 600;
   font-family: var(--font-body);
+  box-shadow: 0 8px 20px rgba(122, 34, 69, 0.28);
 }
 
 .btn-gold:hover {
-  background-color: var(--dark-gold);
+  background: var(--dark-gold);
   transform: scale(1.05);
 }
 

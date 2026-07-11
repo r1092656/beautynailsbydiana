@@ -14,7 +14,7 @@
 }
 
 .navbar-brand {
-  color: var(--dark-text);
+  color: var(--text-on-dark);
   text-decoration: none;
   font-family: var(--font-heading);
   font-size: 1.5rem;
@@ -36,7 +36,8 @@
 }
 
 .nav-link {
-  color: var(--dark-text);
+  color: var(--text-on-dark);
+  opacity: 0.85;
   text-decoration: none;
   font-size: 1rem;
   transition: 0.3s;
@@ -44,12 +45,13 @@
 }
 
 .nav-link:hover, .nav-link.active {
-  color: var(--gold);
+  color: var(--bg-light);
+  opacity: 1;
 }
 
 .menu-icon {
   display: none;
-  color: var(--dark-text);
+  color: var(--text-on-dark);
   cursor: pointer;
 }
 

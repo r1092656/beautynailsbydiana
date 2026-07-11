@@ -1,6 +1,6 @@
 .services-page {
   padding: 80px 0;
-  background: linear-gradient(135deg, #fffafa 0%, #fdf5f2 100%);
+  background: linear-gradient(135deg, #FFF6FA 0%, #FFE4EF 100%);
   min-height: 100vh;
 }
 
@@ -31,7 +31,7 @@
 
 .category-title {
   font-size: 1.8rem;
-  color: #D4AF37;
+  color: #7A2245;
   margin-bottom: 40px;
   display: flex;
   align-items: center;
@@ -45,7 +45,7 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, #D4AF37 0%, transparent 100%);
+  background: linear-gradient(90deg, #7A2245 0%, transparent 100%);
 }
 
 .services-grid {
@@ -57,7 +57,7 @@
 .service-card {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(122, 34, 69, 0.2);
   border-radius: 24px;
   padding: 40px;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -70,22 +70,22 @@
 
 .service-card:hover {
   transform: translateY(-10px);
-  border-color: rgba(212, 175, 55, 0.6);
-  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.1);
+  border-color: rgba(122, 34, 69, 0.6);
+  box-shadow: 0 20px 40px rgba(122, 34, 69, 0.1);
   background: rgba(255, 255, 255, 0.9);
 }
 
 .service-icon-wrapper {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  background: linear-gradient(135deg, #7A2245 0%, #4A1230 100%);
   border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   margin-bottom: 25px;
-  box-shadow: 0 8px 15px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 15px rgba(122, 34, 69, 0.3);
 }
 
 .service-card h3 {
@@ -111,8 +111,8 @@
   width: 100%;
   padding: 14px;
   background: transparent;
-  border: 2px solid #D4AF37;
-  color: #D4AF37;
+  border: 2px solid #7A2245;
+  color: #7A2245;
   border-radius: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
@@ -123,7 +123,7 @@
 }
 
 .service-card .btn-book:hover {
-  background: #D4AF37;
+  background: #7A2245;
   color: white;
 }
 

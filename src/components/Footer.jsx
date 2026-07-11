@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer style={{ backgroundColor: 'var(--dark-bg)', color: 'var(--dark-text)', padding: '40px 0', marginTop: 'auto' }}>
+    <footer style={{ backgroundColor: 'var(--dark-bg)', color: 'var(--text-on-dark)', padding: '40px 0', marginTop: 'auto' }}>
       <div className="container text-center">
         <p style={{ margin: 0, opacity: 0.8 }}>Copyright &copy; BeautyNails Diana 2026. All rights reserved.</p>
         <p style={{ margin: '10px 0 0', opacity: 0.6, fontSize: '0.9rem' }}>

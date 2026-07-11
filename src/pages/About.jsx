@@ -6,7 +6,7 @@ const About = () => {
   return (
     <div className="fade-in">
       {/* Header */}
-      <header className="text-center" style={{ padding: '80px 0 60px 0', background: 'linear-gradient(rgba(253, 240, 240, 0.5), rgba(252, 248, 249, 1))' }}>
+      <header className="text-center" style={{ padding: '80px 0 60px 0', background: 'linear-gradient(rgba(255, 228, 239, 0.5), rgba(255, 246, 250, 1))' }}>
         <div className="container">
           <span style={{ textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--dark-gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
             The Artist Behind the Art

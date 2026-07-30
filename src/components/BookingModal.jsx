@@ -12,11 +12,10 @@ const SERVICE_STRUCTURE = {
   'BIAB': ['Fill In', 'Fullset'],
   'Verlenging': ['Fill In', 'Fullset'],
   'Manicure': ['Manicure', 'Manicure + Gellak', 'Spa Manicure', 'Spa Manicure + Gellak'],
-  'Pedicure': ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak']
+  'Pedicure': ['Basis Pedicure', 'Basis Pedicure + Gellak', 'Basis Pedicure + Versteviging Gel', 'Basis Pedicure incl. Versteviging Gel + Gellak']
 };
 
 const NAIL_LENGTHS = ['Small (1–2)', 'Medium (3–4)', 'Long (5–6)'];
-const NATURAL_NAIL_LENGTHS = ['Korte natuurlijke nagels', 'Lange natuurlijke nagels'];
 const BIAB_TYPES = ['Basic BIAB', 'BIAB met French/kleur'];
 const GEL_DESIGNS = [
   { name: 'No design', desc: '' },
@@ -27,7 +26,6 @@ const GEL_DESIGNS = [
 // BIAB doesn't offer the "Full" design tier — only Gel Overlay/Verlenging do.
 const getDesignOptions = (category) =>
   category === 'BIAB' ? GEL_DESIGNS.filter((d) => d.name !== 'Full') : GEL_DESIGNS;
-const PEDICURE_SERVICES = ['Gellak', 'Versteviging gel', 'Versteviging gel + gellak'];
 const PEDICURE_DESIGNS = ['No design', 'French', 'Other'];
 
 const timeToMins = (timeStr) => {
@@ -82,7 +80,6 @@ const BookingModal = () => {
   const [category, setCategory] = useState('');
   const [subService, setSubService] = useState('');
   const [nailLength, setNailLength] = useState('');
-  const [naturalNailLength, setNaturalNailLength] = useState('');
   const [biabType, setBiabType] = useState('');
   const [design, setDesign] = useState('');
   const [notes, setNotes] = useState('');
@@ -188,7 +185,6 @@ const BookingModal = () => {
   }, [isModalOpen, date]);
 
   const needsNailOptions = useMemo(() => category === 'Gel Overlay' || category === 'BIAB' || category === 'Verlenging', [category]);
-  const needsNaturalNailLength = useMemo(() => category === 'Gel Overlay' || category === 'BIAB', [category]);
   const isPedicure = useMemo(() => category === 'Pedicure', [category]);
   const isManicure = useMemo(() => category === 'Manicure', [category]);
   const durationMins = useMemo(() => getDurationMins(category, subService), [category, subService]);
@@ -254,7 +250,7 @@ const BookingModal = () => {
       // Fold the extra choices (nail length, design) into the service label that
       // actually gets emailed/stored, so Diana sees them without changing the
       // underlying value used for duration calculations.
-      const extraDetails = [nailLength, naturalNailLength, biabType, design && design !== 'No design' ? `${design} design` : '']
+      const extraDetails = [nailLength, biabType, design && design !== 'No design' ? `${design} design` : '']
         .filter(Boolean)
         .join(', ');
       const fullSubService = extraDetails ? `${subService} (${extraDetails})` : subService;
@@ -330,7 +326,6 @@ const BookingModal = () => {
     setCategory('');
     setSubService('');
     setNailLength('');
-    setNaturalNailLength('');
     setBiabType('');
     setDesign('');
     setNotes('');
@@ -402,7 +397,6 @@ const BookingModal = () => {
                       setCategory(cat);
                       setSubService('');
                       setNailLength('');
-                      setNaturalNailLength('');
                       setBiabType('');
                       setDesign('');
                     }}>{cat}</button>
@@ -431,17 +425,6 @@ const BookingModal = () => {
                       <div className="option-grid">
                         {NAIL_LENGTHS.map((len) => (
                           <button key={len} type="button" className={`mini-option-btn ${nailLength === len ? 'selected' : ''}`} onClick={() => setNailLength(len)}>{len}</button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {needsNaturalNailLength && (
-                    <div className="form-group">
-                      <label>Lengte natuurlijke nagel</label>
-                      <div className="option-grid">
-                        {NATURAL_NAIL_LENGTHS.map((len) => (
-                          <button key={len} type="button" className={`mini-option-btn ${naturalNailLength === len ? 'selected' : ''}`} onClick={() => setNaturalNailLength(len)}>{len}</button>
                         ))}
                       </div>
                     </div>
@@ -480,11 +463,20 @@ const BookingModal = () => {
               {isPedicure && (
                 <div className="fade-in">
                   <div className="form-group">
-                    <label>Choose Pedicure Service</label>
-                    <select value={subService} onChange={(e) => setSubService(e.target.value)} required>
-                      <option value="" disabled>Select treatment...</option>
-                      {PEDICURE_SERVICES.map((srv) => <option key={srv} value={srv}>{srv}</option>)}
-                    </select>
+                    <label>Kies Pedicure Optie</label>
+                    <div className="option-grid">
+                      {SERVICE_STRUCTURE['Pedicure'].map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          className={`mini-option-btn ${subService === opt ? 'selected' : ''}`}
+                          onClick={() => setSubService(opt)}
+                          style={{ minHeight: '50px' }}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="form-group">
                     <label>Design</label>

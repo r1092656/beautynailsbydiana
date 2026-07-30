@@ -42,11 +42,20 @@
   font-size: 1rem;
   transition: 0.3s;
   padding: 5px 10px;
+  border-radius: 4px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-link:hover, .nav-link.active {
   color: var(--bg-light);
   opacity: 1;
+  background: transparent;
+}
+
+.nav-link:focus-visible {
+  outline: 1.5px solid var(--bg-light);
+  outline-offset: 2px;
 }
 
 .menu-icon {

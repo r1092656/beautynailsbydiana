@@ -177,13 +177,12 @@
 
 .price-row-desc {
   display: block;
-  font-family: var(--font-heading);
-  font-style: italic;
-  font-size: 0.78rem;
-  color: #3A1626;
-  opacity: 0.6;
-  margin-top: 2px;
-  line-height: 1.4;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 0.82rem;
+  color: #6b4a57;
+  margin-top: 3px;
+  line-height: 1.5;
 }
 
 .price-row-values {

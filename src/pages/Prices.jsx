@@ -2,14 +2,32 @@ import { useState } from 'react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import './Prices.css';
 
-// Design add-ons and "verwijderen van gel" pricing are identical at both
-// locations, so they're shared between the two lists below.
+// Design add-ons, BIAB and "verwijderen van gel" pricing are identical at
+// both locations, so they're shared between the two lists below. Only
+// Gel Overlay, Verlenging, Manicures and Andere differ per location.
 const DESIGN_SECTION = {
   title: 'Design',
   items: [
     { name: 'Simpel design', desc: 'french, enkele stenen, one nail design...', price: '€ + 5' },
     { name: 'Medium design', desc: 'french met design, meerdere stenen, 2-3 nail design...', price: '€ + 10' },
     { name: 'Full design', desc: 'French met design + add ons, meerdere verschillende technieken, full charm nail, 3+ nail design...', price: '€ + 15' },
+  ],
+};
+
+const BIAB_SECTION = {
+  title: 'BIAB',
+  columns: ['nieuwe set', 'opvullen'],
+  items: [
+    { name: 'Basic BIAB', prices: ['€45', '€40'] },
+    { name: 'Basic BIAB incl. kleur/french', prices: ['€50', '€45'] },
+  ],
+};
+
+const VERWIJDEREN_SECTION = {
+  title: 'Verwijderen van gel',
+  items: [
+    { name: 'Verwijderen van gel overlay / pedicure', desc: 'verwijderen van ander salon of voor nieuwe set, na 3 opvullingen = nieuwe set verplicht', price: '€ + 10' },
+    { name: 'Verwijderen van verlenging', desc: 'verwijderen van ander salon of voor nieuwe set, na 3 opvullingen = nieuwe set verplicht', price: '€ + 15' },
   ],
 };
 
@@ -20,6 +38,9 @@ const ANDERE_SECTION = {
   ],
 };
 
+// Fixed layout for both locations: left = Gel Overlay, Verlenging, Design.
+// right = BIAB, Manicures, Verwijderen van gel. Andere at the bottom.
+// Only the values inside these sections change between Turnhout/Laakdal.
 const TURNHOUT = {
   left: [
     {
@@ -30,7 +51,6 @@ const TURNHOUT = {
         { name: 'Basis gel incl. kleur/french', prices: ['€45', '€40'] },
       ],
     },
-    DESIGN_SECTION,
     {
       title: 'Verlenging',
       columns: ['nieuwe set', 'opvullen'],
@@ -40,25 +60,22 @@ const TURNHOUT = {
         { name: 'Long (5&6)', prices: ['€80', '€75'] },
       ],
     },
+    DESIGN_SECTION,
   ],
   right: [
+    BIAB_SECTION,
     {
-      title: 'BIAB',
-      columns: ['nieuwe set', 'opvullen'],
+      title: 'Manicures',
       items: [
-        { name: 'Basic BIAB', prices: ['€45', '€40'] },
-        { name: 'Basic BIAB incl. kleur/french', prices: ['€50', '€45'] },
+        { name: 'Basis manicure', price: '€20' },
+        { name: 'Basis manicure incl. gellak', price: '€30' },
+        { name: 'Spa manicure', price: '€30' },
+        { name: 'Spa manicure incl. gellak', price: '€40' },
       ],
     },
-    {
-      title: 'Verwijderen van gel',
-      items: [
-        { name: 'Verwijderen van gel overlay / pedicure', desc: 'verwijderen van ander salon of voor nieuwe set, na 3 opvullingen = nieuwe set verplicht', price: '€ + 10' },
-        { name: 'Verwijderen van verlenging', desc: 'verwijderen van ander salon of voor nieuwe set, na 3 opvullingen = nieuwe set verplicht', price: '€ + 15' },
-      ],
-    },
-    ANDERE_SECTION,
+    VERWIJDEREN_SECTION,
   ],
+  bottom: [ANDERE_SECTION],
 };
 
 const LAAKDAL = {
@@ -71,18 +88,6 @@ const LAAKDAL = {
         { name: 'Basis gel + kleur/french', prices: ['€40', '€35'] },
       ],
     },
-    DESIGN_SECTION,
-    {
-      title: 'Manicures',
-      items: [
-        { name: 'Manicure', price: '€20' },
-        { name: 'Manicure + gellak', price: '€25' },
-        { name: 'Spa manicure', price: '€25' },
-        { name: 'Spa manicure + gellak', price: '€30' },
-      ],
-    },
-  ],
-  right: [
     {
       title: 'Verlenging',
       columns: ['nieuwe set', 'opvullen'],
@@ -92,15 +97,22 @@ const LAAKDAL = {
         { name: 'Long (5&6)', prices: ['€70', '€65'] },
       ],
     },
+    DESIGN_SECTION,
+  ],
+  right: [
+    BIAB_SECTION,
     {
-      title: 'Verwijderen van gel',
+      title: 'Manicures',
       items: [
-        { name: 'Verwijderen van gel overlay', desc: 'verwijderen van ander salon of voor nieuwe set, na 3 opvullingen = nieuwe set verplicht', price: '€ + 10' },
-        { name: 'Verwijderen van verlenging', desc: 'verwijderen van ander salon of voor nieuwe set, na 3 opvullingen = nieuwe set verplicht', price: '€ + 15' },
+        { name: 'Manicure', price: '€20' },
+        { name: 'Manicure + gellak', price: '€25' },
+        { name: 'Spa manicure', price: '€25' },
+        { name: 'Spa manicure + gellak', price: '€30' },
       ],
     },
-    ANDERE_SECTION,
+    VERWIJDEREN_SECTION,
   ],
+  bottom: [ANDERE_SECTION],
 };
 
 const PEDICURE_SECTION = {
@@ -142,7 +154,7 @@ const PriceCategory = ({ section }) => (
 );
 
 const Prices = () => {
-  useDocumentTitle('Prijzen', 'Bekijk de prijzen van Beauty Nails by Diana voor Turnhout en Laakdal: gel overlay, BIAB, verlenging, manicure, pedicure en meer.');
+  useDocumentTitle('Pricelist', 'Bekijk de pricelist van Beauty Nails by Diana voor Turnhout en Laakdal: gel overlay, BIAB, verlenging, manicure, pedicure en meer.');
   const [location, setLocation] = useState('Turnhout');
   const list = location === 'Turnhout' ? TURNHOUT : LAAKDAL;
 
@@ -190,6 +202,9 @@ const Prices = () => {
 
         <div className="price-pedicure-wrap">
           <div className="prices-grid">
+            <div>
+              {list.bottom.map((section) => <PriceCategory section={section} key={section.title} />)}
+            </div>
             <div>
               <PriceCategory section={PEDICURE_SECTION} />
             </div>

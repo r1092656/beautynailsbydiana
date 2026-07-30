@@ -35,7 +35,6 @@ const Reviews = () => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial data fetch on mount
     fetchReviews();
 
     // Subscribe to real-time changes

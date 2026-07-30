@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Users, Calendar as CalendarIcon } from 'lucide-react';
@@ -10,8 +10,7 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 const AdminDashboard = () => {
   useDocumentTitle('Admin Dashboard');
   const { content, deleteContent } = useContent();
-  // Computed once per content refresh rather than on every render.
-  const now = useMemo(() => Date.now(), [content]);
+  const [now] = useState(() => Date.now());
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'portfolio';
   
@@ -22,24 +21,23 @@ const AdminDashboard = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  const fetchReviews = useCallback(async () => {
-    setReviewsLoading(true);
-    const { data, error } = await supabase
-      .from('reviews')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching reviews:', error);
-    } else {
-      setReviews(data || []);
-    }
-    setReviewsLoading(false);
-  }, []);
-
   useEffect(() => {
     if (activeTab === 'reviews') {
-      fetchReviews();
+      let isMounted = true;
+      
+      supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!isMounted) return;
+          if (error) {
+            console.error('Error fetching reviews:', error);
+          } else {
+            setReviews(data || []);
+          }
+          setReviewsLoading(false);
+        });
 
       const subscription = supabase
         .channel('admin:reviews')
@@ -53,10 +51,11 @@ const AdminDashboard = () => {
         .subscribe();
 
       return () => {
+        isMounted = false;
         supabase.removeChannel(subscription);
       };
     }
-  }, [activeTab, fetchReviews]);
+  }, [activeTab]);
 
   const handleDeleteReview = async (id) => {
     if (window.confirm('Weet je zeker dat je deze review wilt verwijderen?')) {

@@ -45,7 +45,6 @@ export const ContentProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial data fetch on mount
     fetchContent();
   }, []);
 

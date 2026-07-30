@@ -26,7 +26,6 @@ export const sendBookingEmails = async (bookingData) => {
   const description = escapeHtml(rawDescription);
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const needsNailOptions = category === 'Gel Overlay' || category === 'Verlenging';
 
   // Generate Google Calendar Link
   const generateCalendarLink = () => {
@@ -58,7 +57,7 @@ export const sendBookingEmails = async (bookingData) => {
       });
 
       return `${baseUrl}&${params.toString()}`;
-    } catch (e) {
+    } catch {
       return "#";
     }
   };

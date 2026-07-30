@@ -1,0 +1,216 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap');
+
+/* Scoped to the Prijzen page only. */
+
+.prices-page {
+  background: #FFF6FA;
+  padding: 60px 0 90px;
+}
+
+.prices-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.prices-brand {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 3rem;
+  color: #3A1626;
+  margin-bottom: 0;
+  line-height: 1;
+}
+
+.prices-brand span {
+  color: #7A2245;
+}
+
+.prices-by {
+  font-family: 'Alex Brush', cursive;
+  font-size: 1.6rem;
+  color: #B15C86;
+  margin: -4px 0 8px;
+}
+
+.prices-script-title {
+  font-family: 'Alex Brush', cursive;
+  font-size: 2.6rem;
+  color: #7A2245;
+}
+
+.prices-intro {
+  max-width: 640px;
+  margin: 20px auto 36px;
+  text-align: center;
+  color: #3A1626;
+  opacity: 0.8;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.prices-intro strong {
+  color: #7A2245;
+  opacity: 1;
+}
+
+.prices-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 46px;
+}
+
+.price-toggle-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 34px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #7A2245;
+  background: transparent;
+  color: #7A2245;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.price-toggle-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(122, 34, 69, 0.08);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.price-toggle-btn:hover {
+  transform: translateY(-2px);
+}
+
+.price-toggle-btn:hover::after {
+  opacity: 1;
+}
+
+.price-toggle-btn.active {
+  background: var(--wine-gradient, linear-gradient(120deg, #4A1230 0%, #7A2245 40%, #B15C86 60%, #7A2245 100%));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(122, 34, 69, 0.28);
+}
+
+.price-toggle-btn.active::after {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.prices-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 50px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 760px) {
+  .prices-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.price-category {
+  margin-bottom: 40px;
+}
+
+.price-category-title {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #3A1626;
+  border-bottom: 2px solid #7A2245;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.price-columns-labels {
+  display: flex;
+  gap: 18px;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: #B15C86;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.price-columns-labels span {
+  width: 54px;
+  text-align: right;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: 4px;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.price-row:hover {
+  background: rgba(122, 34, 69, 0.06);
+  transform: translateX(4px);
+}
+
+.price-row-name {
+  color: #3A1626;
+  font-size: 0.95rem;
+}
+
+.price-row-desc {
+  display: block;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: #3A1626;
+  opacity: 0.6;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.price-row-values {
+  display: flex;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.price-row-values span {
+  width: 54px;
+  text-align: right;
+  font-weight: 600;
+  color: #7A2245;
+  font-size: 0.95rem;
+}
+
+.price-row-single {
+  font-weight: 600;
+  color: #7A2245;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.price-pedicure-wrap {
+  max-width: 1000px;
+  margin: 10px auto 0;
+  border-top: 1px solid rgba(122, 34, 69, 0.2);
+  padding-top: 30px;
+}

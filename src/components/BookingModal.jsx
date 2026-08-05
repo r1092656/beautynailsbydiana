@@ -1,6 +1,7 @@
 import { useBooking } from '../context/BookingContext';
 import { X, CircleCheck, Upload, FileImage, Loader, CreditCard, ChevronRight, ChevronLeft, Info, ExternalLink } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { compressImage } from '../utils/compressImage';
 import { supabase } from '../supabaseClient';
 import { syncClientData } from '../utils/clientSync';
@@ -642,17 +643,18 @@ const BookingModal = () => {
           </div>
         )}
 
-        {showFullsetWarning && (
+        {showFullsetWarning && createPortal(
           <div className="warning-overlay fade-in">
             <div className="warning-content glass-panel">
               <h3 className="text-gold mb-3">Opmerking</h3>
               <p className="mb-4">Een Fullset is de standaard voor sets die ouder zijn dan 4 weken.</p>
               <button className="btn-gold w-100" onClick={() => setShowFullsetWarning(false)}>Begrepen</button>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {showLastMinuteWarning && (
+        {showLastMinuteWarning && createPortal(
           <div className="warning-overlay fade-in">
             <div className="warning-content glass-panel last-minute-popup">
               <h3 className="text-gold mb-3">Last-minute boeking</h3>
@@ -665,7 +667,8 @@ const BookingModal = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>

@@ -461,21 +461,53 @@ const AdminCalendar = () => {
           {calendarDays.map((d, index) => {
             const dayBookings = bookings.filter(b => b.date === d.date);
             const dayBlocks = blocks.filter(b => b.date === d.date);
-            
+
+            // Named appointments for this day: customer bookings + admin "planned"
+            // appointments, deduped by group_id since a multi-slot admin appointment
+            // has one availability_blocks row per slot but represents one client.
+            const plannedByGroup = new Map();
+            dayBlocks.filter(b => b.status === 'planned').forEach(b => {
+              const key = b.group_id || `${b.client_name}-${b.time_slot}`;
+              if (!plannedByGroup.has(key)) plannedByGroup.set(key, b.client_name);
+            });
+            const initialsEntries = [
+              ...dayBookings.map(b => ({ key: `b-${b.id}`, name: b.name, type: 'booked' })),
+              ...Array.from(plannedByGroup.entries()).map(([key, name]) => ({ key: `p-${key}`, name, type: 'planned' }))
+            ];
+            const visibleInitials = initialsEntries.slice(0, 3);
+            const overflowCount = initialsEntries.length - visibleInitials.length;
+
+            // Block extent: a full-day block tints the whole cell; a partial
+            // (few-hour) block instead shows a bar filled proportionally.
+            const blockedSlots = dayBlocks.filter(b => b.status === 'blocked' || !b.status);
+            const isFullDayBlocked = blockedSlots.some(b => b.time_slot === 'all_day') || blockedSlots.length >= TIME_SLOTS.length;
+            const hasPartialBlock = !isFullDayBlocked && blockedSlots.length > 0;
+            const blockedRatio = Math.min(blockedSlots.length / TIME_SLOTS.length, 1);
+
             return (
-              <div 
+              <div
                 key={index}
-                className={`calendar-day ${!d.day ? 'empty' : ''} ${selectedDate?.date === d.date ? 'selected' : ''} ${d.isToday ? 'today' : ''}`}
+                className={`calendar-day ${!d.day ? 'empty' : ''} ${selectedDate?.date === d.date ? 'selected' : ''} ${d.isToday ? 'today' : ''} ${isFullDayBlocked ? 'day-blocked-full' : ''}`}
                 onClick={() => handleDaySelect(d)}
               >
                 {d.day && (
                   <>
+                    {initialsEntries.length > 0 && (
+                      <div className="day-initials">
+                        {visibleInitials.map(entry => (
+                          <span key={entry.key} className={`day-initial-badge ${entry.type}`} title={entry.name || 'Onbekend'}>
+                            {getInitials(entry.name)}
+                          </span>
+                        ))}
+                        {overflowCount > 0 && <span className="day-initial-badge overflow">+{overflowCount}</span>}
+                      </div>
+                    )}
                     <span className="day-number">{d.day}</span>
-                    <div className="day-indicators">
-                      {dayBookings.length > 0 && <span className="dot booked"></span>}
-                      {dayBlocks.some(b => b.status === 'planned') && <span className="dot planned"></span>}
-                      {dayBlocks.some(b => b.status === 'blocked' || !b.status) && <span className="dot blocked"></span>}
-                    </div>
+                    {hasPartialBlock && (
+                      <div className="day-block-bar" title={`${blockedSlots.length} van ${TIME_SLOTS.length} sloten geblokkeerd`}>
+                        <div className="day-block-bar-fill" style={{ width: `${blockedRatio * 100}%` }}></div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -484,10 +516,10 @@ const AdminCalendar = () => {
         </div>
 
         <div className="calendar-legend">
-          <div className="legend-item"><span className="legend-dot available"></span> Beschikbaar</div>
-          <div className="legend-item"><span className="legend-dot booked"></span> Client Boeking</div>
-          <div className="legend-item"><span className="legend-dot planned"></span> Admin Boeking</div>
-          <div className="legend-item"><span className="legend-dot blocked"></span> Niet Beschikbaar</div>
+          <div className="legend-item"><span className="legend-dot booked"></span> Cirkel = Client Boeking (initialen)</div>
+          <div className="legend-item"><span className="legend-dot planned"></span> Cirkel = Admin Boeking (initialen)</div>
+          <div className="legend-item"><span className="legend-bar-sample"><span className="legend-bar-sample-fill"></span></span> Balk = deels geblokkeerd</div>
+          <div className="legend-item"><span className="legend-dot blocked"></span> Volledig rood vak = hele dag geblokkeerd</div>
         </div>
       </div>
 

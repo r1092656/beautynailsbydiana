@@ -99,6 +99,7 @@ const BookingModal = () => {
   const [renderedAt] = useState(() => Date.now());
   const [consentGiven, setConsentGiven] = useState(false);
   const [lastMinuteConsent, setLastMinuteConsent] = useState(false);
+  const [showLastMinuteWarning, setShowLastMinuteWarning] = useState(false);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [name, setName] = useState('');
@@ -216,7 +217,8 @@ const BookingModal = () => {
     const isAllDayBlocked = adminBlocks.some(b => b.time_slot === 'all_day');
     
     return allSlots.map(slot => {
-      if (isAllDayBlocked) return { time: slot, blocked: true };
+      const lastMinute = getLastMinuteFee(date, slot) > 0;
+      if (isAllDayBlocked) return { time: slot, blocked: true, lastMinute };
 
       const startSlotMins = timeToMins(slot);
       const endSlotMins = startSlotMins + durationMins;
@@ -234,9 +236,10 @@ const BookingModal = () => {
       // 2. Admin manually blocked this specific time slot
       const isManuallyBlocked = adminBlocks.some(b => b.time_slot === slot);
 
-      return { 
-        time: slot, 
-        blocked: isBooked || isManuallyBlocked 
+      return {
+        time: slot,
+        blocked: isBooked || isManuallyBlocked,
+        lastMinute
       };
     });
   }, [date, existingBookings, adminBlocks, durationMins]);
@@ -253,13 +256,30 @@ const BookingModal = () => {
     }
   };
 
+  // Validates the form and, for last-minute slots, shows a confirmation popup
+  // before actually submitting (instead of blocking with an inline checkbox).
   const confirmBooking = async (e) => {
     if (e) e.preventDefault();
     if (!location) { alert("Selecteer een locatie."); return; }
     if (!time) { alert("Selecteer een tijdslot."); return; }
-    if (lastMinuteFee > 0 && !lastMinuteConsent) { alert(`Bevestig eerst dat je akkoord gaat met de extra kosten (€${lastMinuteFee}) voor deze last-minute boeking.`); return; }
     if (!consentGiven) { alert("Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden."); return; }
 
+    if (lastMinuteFee > 0 && !lastMinuteConsent) {
+      setShowLastMinuteWarning(true);
+      return;
+    }
+
+    await doSubmit();
+  };
+
+  // Called by the popup's "Doorgaan" button to finalize a last-minute booking.
+  const proceedWithLastMinute = async () => {
+    setLastMinuteConsent(true);
+    setShowLastMinuteWarning(false);
+    await doSubmit();
+  };
+
+  const doSubmit = async () => {
     setIsSending(true);
     try {
       let compressedImageBase64 = null;
@@ -354,6 +374,7 @@ const BookingModal = () => {
     setDesign('');
     setNotes('');
     setShowFullsetWarning(false);
+    setShowLastMinuteWarning(false);
     setDate('');
     setTime('');
     setName('');
@@ -551,27 +572,17 @@ const BookingModal = () => {
                   ) : (
                     <div className="time-grid">
                       {availableSlots.map((slot) => (
-                        <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
+                        <button
+                          type="button"
+                          key={slot.time}
+                          disabled={slot.blocked}
+                          onClick={() => setTime(slot.time)}
+                          className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''} ${slot.lastMinute ? 'last-minute' : ''}`}
+                          title={slot.lastMinute ? 'Last-minute tijdstip: hiervoor geldt een toeslag' : undefined}
+                        >
+                          {slot.time}
+                        </button>
                       ))}
-                    </div>
-                  )}
-
-                  {time && lastMinuteFee > 0 && (
-                    <div className="last-minute-warning fade-in">
-                      <p>
-                        <strong>Let op: dit is een last-minute boeking</strong> (binnen {lastMinuteFee === 15 ? '12' : '24'} uur).
-                        We raden aan om vroeger te boeken zodat we voldoende tijd hebben. Boek je toch nu, dan rekenen we
-                        <strong> €{lastMinuteFee} extra</strong> aan voor deze last-minute afspraak.
-                      </p>
-                      <label className="last-minute-check">
-                        <input
-                          type="checkbox"
-                          checked={lastMinuteConsent}
-                          onChange={(e) => setLastMinuteConsent(e.target.checked)}
-                          required
-                        />
-                        Ik ga akkoord met de extra kosten (€{lastMinuteFee}) voor deze last-minute boeking en wil doorgaan.
-                      </label>
                     </div>
                   )}
                 </div>
@@ -637,6 +648,22 @@ const BookingModal = () => {
               <h3 className="text-gold mb-3">Opmerking</h3>
               <p className="mb-4">Een Fullset is de standaard voor sets die ouder zijn dan 4 weken.</p>
               <button className="btn-gold w-100" onClick={() => setShowFullsetWarning(false)}>Begrepen</button>
+            </div>
+          </div>
+        )}
+
+        {showLastMinuteWarning && (
+          <div className="warning-overlay fade-in">
+            <div className="warning-content glass-panel last-minute-popup">
+              <h3 className="text-gold mb-3">Last-minute boeking</h3>
+              <p>Je kiest een tijdstip binnen {lastMinuteFee === 15 ? '12' : '24'} uur. Je aanvraag wordt voorlopig gereserveerd — de nagelstylist neemt telefonisch contact met je op om te bevestigen of de afspraak mogelijk is.</p>
+              <p className="mb-4">Voor een last-minute boeking wordt <strong>€{lastMinuteFee} extra</strong> aangerekend.</p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="button" className="btn-outline-gold" style={{ flex: 1 }} onClick={() => setShowLastMinuteWarning(false)}>Annuleren</button>
+                <button type="button" className="btn-gold" style={{ flex: 1 }} disabled={isSending} onClick={proceedWithLastMinute}>
+                  {isSending ? 'Bezig...' : 'Doorgaan'}
+                </button>
+              </div>
             </div>
           </div>
         )}

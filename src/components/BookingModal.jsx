@@ -70,6 +70,17 @@ const formatDuration = (mins) => {
   return `${h}u ${m > 0 ? m + 'm' : ''}`.trim();
 };
 
+// Last-minute surcharge tiers: <12h = €15, 12–24h = €10, 24h+ = no surcharge.
+const getLastMinuteFee = (date, time) => {
+  if (!date || !time) return 0;
+  const target = new Date(`${date}T${time}`);
+  const hoursUntil = (target.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursUntil < 0) return 0; // let the normal "past date" handling deal with this
+  if (hoursUntil < 12) return 15;
+  if (hoursUntil < 24) return 10;
+  return 0;
+};
+
 const BookingModal = () => {
   const { isModalOpen, closeModal, selectedService } = useBooking();
 
@@ -87,6 +98,7 @@ const BookingModal = () => {
   const [honeypot, setHoneypot] = useState('');
   const [renderedAt] = useState(() => Date.now());
   const [consentGiven, setConsentGiven] = useState(false);
+  const [lastMinuteConsent, setLastMinuteConsent] = useState(false);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [name, setName] = useState('');
@@ -188,6 +200,13 @@ const BookingModal = () => {
   const isPedicure = useMemo(() => category === 'Pedicure', [category]);
   const isManicure = useMemo(() => category === 'Manicure', [category]);
   const durationMins = useMemo(() => getDurationMins(category, subService), [category, subService]);
+  const lastMinuteFee = useMemo(() => getLastMinuteFee(date, time), [date, time]);
+
+  // If the customer changes the date/time, make them re-confirm the surcharge.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: reset consent whenever the chosen slot changes
+    setLastMinuteConsent(false);
+  }, [date, time]);
 
   const availableSlots = useMemo(() => {
     const allSlots = generateTimeSlots();
@@ -238,6 +257,7 @@ const BookingModal = () => {
     if (e) e.preventDefault();
     if (!location) { alert("Selecteer een locatie."); return; }
     if (!time) { alert("Selecteer een tijdslot."); return; }
+    if (lastMinuteFee > 0 && !lastMinuteConsent) { alert(`Bevestig eerst dat je akkoord gaat met de extra kosten (€${lastMinuteFee}) voor deze last-minute boeking.`); return; }
     if (!consentGiven) { alert("Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden."); return; }
 
     setIsSending(true);
@@ -253,7 +273,10 @@ const BookingModal = () => {
       const extraDetails = [nailLength, biabType, design && design !== 'No design' ? `${design} design` : '']
         .filter(Boolean)
         .join(', ');
-      const fullSubService = extraDetails ? `${subService} (${extraDetails})` : subService;
+      let fullSubService = extraDetails ? `${subService} (${extraDetails})` : subService;
+      if (lastMinuteFee > 0) {
+        fullSubService = `${fullSubService} (LAST-MINUTE +€${lastMinuteFee})`;
+      }
 
       const emailPayload = {
         name,
@@ -267,6 +290,7 @@ const BookingModal = () => {
         description: notes,
         inspiration_image: compressedImageBase64,
         duration_mins: durationMins,
+        last_minute_fee: lastMinuteFee,
         _hp: honeypot,
         _ts: renderedAt
       };
@@ -339,6 +363,7 @@ const BookingModal = () => {
     setImagePreview(null);
     setSelectedFile(null);
     setConsentGiven(false);
+    setLastMinuteConsent(false);
     closeModal();
   };
 
@@ -528,6 +553,25 @@ const BookingModal = () => {
                       {availableSlots.map((slot) => (
                         <button type="button" key={slot.time} disabled={slot.blocked} onClick={() => setTime(slot.time)} className={`time-slot ${time === slot.time ? 'selected' : ''} ${slot.blocked ? 'blocked' : ''}`}>{slot.time}</button>
                       ))}
+                    </div>
+                  )}
+
+                  {time && lastMinuteFee > 0 && (
+                    <div className="last-minute-warning fade-in">
+                      <p>
+                        <strong>Let op: dit is een last-minute boeking</strong> (binnen {lastMinuteFee === 15 ? '12' : '24'} uur).
+                        We raden aan om vroeger te boeken zodat we voldoende tijd hebben. Boek je toch nu, dan rekenen we
+                        <strong> €{lastMinuteFee} extra</strong> aan voor deze last-minute afspraak.
+                      </p>
+                      <label className="last-minute-check">
+                        <input
+                          type="checkbox"
+                          checked={lastMinuteConsent}
+                          onChange={(e) => setLastMinuteConsent(e.target.checked)}
+                          required
+                        />
+                        Ik ga akkoord met de extra kosten (€{lastMinuteFee}) voor deze last-minute boeking en wil doorgaan.
+                      </label>
                     </div>
                   )}
                 </div>

@@ -13,7 +13,8 @@ export const sendBookingEmails = async (bookingData) => {
     time,
     duration_mins = 150,
     type = 'online',
-    description: rawDescription
+    description: rawDescription,
+    last_minute_fee: lastMinuteFee = 0
   } = bookingData;
 
   // Escape everything that originated from user input before it goes into HTML emails.
@@ -24,6 +25,8 @@ export const sendBookingEmails = async (bookingData) => {
   const sub_service = escapeHtml(rawSubService);
   const location = escapeHtml(rawLocation);
   const description = escapeHtml(rawDescription);
+  // Coerce/validate: this arrives from client input, so never trust it as-is.
+  const safeLastMinuteFee = [10, 15].includes(Number(lastMinuteFee)) ? Number(lastMinuteFee) : 0;
 
   const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -104,6 +107,12 @@ export const sendBookingEmails = async (bookingData) => {
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value">${time}</span></div>
           </div>
+          ${safeLastMinuteFee > 0 ? `
+          <div class="section" style="background: #fff8e6; border-radius: 8px; padding: 15px; border-bottom: none;">
+            <div class="section-title" style="color: #b8860b;">Last-minute boeking</div>
+            <div>Deze boeking is binnen ${safeLastMinuteFee === 15 ? '12' : '24'} uur gemaakt — er wordt <strong>€${safeLastMinuteFee} extra</strong> aangerekend.</div>
+          </div>
+          ` : ''}
           ${description ? `
           <div class="section">
             <div class="section-title">Opmerkingen van klant</div>
@@ -130,6 +139,12 @@ export const sendBookingEmails = async (bookingData) => {
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
           </div>
+          ${safeLastMinuteFee > 0 ? `
+          <div class="section" style="background: #fff8e6; border-radius: 8px; padding: 15px; border-bottom: none;">
+            <div class="section-title" style="color: #b8860b;">Last-minute toeslag</div>
+            <div>Omdat deze boeking binnen ${safeLastMinuteFee === 15 ? '12' : '24'} uur is gemaakt, rekenen we <strong>€${safeLastMinuteFee} extra</strong> aan voor deze last-minute afspraak.</div>
+          </div>
+          ` : ''}
         </div>
       </div>
     </body></html>

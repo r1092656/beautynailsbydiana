@@ -77,16 +77,16 @@ const Home = () => {
         <div className="home-services-eyebrow">Populaire behandelingen</div>
         <div className="home-services-grid">
           <Link to="/services" className="home-service-tile">
-            <img src="/assets/portfolio/12.jpeg" alt="Manicure voorbeeld" loading="lazy" />
-            <div className="home-service-tile-label">Manicure</div>
-          </Link>
-          <Link to="/services" className="home-service-tile">
-            <img src="/assets/portfolio/20.jpeg" alt="Gel Overlay voorbeeld" loading="lazy" />
+            <img src="/assets/portfolio/home-gel-overlay.jpg" alt="Gel Overlay voorbeeld" loading="lazy" />
             <div className="home-service-tile-label">Gel Overlay</div>
           </Link>
           <Link to="/services" className="home-service-tile">
-            <img src="/assets/portfolio/40.jpeg" alt="BIAB voorbeeld" loading="lazy" />
+            <img src="/assets/portfolio/home-biab.jpg" alt="BIAB voorbeeld" loading="lazy" />
             <div className="home-service-tile-label">BIAB</div>
+          </Link>
+          <Link to="/services" className="home-service-tile">
+            <img src="/assets/portfolio/home-manicure.jpg" alt="Manicure voorbeeld" loading="lazy" />
+            <div className="home-service-tile-label">Manicure</div>
           </Link>
         </div>
       </section>

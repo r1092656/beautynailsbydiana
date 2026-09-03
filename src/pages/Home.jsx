@@ -15,7 +15,7 @@ const Home = () => {
         <div className="home-hero-blob"></div>
         <div className="container home-hero-inner">
           <div className="row align-items-center">
-            <div className="col-lg-5 mb-4">
+            <div className="col-lg-5 mb-4 text-center">
               <h1 className="display-3 fw-bold mb-4 home-heading">
                 BeautyNails <br /><span className="home-accent">By Diana</span>
               </h1>
@@ -23,7 +23,7 @@ const Home = () => {
                 Ervaar hoogwaardige nagelverzorging met een persoonlijke touch. Van klassieke behandelingen tot
                 creatieve designs; elke sessie is erop gericht om je zelfverzekerd en ontspannen te laten voelen.
               </p>
-              <div style={{ display: 'flex', gap: '15px' }}>
+              <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button className="btn-wine" onClick={() => openModal('')}>Boek Nu</button>
                 <Link to="/contact" className="btn-wine-outline">Neem contact op</Link>
               </div>

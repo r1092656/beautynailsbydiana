@@ -206,7 +206,6 @@ const BookingModal = () => {
 
   // If the customer changes the date/time, make them re-confirm the surcharge.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: reset consent whenever the chosen slot changes
     setLastMinuteConsent(false);
   }, [date, time]);
 

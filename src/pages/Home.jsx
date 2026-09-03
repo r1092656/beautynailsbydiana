@@ -96,7 +96,7 @@ const Home = () => {
         <div className="home-cta-banner">
           <h3 className="mb-3">Klaar voor prachtige nagels?</h3>
           <p style={{ opacity: 0.85, marginBottom: '25px' }}>Boek je afspraak in slechts 2 minuten met ons nieuwe reserveringssysteem.</p>
-          <button className="btn-wine" onClick={() => openModal('')}>Start Bij boeken</button>
+          <button className="btn-wine" onClick={() => openModal('')}>Start met boeken</button>
         </div>
       </section>
     </div>

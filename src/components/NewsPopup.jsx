@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Bell, Megaphone } from 'lucide-react';
+import { X, Megaphone } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { getActiveAnnouncement } from '../utils/siteSettings';
 import './NewsPopup.css';
 
 const NewsPopup = () => {
@@ -9,33 +10,22 @@ const NewsPopup = () => {
 
   useEffect(() => {
     fetchActiveNews();
+
+    const channel = supabase
+      .channel('news-realtime-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'availability_blocks' }, () => {
+        fetchActiveNews();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchActiveNews = async () => {
     try {
-      // 1. Try fetching from Supabase table 'site_announcements'
-      const { data, error } = await supabase
-        .from('site_announcements')
-        .select('*')
-        .eq('active', true)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      let activeNews = null;
-
-      if (!error && data && data.length > 0) {
-        activeNews = data[0];
-      } else {
-        // Fallback to localStorage / site_settings if table doesn't exist yet
-        const stored = localStorage.getItem('site_announcement');
-        if (stored) {
-          try {
-            activeNews = JSON.parse(stored);
-          } catch {
-            activeNews = null;
-          }
-        }
-      }
+      const activeNews = await getActiveAnnouncement();
 
       if (activeNews && activeNews.active) {
         const now = Date.now();
@@ -48,9 +38,13 @@ const NewsPopup = () => {
           if (!isDismissed) {
             setNews(activeNews);
             setIsOpen(true);
+            return;
           }
         }
       }
+
+      setNews(null);
+      setIsOpen(false);
     } catch (err) {
       console.error('Error fetching active news:', err);
     }

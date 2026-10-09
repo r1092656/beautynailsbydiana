@@ -6,24 +6,30 @@ const LOCAL_NEWS_KEY = 'site_announcement';
 // --- SERVICE AVAILABILITY ---
 
 export const getDisabledServices = async () => {
+  const disabledMap = {};
+
   try {
-    // 1. Try Supabase
+    // Primary: fetch from Supabase availability_blocks table using SETTINGS_DISABLED
     const { data, error } = await supabase
-      .from('disabled_services')
-      .select('service_name');
+      .from('availability_blocks')
+      .select('time_slot')
+      .eq('date', 'SETTINGS_DISABLED');
 
     if (!error && data) {
-      const disabledMap = {};
       data.forEach(row => {
-        disabledMap[row.service_name] = true;
+        if (row.time_slot) {
+          disabledMap[row.time_slot] = true;
+        }
       });
+      // Also cache locally
+      localStorage.setItem(LOCAL_DISABLED_SERVICES_KEY, JSON.stringify(disabledMap));
       return disabledMap;
     }
   } catch (err) {
     console.error('Error fetching disabled services from Supabase:', err);
   }
 
-  // 2. LocalStorage Fallback
+  // Fallback to localStorage if offline
   try {
     const raw = localStorage.getItem(LOCAL_DISABLED_SERVICES_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -50,12 +56,30 @@ export const setServiceDisabledState = async (serviceName, isDisabled) => {
 
   localStorage.setItem(LOCAL_DISABLED_SERVICES_KEY, JSON.stringify(currentMap));
 
-  // Try Supabase sync
+  // Sync to Supabase availability_blocks table
   try {
     if (isDisabled) {
-      await supabase.from('disabled_services').upsert({ service_name: serviceName, disabled: true }, { onConflict: 'service_name' });
+      // First delete any existing setting row for this service
+      await supabase
+        .from('availability_blocks')
+        .delete()
+        .eq('date', 'SETTINGS_DISABLED')
+        .eq('time_slot', serviceName);
+
+      // Insert new setting row
+      await supabase
+        .from('availability_blocks')
+        .insert([{
+          date: 'SETTINGS_DISABLED',
+          time_slot: serviceName,
+          status: 'disabled'
+        }]);
     } else {
-      await supabase.from('disabled_services').delete().eq('service_name', serviceName);
+      await supabase
+        .from('availability_blocks')
+        .delete()
+        .eq('date', 'SETTINGS_DISABLED')
+        .eq('time_slot', serviceName);
     }
   } catch (err) {
     console.warn('Supabase sync for disabled services warning:', err);
@@ -69,13 +93,15 @@ export const setServiceDisabledState = async (serviceName, isDisabled) => {
 export const getActiveAnnouncement = async () => {
   try {
     const { data, error } = await supabase
-      .from('site_announcements')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .from('availability_blocks')
+      .select('time_slot, description')
+      .eq('date', 'SETTINGS_NEWS')
       .limit(1);
 
-    if (!error && data && data.length > 0) {
-      return data[0];
+    if (!error && data && data.length > 0 && data[0].description) {
+      const activeNews = JSON.parse(data[0].description);
+      localStorage.setItem(LOCAL_NEWS_KEY, JSON.stringify(activeNews));
+      return activeNews;
     }
   } catch (err) {
     console.error('Error fetching announcement from Supabase:', err);
@@ -105,15 +131,21 @@ export const saveAnnouncement = async (title, content, daysValid = 7) => {
   // Save in LocalStorage immediately
   localStorage.setItem(LOCAL_NEWS_KEY, JSON.stringify(announcementObj));
 
-  // Try Supabase
+  // Sync to Supabase availability_blocks table
   try {
-    await supabase.from('site_announcements').insert([{
-      title: announcementObj.title,
-      content: announcementObj.content,
-      created_at: announcementObj.created_at,
-      expires_at: announcementObj.expires_at,
-      active: true
-    }]);
+    await supabase
+      .from('availability_blocks')
+      .delete()
+      .eq('date', 'SETTINGS_NEWS');
+
+    await supabase
+      .from('availability_blocks')
+      .insert([{
+        date: 'SETTINGS_NEWS',
+        time_slot: announcementObj.id,
+        description: JSON.stringify(announcementObj),
+        status: 'active'
+      }]);
   } catch (err) {
     console.warn('Supabase announcement insert warning:', err);
   }
@@ -121,14 +153,13 @@ export const saveAnnouncement = async (title, content, daysValid = 7) => {
   return announcementObj;
 };
 
-export const deleteAnnouncement = async (id) => {
+export const deleteAnnouncement = async () => {
   localStorage.removeItem(LOCAL_NEWS_KEY);
   try {
-    if (id) {
-      await supabase.from('site_announcements').delete().eq('id', id);
-    } else {
-      await supabase.from('site_announcements').update({ active: false }).neq('id', '0');
-    }
+    await supabase
+      .from('availability_blocks')
+      .delete()
+      .eq('date', 'SETTINGS_NEWS');
   } catch (err) {
     console.warn('Supabase announcement delete warning:', err);
   }

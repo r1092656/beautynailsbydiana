@@ -136,6 +136,7 @@ export const sendBookingEmails = async (bookingData) => {
           <div class="section">
             <div class="section-title">Jouw Afspraak</div>
             <div class="detail-row"><span class="label">Service:</span><span class="value">${sub_service}</span></div>
+            <div class="detail-row"><span class="label">Locatie:</span><span class="value">Laakdal</span></div>
             <div class="detail-row"><span class="label">Datum:</span><span class="value">${date}</span></div>
             <div class="detail-row"><span class="label">Tijd:</span><span class="value important-value">${time}</span></div>
           </div>

@@ -7,6 +7,9 @@ const Footer = () => {
         <p style={{ margin: 0, opacity: 0.8 }}>Copyright &copy; BeautyNails Diana 2026. All rights reserved.</p>
         <p style={{ margin: '10px 0 0', opacity: 0.6, fontSize: '0.9rem' }}>
           Laakdal, Belgium • Premium Nail Services
+          <span style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7, marginTop: '4px' }}>
+            Het exacte adres in Laakdal ontvang je in je bevestigingsmail.
+          </span>
         </p>
         
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px' }}>

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import './Prices.css';
 
@@ -38,46 +37,8 @@ const ANDERE_SECTION = {
   ],
 };
 
-// Fixed layout for both locations: left = Gel Overlay, Verlenging, Design.
+// Layout: left = Gel Overlay, Verlenging, Design.
 // right = BIAB, Manicures, Verwijderen van gel. Andere at the bottom.
-// Only the values inside these sections change between Turnhout/Laakdal.
-const TURNHOUT = {
-  left: [
-    {
-      title: 'Gel Overlay',
-      columns: ['nieuwe set', 'opvullen'],
-      items: [
-        { name: 'Basis gel', prices: ['€40', '€35'] },
-        { name: 'Basis gel incl. kleur/french', prices: ['€45', '€40'] },
-      ],
-    },
-    {
-      title: 'Verlenging',
-      columns: ['nieuwe set', 'opvullen'],
-      items: [
-        { name: 'Short (1&2)', prices: ['€60', '€55'] },
-        { name: 'Medium (3&4)', prices: ['€70', '€65'] },
-        { name: 'Long (5&6)', prices: ['€80', '€75'] },
-      ],
-    },
-    DESIGN_SECTION,
-  ],
-  right: [
-    BIAB_SECTION,
-    {
-      title: 'Manicures',
-      items: [
-        { name: 'Basis manicure', price: '€20' },
-        { name: 'Basis manicure incl. gellak', price: '€30' },
-        { name: 'Spa manicure', price: '€30' },
-        { name: 'Spa manicure incl. gellak', price: '€40' },
-      ],
-    },
-    VERWIJDEREN_SECTION,
-  ],
-  bottom: [ANDERE_SECTION],
-};
-
 const LAAKDAL = {
   left: [
     {
@@ -154,9 +115,8 @@ const PriceCategory = ({ section }) => (
 );
 
 const Prices = () => {
-  useDocumentTitle('Pricelist', 'Bekijk de pricelist van Beauty Nails by Diana voor Turnhout en Laakdal: gel overlay, BIAB, verlenging, manicure, pedicure en meer.');
-  const [location, setLocation] = useState('Turnhout');
-  const list = location === 'Turnhout' ? TURNHOUT : LAAKDAL;
+  useDocumentTitle('Pricelist', 'Bekijk de pricelist van Beauty Nails by Diana in Laakdal: gel overlay, BIAB, verlenging, manicure, pedicure en meer.');
+  const list = LAAKDAL;
 
   return (
     <div className="prices-page fade-in">
@@ -168,28 +128,13 @@ const Prices = () => {
         </div>
 
         <p className="prices-intro">
-          De prijzen hieronder kunnen <strong>variëren per locatie</strong> — bij de thuissalon in Laakdal
-          liggen de prijzen iets lager dan in Turnhout. Op speciale dagen zoals <strong>Kerstmis, Valentijn
+          Bekijk hieronder de actuele tarieven voor de behandelingen in Laakdal. Op speciale dagen zoals <strong>Kerstmis, Valentijn
           of jouw verjaardag</strong> kan er af en toe een leuke korting gelden. Twijfel je? Vraag gerust
-          naar de actuele prijs bij het boeken.
+          naar de mogelijkheden bij het boeken.<br /><br />
+          <span style={{ fontSize: '0.9rem', color: '#7A2245', fontWeight: '600' }}>
+            📍 Het exacte adres in Laakdal ontvang je automatisch in je bevestigingsmail na het boeken.
+          </span>
         </p>
-
-        <div className="prices-toggle">
-          <button
-            type="button"
-            className={`price-toggle-btn ${location === 'Laakdal' ? 'active' : ''}`}
-            onClick={() => setLocation('Laakdal')}
-          >
-            Laakdal
-          </button>
-          <button
-            type="button"
-            className={`price-toggle-btn ${location === 'Turnhout' ? 'active' : ''}`}
-            onClick={() => setLocation('Turnhout')}
-          >
-            Turnhout
-          </button>
-        </div>
 
         <div className="prices-grid">
           <div>

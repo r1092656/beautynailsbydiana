@@ -346,7 +346,7 @@ const AdminCalendar = () => {
           nail_length: 'N.v.t.',
           design: 'N.v.t.',
           extra_bewerking: 'N.v.t.',
-          location: manualFormData.location || 'Turnhout',
+          location: manualFormData.location || 'Laakdal',
           date: selectedDate.date,
           time: startTimeStr,
           inspiration_image: null,
@@ -741,18 +741,7 @@ const AdminCalendar = () => {
                   </div>
                   <div className="form-group full-width">
                     <label>Locatie</label>
-                    <div className="location-grid">
-                      <button 
-                        type="button" 
-                        className={`location-btn ${manualFormData.location === 'Turnhout' ? 'selected' : ''}`} 
-                        onClick={() => setManualFormData({...manualFormData, location: 'Turnhout'})}
-                      >Turnhout</button>
-                      <button 
-                        type="button" 
-                        className={`location-btn ${manualFormData.location === 'Laakdal' ? 'selected' : ''}`} 
-                        onClick={() => setManualFormData({...manualFormData, location: 'Laakdal'})}
-                      >Laakdal</button>
-                    </div>
+                    <input type="text" value="Laakdal" readOnly style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }} />
                   </div>
                   <div className="form-group full-width">
                     <label>E-mail (optioneel — enkel nodig als je een bevestigingsmail wil sturen)</label>

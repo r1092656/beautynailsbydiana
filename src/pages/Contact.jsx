@@ -60,6 +60,21 @@ const Contact = () => {
       <div className="row" style={{ justifyContent: 'center' }}>
         <div className="col-lg-5 mb-5" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
+          <div 
+            className="glass-panel" 
+            style={{ padding: '25px', display: 'flex', alignItems: 'center', gap: '20px', color: 'inherit' }}
+          >
+            <div style={{ backgroundColor: 'var(--soft-pink)', padding: '15px', borderRadius: '50%' }}>
+              <MapPin color="var(--gold)" size={24} />
+            </div>
+            <div>
+              <h4 style={{ margin: '0 0 5px 0' }}>Locatie</h4>
+              <p style={{ margin: 0, fontWeight: 'bold', color: 'var(--dark-text)' }}>Laakdal, België</p>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Het exacte adres ontvang je automatisch in de bevestigingsmail.
+              </p>
+            </div>
+          </div>
           <a 
             href="mailto:info@beautynailsbydiana.be" 
             className="glass-panel" 

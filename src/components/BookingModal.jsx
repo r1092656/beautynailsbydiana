@@ -106,7 +106,7 @@ const BookingModal = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState('Laakdal');
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSending, setIsSending] = useState(false);
@@ -260,7 +260,6 @@ const BookingModal = () => {
   // before actually submitting (instead of blocking with an inline checkbox).
   const confirmBooking = async (e) => {
     if (e) e.preventDefault();
-    if (!location) { alert("Selecteer een locatie."); return; }
     if (!time) { alert("Selecteer een tijdslot."); return; }
     if (!consentGiven) { alert("Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden."); return; }
 
@@ -380,7 +379,7 @@ const BookingModal = () => {
     setName('');
     setEmail('');
     setPhone('');
-    setLocation('');
+    setLocation('Laakdal');
     setImagePreview(null);
     setSelectedFile(null);
     setConsentGiven(false);
@@ -426,13 +425,14 @@ const BookingModal = () => {
                 </div>
               </div>
 
-              {/* Step 2: Location & Category */}
-              <div className="form-group mt-2">
-                <label>Select Location</label>
-                <div className="location-grid">
-                  <button type="button" className={`location-btn ${location === 'Turnhout' ? 'selected' : ''}`} onClick={() => setLocation('Turnhout')}>Turnhout</button>
-                  <button type="button" className={`location-btn ${location === 'Laakdal' ? 'selected' : ''}`} onClick={() => setLocation('Laakdal')}>Laakdal</button>
-                </div>
+              {/* Location Note */}
+              <div className="form-group mt-2" style={{ backgroundColor: 'var(--soft-pink)', padding: '12px 15px', borderRadius: '10px', borderLeft: '4px solid var(--gold)' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--dark-text)', fontWeight: '600' }}>
+                  📍 Locatie: <strong>Laakdal</strong>
+                </span>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#666' }}>
+                  Het exacte adres ontvang je automatisch in de bevestigingsmail.
+                </p>
               </div>
 
               <div className="form-group">
@@ -637,7 +637,7 @@ const BookingModal = () => {
             <CircleCheck size={64} className="text-gold mb-4" />
             <h2 className="modal-title">Boeking Bevestigd!</h2>
             <p>Bedankt, {name}.<br />Je afspraak voor <strong>{subService || category}</strong> is vastgelegd.</p>
-            <p className="text-muted small mt-3">Je ontvangt direct een bevestiging per e-mail.</p>
+            <p className="text-muted small mt-3">Je ontvangt direct een bevestiging per e-mail met daarin <strong>het exacte adres in Laakdal</strong>.</p>
             <button onClick={handleClose} className="btn-outline-gold mt-4">Sluiten</button>
           </div>
         )}

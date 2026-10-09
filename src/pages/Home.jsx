@@ -54,8 +54,8 @@ const Home = () => {
         </div>
         <div className="home-stat-divider"></div>
         <div className="home-stat">
-          <div className="home-stat-number">2</div>
-          <div className="home-stat-label">Locaties</div>
+          <div className="home-stat-number">📍</div>
+          <div className="home-stat-label">Laakdal</div>
         </div>
       </section>
 

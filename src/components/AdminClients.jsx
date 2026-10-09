@@ -84,7 +84,7 @@ const AdminClients = () => {
           time: b.time,
           service: b.sub_service || b.category || 'Behandeling',
           category: b.category,
-          location: b.location || 'Turnhout',
+          location: b.location || 'Laakdal',
           type: 'Online',
           createdAt: b.created_at,
           groupKey: buildGroupKey(b.email, b.name)
@@ -101,7 +101,7 @@ const AdminClients = () => {
             time: b.time_slot,
             service: match ? match[1] : (b.description || 'Admin Boeking'),
             category: match ? match[1] : 'Admin',
-            location: 'Turnhout', // Default for manual
+            location: b.location || 'Laakdal', // Default for manual
             type: 'Admin',
             createdAt: b.created_at,
             groupKey: buildGroupKey(b.client_email, b.client_name)

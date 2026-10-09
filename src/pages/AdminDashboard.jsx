@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Users, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, LogOut, Image, Clock, Folder, MessageSquare, Star, User, Users, Calendar as CalendarIcon, Megaphone, Settings } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import AdminCalendar from '../components/AdminCalendar';
 import AdminClients from '../components/AdminClients';
+import AdminNews from '../components/AdminNews';
+import AdminServicesControl from '../components/AdminServicesControl';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const AdminDashboard = () => {
@@ -119,6 +121,22 @@ const AdminDashboard = () => {
         >
           <Users size={18} style={{ marginRight: '8px' }} />
           Klanten
+        </button>
+        <button 
+          onClick={() => setActiveTab('news')}
+          className={activeTab === 'news' ? 'btn-gold' : 'btn-outline-gold'}
+          style={{ padding: '10px 20px', borderRadius: '30px', flexShrink: 0 }}
+        >
+          <Megaphone size={18} style={{ marginRight: '8px' }} />
+          Nieuws
+        </button>
+        <button 
+          onClick={() => setActiveTab('services')}
+          className={activeTab === 'services' ? 'btn-gold' : 'btn-outline-gold'}
+          style={{ padding: '10px 20px', borderRadius: '30px', flexShrink: 0 }}
+        >
+          <Settings size={18} style={{ marginRight: '8px' }} />
+          Boeking Beheer
         </button>
       </div>
 
@@ -302,6 +320,14 @@ const AdminDashboard = () => {
       
       {activeTab === 'clients' && (
         <AdminClients />
+      )}
+
+      {activeTab === 'news' && (
+        <AdminNews />
+      )}
+
+      {activeTab === 'services' && (
+        <AdminServicesControl />
       )}
     </div>
   );

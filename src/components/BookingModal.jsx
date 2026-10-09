@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { compressImage } from '../utils/compressImage';
 import { supabase } from '../supabaseClient';
 import { syncClientData } from '../utils/clientSync';
+import { getDisabledServices } from '../utils/siteSettings';
 import ConsentCheckbox from './ConsentCheckbox';
 import './BookingModal.css';
 
@@ -110,6 +111,16 @@ const BookingModal = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Disabled Services & Warning Modal State
+  const [disabledServices, setDisabledServices] = useState({});
+  const [disabledServiceModal, setDisabledServiceModal] = useState(null);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      getDisabledServices().then(setDisabledServices);
+    }
+  }, [isModalOpen]);
 
   // Bookings & Blocks State
   const [existingBookings, setExistingBookings] = useState([]);
@@ -260,6 +271,13 @@ const BookingModal = () => {
   // before actually submitting (instead of blocking with an inline checkbox).
   const confirmBooking = async (e) => {
     if (e) e.preventDefault();
+    if (disabledServices[category] || (subService && disabledServices[`${category}:${subService}`])) {
+      setDisabledServiceModal({
+        name: category,
+        reason: 'De gekozen behandeling wordt momenteel niet aangeboden. Kies a.u.b. een andere service.'
+      });
+      return;
+    }
     if (!time) { alert("Selecteer een tijdslot."); return; }
     if (!consentGiven) { alert("Bevestig eerst dat je akkoord gaat met de privacyverklaring en algemene voorwaarden."); return; }
 
@@ -438,15 +456,32 @@ const BookingModal = () => {
               <div className="form-group">
                 <label>Select Category</label>
                 <div className="category-grid">
-                  {Object.keys(SERVICE_STRUCTURE).map((cat) => (
-                    <button key={cat} type="button" className={`option-btn ${category === cat ? 'selected' : ''}`} onClick={() => {
-                      setCategory(cat);
-                      setSubService('');
-                      setNailLength('');
-                      setBiabType('');
-                      setDesign('');
-                    }}>{cat}</button>
-                  ))}
+                  {Object.keys(SERVICE_STRUCTURE).map((cat) => {
+                    const isCatDisabled = !!disabledServices[cat];
+                    return (
+                      <button 
+                        key={cat} 
+                        type="button" 
+                        className={`option-btn ${category === cat ? 'selected' : ''} ${isCatDisabled ? 'disabled-service-btn' : ''}`} 
+                        onClick={() => {
+                          if (isCatDisabled) {
+                            setDisabledServiceModal({
+                              name: cat,
+                              reason: `De categorie '${cat}' is momenteel tijdelijk niet beschikbaar. Kies a.u.b. een andere behandeling.`
+                            });
+                            return;
+                          }
+                          setCategory(cat);
+                          setSubService('');
+                          setNailLength('');
+                          setBiabType('');
+                          setDesign('');
+                        }}
+                      >
+                        {cat} {isCatDisabled && '🔒'}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -456,12 +491,29 @@ const BookingModal = () => {
                   <div className="form-group">
                     <label>Choose Service</label>
                     <div className="option-grid">
-                      {['Fill In', 'Fullset'].map((opt) => (
-                        <button key={opt} type="button" className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} onClick={() => { 
-                          setSubService(opt); 
-                          if (opt === 'Fullset') setShowFullsetWarning(true); 
-                        }}>{opt}</button>
-                      ))}
+                      {['Fill In', 'Fullset'].map((opt) => {
+                        const isSubDisabled = !!disabledServices[`${category}:${opt}`] || !!disabledServices[category];
+                        return (
+                          <button 
+                            key={opt} 
+                            type="button" 
+                            className={`mini-option-btn ${subService === opt ? 'selected' : ''} ${isSubDisabled ? 'disabled-service-btn' : ''}`} 
+                            onClick={() => { 
+                              if (isSubDisabled) {
+                                setDisabledServiceModal({
+                                  name: `${category} - ${opt}`,
+                                  reason: `De behandeling '${opt}' is momenteel niet beschikbaar. Kies a.u.b. een andere optie.`
+                                });
+                                return;
+                              }
+                              setSubService(opt); 
+                              if (opt === 'Fullset') setShowFullsetWarning(true); 
+                            }}
+                          >
+                            {opt} {isSubDisabled && '🔒'}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   
@@ -511,17 +563,29 @@ const BookingModal = () => {
                   <div className="form-group">
                     <label>Kies Pedicure Optie</label>
                     <div className="option-grid">
-                      {SERVICE_STRUCTURE['Pedicure'].map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          className={`mini-option-btn ${subService === opt ? 'selected' : ''}`}
-                          onClick={() => setSubService(opt)}
-                          style={{ minHeight: '50px' }}
-                        >
-                          {opt}
-                        </button>
-                      ))}
+                      {SERVICE_STRUCTURE['Pedicure'].map((opt) => {
+                        const isSubDisabled = !!disabledServices[`Pedicure:${opt}`] || !!disabledServices['Pedicure'];
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            className={`mini-option-btn ${subService === opt ? 'selected' : ''} ${isSubDisabled ? 'disabled-service-btn' : ''}`}
+                            onClick={() => {
+                              if (isSubDisabled) {
+                                setDisabledServiceModal({
+                                  name: `Pedicure - ${opt}`,
+                                  reason: `De behandeling '${opt}' is momenteel niet beschikbaar. Kies a.u.b. een andere optie.`
+                                });
+                                return;
+                              }
+                              setSubService(opt);
+                            }}
+                            style={{ minHeight: '50px' }}
+                          >
+                            {opt} {isSubDisabled && '🔒'}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="form-group">
@@ -539,17 +603,29 @@ const BookingModal = () => {
                   <div className="form-group">
                     <label>Kies Manicure Optie</label>
                     <div className="option-grid">
-                      {SERVICE_STRUCTURE['Manicure'].map((opt) => (
-                        <button 
-                          key={opt} 
-                          type="button" 
-                          className={`mini-option-btn ${subService === opt ? 'selected' : ''}`} 
-                          onClick={() => setSubService(opt)}
-                          style={{ minHeight: '50px' }}
-                        >
-                          {opt}
-                        </button>
-                      ))}
+                      {SERVICE_STRUCTURE['Manicure'].map((opt) => {
+                        const isSubDisabled = !!disabledServices[`Manicure:${opt}`] || !!disabledServices['Manicure'];
+                        return (
+                          <button 
+                            key={opt} 
+                            type="button" 
+                            className={`mini-option-btn ${subService === opt ? 'selected' : ''} ${isSubDisabled ? 'disabled-service-btn' : ''}`} 
+                            onClick={() => {
+                              if (isSubDisabled) {
+                                setDisabledServiceModal({
+                                  name: `Manicure - ${opt}`,
+                                  reason: `De behandeling '${opt}' is momenteel niet beschikbaar. Kies a.u.b. een andere optie.`
+                                });
+                                return;
+                              }
+                              setSubService(opt);
+                            }}
+                            style={{ minHeight: '50px' }}
+                          >
+                            {opt} {isSubDisabled && '🔒'}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -665,6 +741,24 @@ const BookingModal = () => {
                   {isSending ? 'Bezig...' : 'Doorgaan'}
                 </button>
               </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {disabledServiceModal && createPortal(
+          <div className="warning-overlay fade-in" style={{ zIndex: 3000 }}>
+            <div className="warning-content glass-panel" style={{ border: '2px solid #ef4444', backgroundColor: '#fff5f5' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#b91c1c', marginBottom: '12px' }}>
+                <span style={{ fontSize: '1.6rem' }}>⚠️</span>
+                <h3 style={{ margin: 0, color: '#b91c1c' }}>Service Niet Beschikbaar</h3>
+              </div>
+              <p style={{ color: '#374151', fontSize: '0.95rem', lineHeight: '1.5', marginBottom: '20px' }}>
+                {disabledServiceModal.reason}
+              </p>
+              <button type="button" className="btn-gold w-100" style={{ backgroundColor: '#b91c1c' }} onClick={() => setDisabledServiceModal(null)}>
+                Begrepen & Kies Andere Service
+              </button>
             </div>
           </div>,
           document.body

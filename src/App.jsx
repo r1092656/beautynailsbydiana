@@ -10,6 +10,7 @@ import BookingModal from './components/BookingModal';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import CookieBanner from './components/CookieBanner';
+import NewsPopup from './components/NewsPopup';
 
 import './index.css';
 
@@ -85,6 +86,7 @@ const AppContent = () => {
       </Suspense>
       {!isAdminPath && <Footer />}
       {!isAdminPath && <CookieBanner />}
+      {!isAdminPath && <NewsPopup />}
       <BookingModal />
     </>
   );

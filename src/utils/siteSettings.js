@@ -3,25 +3,30 @@ import { supabase } from '../supabaseClient';
 const LOCAL_DISABLED_SERVICES_KEY = 'disabled_site_services';
 const LOCAL_NEWS_KEY = 'site_announcement';
 
+// We use valid ISO date strings in year 2099 so Postgres DATE type accepts them without syntax errors,
+// and they will never collide with calendar dates.
+const SETTINGS_DISABLED_DATE = '2099-12-31';
+const SETTINGS_NEWS_DATE = '2099-12-30';
+
 // --- SERVICE AVAILABILITY ---
 
 export const getDisabledServices = async () => {
   const disabledMap = {};
 
   try {
-    // Primary: fetch from Supabase availability_blocks table using SETTINGS_DISABLED
     const { data, error } = await supabase
       .from('availability_blocks')
       .select('time_slot')
-      .eq('date', 'SETTINGS_DISABLED');
+      .eq('date', SETTINGS_DISABLED_DATE);
 
-    if (!error && data) {
+    if (error) {
+      console.error('Supabase fetch disabled services error:', error);
+    } else if (data) {
       data.forEach(row => {
         if (row.time_slot) {
           disabledMap[row.time_slot] = true;
         }
       });
-      // Also cache locally
       localStorage.setItem(LOCAL_DISABLED_SERVICES_KEY, JSON.stringify(disabledMap));
       return disabledMap;
     }
@@ -29,7 +34,7 @@ export const getDisabledServices = async () => {
     console.error('Error fetching disabled services from Supabase:', err);
   }
 
-  // Fallback to localStorage if offline
+  // Fallback to localStorage if offline or error
   try {
     const raw = localStorage.getItem(LOCAL_DISABLED_SERVICES_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -39,7 +44,7 @@ export const getDisabledServices = async () => {
 };
 
 export const setServiceDisabledState = async (serviceName, isDisabled) => {
-  // Update localStorage first for immediate reactivity
+  // Update localStorage first for instant feedback
   let currentMap = {};
   try {
     const raw = localStorage.getItem(LOCAL_DISABLED_SERVICES_KEY);
@@ -56,30 +61,38 @@ export const setServiceDisabledState = async (serviceName, isDisabled) => {
 
   localStorage.setItem(LOCAL_DISABLED_SERVICES_KEY, JSON.stringify(currentMap));
 
-  // Sync to Supabase availability_blocks table
+  // Sync to Supabase availability_blocks table using valid date '2099-12-31'
   try {
     if (isDisabled) {
-      // First delete any existing setting row for this service
+      // First delete any previous entry for this service to avoid duplicates
       await supabase
         .from('availability_blocks')
         .delete()
-        .eq('date', 'SETTINGS_DISABLED')
+        .eq('date', SETTINGS_DISABLED_DATE)
         .eq('time_slot', serviceName);
 
-      // Insert new setting row
-      await supabase
+      // Insert new disabled setting row
+      const { error } = await supabase
         .from('availability_blocks')
         .insert([{
-          date: 'SETTINGS_DISABLED',
+          date: SETTINGS_DISABLED_DATE,
           time_slot: serviceName,
           status: 'disabled'
         }]);
+
+      if (error) {
+        console.error('Supabase insert disabled service error:', error);
+      }
     } else {
-      await supabase
+      const { error } = await supabase
         .from('availability_blocks')
         .delete()
-        .eq('date', 'SETTINGS_DISABLED')
+        .eq('date', SETTINGS_DISABLED_DATE)
         .eq('time_slot', serviceName);
+
+      if (error) {
+        console.error('Supabase delete disabled service error:', error);
+      }
     }
   } catch (err) {
     console.warn('Supabase sync for disabled services warning:', err);
@@ -95,10 +108,12 @@ export const getActiveAnnouncement = async () => {
     const { data, error } = await supabase
       .from('availability_blocks')
       .select('time_slot, description')
-      .eq('date', 'SETTINGS_NEWS')
+      .eq('date', SETTINGS_NEWS_DATE)
       .limit(1);
 
-    if (!error && data && data.length > 0 && data[0].description) {
+    if (error) {
+      console.error('Supabase fetch announcement error:', error);
+    } else if (data && data.length > 0 && data[0].description) {
       const activeNews = JSON.parse(data[0].description);
       localStorage.setItem(LOCAL_NEWS_KEY, JSON.stringify(activeNews));
       return activeNews;
@@ -128,24 +143,26 @@ export const saveAnnouncement = async (title, content, daysValid = 7) => {
     active: true
   };
 
-  // Save in LocalStorage immediately
   localStorage.setItem(LOCAL_NEWS_KEY, JSON.stringify(announcementObj));
 
-  // Sync to Supabase availability_blocks table
   try {
     await supabase
       .from('availability_blocks')
       .delete()
-      .eq('date', 'SETTINGS_NEWS');
+      .eq('date', SETTINGS_NEWS_DATE);
 
-    await supabase
+    const { error } = await supabase
       .from('availability_blocks')
       .insert([{
-        date: 'SETTINGS_NEWS',
+        date: SETTINGS_NEWS_DATE,
         time_slot: announcementObj.id,
         description: JSON.stringify(announcementObj),
         status: 'active'
       }]);
+
+    if (error) {
+      console.error('Supabase insert announcement error:', error);
+    }
   } catch (err) {
     console.warn('Supabase announcement insert warning:', err);
   }
@@ -159,7 +176,7 @@ export const deleteAnnouncement = async () => {
     await supabase
       .from('availability_blocks')
       .delete()
-      .eq('date', 'SETTINGS_NEWS');
+      .eq('date', SETTINGS_NEWS_DATE);
   } catch (err) {
     console.warn('Supabase announcement delete warning:', err);
   }

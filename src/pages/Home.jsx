@@ -84,8 +84,17 @@ const Home = () => {
             <img src="/assets/portfolio/home-biab.jpg" alt="BIAB voorbeeld" loading="lazy" />
             <div className="home-service-tile-label">BIAB</div>
           </Link>
-          <Link to="/services" className="home-service-tile">
-            <img src="/assets/portfolio/home-manicure.jpg" alt="Manicure voorbeeld" loading="lazy" />
+          <Link to="/services" className="home-service-tile home-service-tile-split">
+            <div className="home-service-split-grid">
+              <div className="home-service-split-item">
+                <img src="/assets/portfolio/home-manicure-incl.jpg" alt="Manicure incl. gellak voorbeeld" loading="lazy" />
+                <span className="home-service-sublabel">incl. gellak</span>
+              </div>
+              <div className="home-service-split-item">
+                <img src="/assets/portfolio/home-manicure-excl.jpg" alt="Manicure excl. gellak voorbeeld" loading="lazy" />
+                <span className="home-service-sublabel">excl. gellak</span>
+              </div>
+            </div>
             <div className="home-service-tile-label">Manicure</div>
           </Link>
         </div>

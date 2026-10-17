@@ -95,7 +95,7 @@ const AddContent = () => {
     }
   };
 
-  const categories = ['Pedicure', 'Gel Overlay', 'Fullset', 'Nail Art', 'Verlenging'];
+  const categories = ['Pedicure', 'Manicure', 'Gel Overlay', 'Verlenging', 'BIAB'];
 
   return (
     <div className="container py-5 mt-5 fade-in">

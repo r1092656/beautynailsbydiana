@@ -1,12 +1,34 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import WhatsNew from '../components/WhatsNew';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useBooking } from '../context/BookingContext';
 import './Home.css';
 
+const MANICURE_SLIDES = [
+  {
+    src: '/assets/portfolio/home-manicure-incl.jpg',
+    alt: 'Manicure incl. gellak voorbeeld',
+    badge: 'incl. gellak',
+  },
+  {
+    src: '/assets/portfolio/home-manicure-excl.jpg',
+    alt: 'Manicure excl. gellak voorbeeld',
+    badge: 'excl. gellak',
+  },
+];
+
 const Home = () => {
   useDocumentTitle('Professionele Nagelstudio Laakdal', 'Welkom bij Beauty Nails by Diana in Laakdal. Dé plek voor professionele nagelverzorging, BIAB, gellak en kunstnagels. Boek nu uw afspraak bij Diana.');
   const { openModal } = useBooking();
+  const [manicureIndex, setManicureIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setManicureIndex((prev) => (prev + 1) % MANICURE_SLIDES.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="home-page">
@@ -84,16 +106,25 @@ const Home = () => {
             <img src="/assets/portfolio/home-biab.jpg" alt="BIAB voorbeeld" loading="lazy" />
             <div className="home-service-tile-label">BIAB</div>
           </Link>
-          <Link to="/services" className="home-service-tile home-service-tile-split">
-            <div className="home-service-split-grid">
-              <div className="home-service-split-item">
-                <img src="/assets/portfolio/home-manicure-incl.jpg" alt="Manicure incl. gellak voorbeeld" loading="lazy" />
-                <span className="home-service-sublabel">incl. gellak</span>
-              </div>
-              <div className="home-service-split-item">
-                <img src="/assets/portfolio/home-manicure-excl.jpg" alt="Manicure excl. gellak voorbeeld" loading="lazy" />
-                <span className="home-service-sublabel">excl. gellak</span>
-              </div>
+          <Link to="/services" className="home-service-tile home-service-tile-carousel">
+            <div
+              className="home-service-carousel-track"
+              style={{ transform: `translateX(-${manicureIndex * 50}%)` }}
+            >
+              {MANICURE_SLIDES.map((slide) => (
+                <div className="home-service-carousel-slide" key={slide.badge}>
+                  <img src={slide.src} alt={slide.alt} loading="lazy" />
+                  <span className="home-service-sublabel">{slide.badge}</span>
+                </div>
+              ))}
+            </div>
+            <div className="home-service-carousel-dots">
+              {MANICURE_SLIDES.map((slide, idx) => (
+                <span
+                  key={slide.badge}
+                  className={`home-service-carousel-dot ${idx === manicureIndex ? 'active' : ''}`}
+                />
+              ))}
             </div>
             <div className="home-service-tile-label">Manicure</div>
           </Link>

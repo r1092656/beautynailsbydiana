@@ -285,36 +285,59 @@
   transform: scale(1.06);
 }
 
-.home-service-split-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3px;
-  width: 100%;
+.home-service-carousel-track {
+  display: flex;
+  width: 200%;
   height: 100%;
-  background: #FFF6FA;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.home-service-split-item {
+.home-service-carousel-slide {
   position: relative;
-  width: 100%;
+  width: 50%;
   height: 100%;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
 .home-service-sublabel {
   position: absolute;
-  bottom: 46px;
-  right: 8px;
-  background: rgba(74, 18, 48, 0.82);
+  bottom: 14px;
+  right: 14px;
+  background: rgba(74, 18, 48, 0.85);
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
   letter-spacing: 0.3px;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
   backdrop-filter: blur(3px);
+}
+
+.home-service-carousel-dots {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.home-service-carousel-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.home-service-carousel-dot.active {
+  background: #fff;
+  transform: scale(1.25);
 }
 
 .home-service-tile-label {
